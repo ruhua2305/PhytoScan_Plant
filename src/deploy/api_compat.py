@@ -156,13 +156,9 @@ def _call_llm(system_prompt: str, user_prompt: str):
 
 
 # ==================== ENDPOINTS ====================
-# QUAN TRỌNG: Import các đối tượng từ app.py NGAY TRONG HÀM,
-# để tránh import vòng tròn khi module được nạp.
 
 @router.get("/species")
 def species_list(language: str = "en"):
-    """Trả danh sách loài."""
-    # Import ngay trong hàm để tránh vòng tròn
     from src.deploy.app import REPO_MAP
     keys = list(REPO_MAP.keys())
     return {
@@ -173,17 +169,20 @@ def species_list(language: str = "en"):
 
 @router.get("/diseases")
 def diseases(species: str, language: str = "en"):
-    """Trả danh mục lớp bệnh của 1 loài."""
-    # Import ngay trong hàm
+    """Trả danh mục lớp bệnh. Fallback sang DISEASE_I18N nếu không load được model."""
     from src.deploy.app import _load_species_model, _classes
-    
+
+    raw = []
     try:
         _load_species_model(species)
+        raw = _classes.get(species, [])
     except Exception as e:
-        print(f"[diseases] Lỗi load model {species}: {e}")
-        return {"species": species, "diseases": [], "items": []}
-    
-    raw = _classes.get(species, [])
+        print(f"[diseases] Không load được model {species}, fallback sang DISEASE_I18N: {e}")
+        raw = list(DISEASE_I18N.get(species, {}).keys())
+
+    if not raw:
+        raw = ["healthy"]
+
     return {
         "species": species,
         "diseases": raw,
@@ -194,10 +193,7 @@ def diseases(species: str, language: str = "en"):
 @router.post("/predict")
 async def api_predict(species: str = Form(...), file: UploadFile = File(...),
                       language: str = Form("en")):
-    """Bọc core.predict -> shape frontend."""
-    # Import ngay trong hàm
     from src.deploy.app import predict
-    
     t0 = time.time()
     try:
         result = await predict(species=species, file=file)
@@ -222,7 +218,6 @@ async def api_predict(species: str = Form(...), file: UploadFile = File(...),
 
 @router.post("/consult")
 async def consult(payload: dict):
-    """Tư vấn chatbot bằng LLM ngoài."""
     species = payload.get("species", "")
     disease = payload.get("disease", "")
     message = (payload.get("message", "") or "").strip()
