@@ -1,0 +1,10 @@
+# Môi trường SERVING — CPU-only, KHÔNG torch/CUDA (image nhẹ)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+onnxruntime>=1.17          # CPU-only; KHÔNG onnxruntime-gpu
+pillow>=10.0
+numpy>=1.24
+python-multipart>=0.0.9    # cần cho UploadFile
+httpx>=0.27               # gọi LLM API ngoài cho /api/consult (Mục 7.10)
+huggingface-hub
+python-dotenv

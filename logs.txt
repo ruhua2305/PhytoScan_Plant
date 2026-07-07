@@ -1,0 +1,901 @@
+  Downloading tabulate-0.10.0-py3-none-any.whl.metadata (40 kB)
+Requirement already satisfied: tqdm<5,>=2 in .\.venv\Lib\site-packages (from fiftyone) (4.68.3)
+Collecting xmltodict<2,>=1 (from fiftyone)
+  Downloading xmltodict-1.0.4-py3-none-any.whl.metadata (14 kB)
+Collecting universal-analytics-python3<2,>=1.0.1 (from fiftyone)
+  Downloading universal_analytics_python3-1.1.1-py3-none-any.whl.metadata (5.5 kB)
+Collecting matplotlib<4 (from fiftyone)
+  Using cached matplotlib-3.11.0-cp311-cp311-win_amd64.whl.metadata (80 kB)
+Requirement already satisfied: numpy<3 in .\.venv\Lib\site-packages (from fiftyone) (2.4.6)
+Collecting opencv-python-headless<5 (from fiftyone)
+  Using cached opencv_python_headless-4.13.0.92-cp37-abi3-win_amd64.whl.metadata (20 kB)
+Collecting pandas<4 (from fiftyone)
+  Using cached pandas-3.0.3-cp311-cp311-win_amd64.whl.metadata (19 kB)
+Collecting rtree<2 (from fiftyone)
+  Downloading rtree-1.4.1-py3-none-win_amd64.whl.metadata (2.2 kB)
+Requirement already satisfied: scikit-learn<2 in .\.venv\Lib\site-packages (from fiftyone) (1.9.0)
+Collecting scikit-image<1 (from fiftyone)
+  Using cached scikit_image-0.26.0-cp311-cp311-win_amd64.whl.metadata (15 kB)
+Requirement already satisfied: scipy<2 in .\.venv\Lib\site-packages (from fiftyone) (1.17.1)
+Collecting fiftyone-brain<0.23,>=0.22.0 (from fiftyone)
+  Downloading fiftyone_brain-0.22.0-py3-none-any.whl.metadata (5.2 kB)
+Collecting fiftyone-db<2.0,>=0.4 (from fiftyone)
+  Downloading fiftyone_db-1.4.1-py3-none-win_amd64.whl.metadata (2.5 kB)
+Collecting voxel51-eta<0.17,>=0.16.0 (from fiftyone)
+  Downloading voxel51_eta-0.16.0-py2.py3-none-any.whl.metadata (15 kB)
+Collecting soupsieve>=1.6.1 (from beautifulsoup4<5,>=2->fiftyone)
+  Using cached soupsieve-2.8.4-py3-none-any.whl.metadata (4.6 kB)
+Requirement already satisfied: typing-extensions>=4.0.0 in .\.venv\Lib\site-packages (from beautifulsoup4<5,>=2->fiftyone) (4.16.0)
+Collecting botocore<1.44.0,>=1.43.40 (from boto3<2,>=1->fiftyone)
+  Downloading botocore-1.43.40-py3-none-any.whl.metadata (5.6 kB)
+Collecting jmespath<2.0.0,>=0.7.1 (from boto3<2,>=1->fiftyone)
+  Downloading jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting s3transfer<0.20.0,>=0.19.0 (from boto3<2,>=1->fiftyone)
+  Downloading s3transfer-0.19.0-py3-none-any.whl.metadata (1.7 kB)
+Collecting python-dateutil<3.0.0,>=2.1 (from botocore<1.44.0,>=1.43.40->boto3<2,>=1->fiftyone)
+  Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting urllib3!=2.2.0,<3,>=1.25.4 (from botocore<1.44.0,>=1.43.40->boto3<2,>=1->fiftyone)
+  Using cached urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting wcwidth (from ftfy<7,>=4->fiftyone)
+  Using cached wcwidth-0.8.2-py3-none-any.whl.metadata (43 kB)
+Requirement already satisfied: h11 in .\.venv\Lib\site-packages (from hypercorn<0.19,>=0.13.2->fiftyone) (0.16.0)
+Collecting h2>=4.3.0 (from hypercorn<0.19,>=0.13.2->fiftyone)
+  Downloading h2-4.3.0-py3-none-any.whl.metadata (5.1 kB)
+Collecting priority (from hypercorn<0.19,>=0.13.2->fiftyone)
+  Downloading priority-2.0.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting wsproto>=0.14.0 (from hypercorn<0.19,>=0.13.2->fiftyone)
+  Downloading wsproto-1.3.2-py3-none-any.whl.metadata (5.2 kB)
+Requirement already satisfied: MarkupSafe>=2.0 in .\.venv\Lib\site-packages (from Jinja2<4,>=3->fiftyone) (3.0.3)
+Collecting jsonpointer>=1.9 (from jsonpatch<2,>=1->fiftyone)
+  Using cached jsonpointer-3.1.1-py3-none-any.whl.metadata (2.4 kB)
+Collecting contourpy>=1.0.1 (from matplotlib<4->fiftyone)
+  Using cached contourpy-1.3.3-cp311-cp311-win_amd64.whl.metadata (5.5 kB)
+Collecting cycler>=0.10 (from matplotlib<4->fiftyone)
+  Using cached cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting fonttools>=4.22.0 (from matplotlib<4->fiftyone)
+  Using cached fonttools-4.63.0-cp311-cp311-win_amd64.whl.metadata (121 kB)
+Collecting kiwisolver>=1.3.1 (from matplotlib<4->fiftyone)
+  Using cached kiwisolver-1.5.0-cp311-cp311-win_amd64.whl.metadata (5.2 kB)
+Collecting pyparsing>=3 (from matplotlib<4->fiftyone)
+  Using cached pyparsing-3.3.2-py3-none-any.whl.metadata (5.8 kB)
+Collecting tzdata (from pandas<4->fiftyone)
+  Using cached tzdata-2026.2-py2.py3-none-any.whl.metadata (1.4 kB)
+Requirement already satisfied: narwhals>=1.15.1 in .\.venv\Lib\site-packages (from plotly<7,>=6.1.1->fiftyone) (2.23.0)
+Collecting dnspython<3.0.0,>=1.16.0 (from pymongo~=4.9.2->fiftyone)
+  Using cached dnspython-2.8.0-py3-none-any.whl.metadata (5.7 kB)
+Collecting six>=1.5 (from python-dateutil<3.0.0,>=2.1->botocore<1.44.0,>=1.43.40->boto3<2,>=1->fiftyone)
+  Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Requirement already satisfied: networkx>=3.0 in .\.venv\Lib\site-packages (from scikit-image<1->fiftyone) (3.6.1)
+Collecting imageio!=2.35.0,>=2.33 (from scikit-image<1->fiftyone)
+  Using cached imageio-2.37.3-py3-none-any.whl.metadata (9.7 kB)
+Collecting tifffile>=2022.8.12 (from scikit-image<1->fiftyone)
+  Using cached tifffile-2026.3.3-py3-none-any.whl.metadata (31 kB)
+Collecting lazy-loader>=0.4 (from scikit-image<1->fiftyone)
+  Using cached lazy_loader-0.5-py3-none-any.whl.metadata (5.9 kB)
+Requirement already satisfied: joblib>=1.4.0 in .\.venv\Lib\site-packages (from scikit-learn<2->fiftyone) (1.5.3)
+Requirement already satisfied: threadpoolctl>=3.5.0 in .\.venv\Lib\site-packages (from scikit-learn<2->fiftyone) (3.6.0)
+Requirement already satisfied: anyio>=4.7.0 in .\.venv\Lib\site-packages (from sse-starlette<4,>=0.10.3->fiftyone) (4.14.1)
+Requirement already satisfied: idna>=2.8 in .\.venv\Lib\site-packages (from anyio>=4.7.0->sse-starlette<4,>=0.10.3->fiftyone) (3.18)
+Collecting graphql-core<3.4.0,>=3.2.0 (from strawberry-graphql<0.317.0,>=0.312.3->fiftyone)
+  Downloading graphql_core-3.2.11-py3-none-any.whl.metadata (11 kB)
+Collecting cross-web>=0.6.0 (from strawberry-graphql<0.317.0,>=0.312.3->fiftyone)
+  Downloading cross_web-0.7.0-py3-none-any.whl.metadata (5.1 kB)
+Requirement already satisfied: colorama in .\.venv\Lib\site-packages (from tqdm<5,>=2->fiftyone) (0.4.6)
+Requirement already satisfied: httpx>=0.10.0 in .\.venv\Lib\site-packages (from universal-analytics-python3<2,>=1.0.1->fiftyone) (0.28.1)
+Collecting glob2 (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading glob2-0.7.tar.gz (10 kB)
+  Installing build dependencies ... done
+  Getting requirements to build wheel ... done
+  Preparing metadata (pyproject.toml) ... done
+Collecting jsonlines (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading jsonlines-4.0.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting paramiko<4,>=3 (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading paramiko-3.5.1-py3-none-any.whl.metadata (4.6 kB)
+Collecting py7zr (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading py7zr-1.1.3-py3-none-any.whl.metadata (17 kB)
+Collecting rarfile (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading rarfile-4.2-py3-none-any.whl.metadata (4.4 kB)
+Collecting requests (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting sortedcontainers (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl.metadata (10 kB)
+Collecting tzlocal (from voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading tzlocal-5.4.4-py3-none-any.whl.metadata (7.7 kB)
+Collecting bcrypt>=3.2 (from paramiko<4,>=3->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading bcrypt-5.0.0-cp39-abi3-win_amd64.whl.metadata (10 kB)
+Collecting cryptography>=3.3 (from paramiko<4,>=3->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading cryptography-49.0.0-cp311-abi3-win_amd64.whl.metadata (4.3 kB)
+Collecting pynacl>=1.5 (from paramiko<4,>=3->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading pynacl-1.6.2-cp38-abi3-win_amd64.whl.metadata (10 kB)
+Collecting cffi>=2.0.0 (from cryptography>=3.3->paramiko<4,>=3->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Using cached cffi-2.0.0-cp311-cp311-win_amd64.whl.metadata (2.6 kB)
+Collecting pycparser (from cffi>=2.0.0->cryptography>=3.3->paramiko<4,>=3->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Using cached pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+Collecting hyperframe<7,>=6.1 (from h2>=4.3.0->hypercorn<0.19,>=0.13.2->fiftyone)
+  Downloading hyperframe-6.1.0-py3-none-any.whl.metadata (4.3 kB)
+Collecting hpack<5,>=4.1 (from h2>=4.3.0->hypercorn<0.19,>=0.13.2->fiftyone)
+  Downloading hpack-4.2.0-py3-none-any.whl.metadata (3.3 kB)
+Requirement already satisfied: certifi in .\.venv\Lib\site-packages (from httpx>=0.10.0->universal-analytics-python3<2,>=1.0.1->fiftyone) (2026.6.17)
+Requirement already satisfied: httpcore==1.* in .\.venv\Lib\site-packages (from httpx>=0.10.0->universal-analytics-python3<2,>=1.0.1->fiftyone) (1.0.9)
+Collecting wrapt<3,>=1.10 (from Deprecated->fiftyone)
+  Downloading wrapt-2.2.2-cp311-cp311-win_amd64.whl.metadata (7.6 kB)
+Collecting attrs>=19.2.0 (from jsonlines->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting texttable (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading texttable-1.7.0-py2.py3-none-any.whl.metadata (9.8 kB)
+Collecting pycryptodomex>=3.20.0 (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading pycryptodomex-3.23.0-cp37-abi3-win_amd64.whl.metadata (3.5 kB)
+Collecting brotli>=1.2.0 (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Using cached brotli-1.2.0-cp311-cp311-win_amd64.whl.metadata (6.3 kB)
+Collecting backports.zstd>=1.0.0 (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading backports_zstd-1.6.0-cp311-cp311-win_amd64.whl.metadata (7.0 kB)
+Collecting pyppmd>=1.3.1 (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading pyppmd-1.3.1-cp311-cp311-win_amd64.whl.metadata (5.6 kB)
+Collecting pybcj>=1.0.6 (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading pybcj-1.0.7-cp311-cp311-win_amd64.whl.metadata (4.0 kB)
+Collecting multivolumefile>=0.2.3 (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading multivolumefile-0.2.3-py3-none-any.whl.metadata (6.3 kB)
+Collecting inflate64>=1.0.4 (from py7zr->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Downloading inflate64-1.0.4-cp311-cp311-win_amd64.whl.metadata (4.5 kB)
+Collecting charset_normalizer<4,>=2 (from requests->voxel51-eta<0.17,>=0.16.0->fiftyone)
+  Using cached charset_normalizer-3.4.7-cp311-cp311-win_amd64.whl.metadata (41 kB)
+Downloading fiftyone-1.18.0-py3-none-any.whl (18.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.6/18.6 MB 21.8 MB/s  0:00:00
+Downloading aiofiles-25.1.0-py3-none-any.whl (14 kB)
+Downloading argcomplete-3.7.0-py3-none-any.whl (42 kB)
+Using cached async_lru-2.3.0-py3-none-any.whl (8.4 kB)
+Using cached beautifulsoup4-4.15.0-py3-none-any.whl (109 kB)
+Downloading boto3-1.43.40-py3-none-any.whl (140 kB)
+Downloading botocore-1.43.40-py3-none-any.whl (15.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 15.3/15.3 MB 19.3 MB/s  0:00:00
+Downloading cachetools-7.1.4-py3-none-any.whl (16 kB)
+Downloading dacite-1.9.2-py3-none-any.whl (16 kB)
+Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+Downloading fiftyone_brain-0.22.0-py3-none-any.whl (112 kB)
+Downloading fiftyone_db-1.4.1-py3-none-win_amd64.whl (25.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 25.7/25.7 MB 101.6 MB/s  0:00:00
+Using cached ftfy-6.3.1-py3-none-any.whl (44 kB)
+Downloading humanize-4.16.0-py3-none-any.whl (137 kB)
+Downloading hypercorn-0.18.0-py3-none-any.whl (61 kB)
+Downloading jmespath-1.1.0-py3-none-any.whl (20 kB)
+Downloading jsonpatch-1.33-py2.py3-none-any.whl (12 kB)
+Using cached matplotlib-3.11.0-cp311-cp311-win_amd64.whl (9.3 MB)
+Downloading mongoengine-0.29.3-py3-none-any.whl (112 kB)
+Downloading motor-3.6.1-py3-none-any.whl (74 kB)
+Using cached opencv_python_headless-4.13.0.92-cp37-abi3-win_amd64.whl (40.1 MB)
+Using cached pandas-3.0.3-cp311-cp311-win_amd64.whl (9.9 MB)
+Downloading plotly-6.8.0-py3-none-any.whl (9.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 9.9/9.9 MB 102.6 MB/s  0:00:00
+Downloading pprintpp-0.4.0-py2.py3-none-any.whl (16 kB)
+Using cached psutil-7.2.2-cp37-abi3-win_amd64.whl (137 kB)
+Downloading pydash-8.0.6-py3-none-any.whl (101 kB)
+Downloading pymongo-4.9.2-cp311-cp311-win_amd64.whl (874 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 874.7/874.7 kB ?  0:00:00
+Using cached dnspython-2.8.0-py3-none-any.whl (331 kB)
+Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Downloading retrying-1.4.2-py3-none-any.whl (10 kB)
+Downloading rtree-1.4.1-py3-none-win_amd64.whl (389 kB)
+Downloading s3transfer-0.19.0-py3-none-any.whl (90 kB)
+Using cached scikit_image-0.26.0-cp311-cp311-win_amd64.whl (11.9 MB)
+Downloading sse_starlette-3.4.5-py3-none-any.whl (16 kB)
+Downloading sseclient_py-1.9.0-py3-none-any.whl (8.4 kB)
+Downloading starlette-1.0.1-py3-none-any.whl (72 kB)
+Downloading strawberry_graphql-0.316.0-py3-none-any.whl (326 kB)
+Downloading graphql_core-3.2.11-py3-none-any.whl (214 kB)
+Downloading tabulate-0.10.0-py3-none-any.whl (39 kB)
+Downloading universal_analytics_python3-1.1.1-py3-none-any.whl (10 kB)
+Using cached urllib3-2.7.0-py3-none-any.whl (131 kB)
+Downloading voxel51_eta-0.16.0-py2.py3-none-any.whl (935 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 935.9/935.9 kB ?  0:00:00
+Downloading paramiko-3.5.1-py3-none-any.whl (227 kB)
+Downloading xmltodict-1.0.4-py3-none-any.whl (13 kB)
+Downloading bcrypt-5.0.0-cp39-abi3-win_amd64.whl (150 kB)
+Using cached contourpy-1.3.3-cp311-cp311-win_amd64.whl (225 kB)
+Downloading cross_web-0.7.0-py3-none-any.whl (25 kB)
+Downloading cryptography-49.0.0-cp311-abi3-win_amd64.whl (3.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.8/3.8 MB 110.9 MB/s  0:00:00
+Using cached cffi-2.0.0-cp311-cp311-win_amd64.whl (182 kB)
+Using cached cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Using cached fonttools-4.63.0-cp311-cp311-win_amd64.whl (2.4 MB)
+Downloading h2-4.3.0-py3-none-any.whl (61 kB)
+Downloading hpack-4.2.0-py3-none-any.whl (34 kB)
+Downloading hyperframe-6.1.0-py3-none-any.whl (13 kB)
+Using cached imageio-2.37.3-py3-none-any.whl (317 kB)
+Using cached jsonpointer-3.1.1-py3-none-any.whl (7.7 kB)
+Using cached kiwisolver-1.5.0-cp311-cp311-win_amd64.whl (73 kB)
+Using cached lazy_loader-0.5-py3-none-any.whl (8.0 kB)
+Downloading pynacl-1.6.2-cp38-abi3-win_amd64.whl (239 kB)
+Using cached pyparsing-3.3.2-py3-none-any.whl (122 kB)
+Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Using cached soupsieve-2.8.4-py3-none-any.whl (37 kB)
+Using cached tifffile-2026.3.3-py3-none-any.whl (243 kB)
+Downloading wsproto-1.3.2-py3-none-any.whl (24 kB)
+Downloading deprecated-1.3.1-py2.py3-none-any.whl (11 kB)
+Downloading wrapt-2.2.2-cp311-cp311-win_amd64.whl (80 kB)
+Downloading jsonlines-4.0.0-py3-none-any.whl (8.7 kB)
+Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+Downloading priority-2.0.0-py3-none-any.whl (8.9 kB)
+Downloading py7zr-1.1.3-py3-none-any.whl (72 kB)
+Downloading backports_zstd-1.6.0-cp311-cp311-win_amd64.whl (329 kB)
+Using cached brotli-1.2.0-cp311-cp311-win_amd64.whl (369 kB)
+Downloading inflate64-1.0.4-cp311-cp311-win_amd64.whl (35 kB)
+Downloading multivolumefile-0.2.3-py3-none-any.whl (17 kB)
+Downloading pybcj-1.0.7-cp311-cp311-win_amd64.whl (24 kB)
+Downloading pycryptodomex-3.23.0-cp37-abi3-win_amd64.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 96.3 MB/s  0:00:00
+Downloading pyppmd-1.3.1-cp311-cp311-win_amd64.whl (46 kB)
+Using cached pycparser-3.0-py3-none-any.whl (48 kB)
+Using cached pytz-2026.2-py2.py3-none-any.whl (510 kB)
+Downloading rarfile-4.2-py3-none-any.whl (29 kB)
+Using cached regex-2026.6.28-cp311-cp311-win_amd64.whl (277 kB)
+Using cached requests-2.34.2-py3-none-any.whl (73 kB)
+Using cached charset_normalizer-3.4.7-cp311-cp311-win_amd64.whl (159 kB)
+Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Downloading texttable-1.7.0-py2.py3-none-any.whl (10 kB)
+Using cached tzdata-2026.2-py2.py3-none-any.whl (349 kB)
+Downloading tzlocal-5.4.4-py3-none-any.whl (18 kB)
+Using cached wcwidth-0.8.2-py3-none-any.whl (323 kB)
+Building wheels for collected packages: glob2
+  Building wheel for glob2 (pyproject.toml) ... done
+  Created wheel for glob2: filename=glob2-0.7-py2.py3-none-any.whl size=9378 sha256=95c814aeade9346ce4f87dcc4054f442c17531510cda025ed048974fa7985f00
+  Stored in directory: c:\users\huang\appdata\local\pip\cache\wheels\96\41\06\9f8fddc6eb1d75bde63db7f491311a4ae26905212617e06eb2
+Successfully built glob2
+Installing collected packages: texttable, sortedcontainers, pytz, pprintpp, glob2, brotli, xmltodict, wsproto, wrapt, wcwidth, urllib3, tzdata, tifffile, tabulate, sseclient-py, soupsieve, six, rtree, retrying, regex, rarfile, pyppmd, pyparsing, pydash, pycryptodomex, pycparser, pybcj, psutil, priority, plotly, opencv-python-headless, multivolumefile, lazy-loader, kiwisolver, jsonpointer, jmespath, inflate64, imageio, hyperframe, humanize, hpack, graphql-core, fonttools, fiftyone-db, exceptiongroup, dnspython, dill, dacite, cycler, cross-web, contourpy, charset_normalizer, cachetools, bcrypt, backports.zstd, attrs, async_lru, argcomplete, aiofiles, tzlocal, starlette, scikit-image, requests, python-dateutil, pymongo, py7zr, jsonpatch, jsonlines, h2, ftfy, Deprecated, cffi, beautifulsoup4, universal-analytics-python3, strawberry-graphql, sse-starlette, pynacl, pandas, motor, mongoengine, matplotlib, hypercorn, fiftyone-brain, cryptography, botocore, s3transfer, paramiko, voxel51-eta, boto3, fiftyone
+  Attempting uninstall: opencv-python-headless
+    Found existing installation: opencv-python-headless 5.0.0.93
+    Uninstalling opencv-python-headless-5.0.0.93:
+      Successfully uninstalled opencv-python-headless-5.0.0.93
+  Attempting uninstall: starlette
+    Found existing installation: starlette 1.3.1
+    Uninstalling starlette-1.3.1:
+      Successfully uninstalled starlette-1.3.1
+Successfully installed Deprecated-1.3.1 aiofiles-25.1.0 argcomplete-3.7.0 async_lru-2.3.0 attrs-26.1.0 backports.zstd-1.6.0 bcrypt-5.0.0 beautifulsoup4-4.15.0 boto3-1.43.40 botocore-1.43.40 brotli-1.2.0 cachetools-7.1.4 cffi-2.0.0 charset_normalizer-3.4.7 contourpy-1.3.3 cross-web-0.7.0 cryptography-49.0.0 cycler-0.12.1 dacite-1.9.2 dill-0.4.1 dnspython-2.8.0 exceptiongroup-1.3.1 fiftyone-1.18.0 fiftyone-brain-0.22.0 fiftyone-db-1.4.1 fonttools-4.63.0 ftfy-6.3.1 glob2-0.7 graphql-core-3.2.11 h2-4.3.0 hpack-4.2.0 humanize-4.16.0 hypercorn-0.18.0 hyperframe-6.1.0 imageio-2.37.3 inflate64-1.0.4 jmespath-1.1.0 jsonlines-4.0.0 jsonpatch-1.33 jsonpointer-3.1.1 kiwisolver-1.5.0 lazy-loader-0.5 matplotlib-3.11.0 mongoengine-0.29.3 motor-3.6.1 multivolumefile-0.2.3 opencv-python-headless-4.13.0.92 pandas-3.0.3 paramiko-3.5.1 plotly-6.8.0 pprintpp-0.4.0 priority-2.0.0 psutil-7.2.2 py7zr-1.1.3 pybcj-1.0.7 pycparser-3.0 pycryptodomex-3.23.0 pydash-8.0.6 pymongo-4.9.2 pynacl-1.6.2 pyparsing-3.3.2 pyppmd-1.3.1 python-dateutil-2.9.0.post0 pytz-2026.2 rarfile-4.2 regex-2026.6.28 requests-2.34.2 retrying-1.4.2 rtree-1.4.1 s3transfer-0.19.0 scikit-image-0.26.0 six-1.17.0 sortedcontainers-2.4.0 soupsieve-2.8.4 sse-starlette-3.4.5 sseclient-py-1.9.0 starlette-1.0.1 strawberry-graphql-0.316.0 tabulate-0.10.0 texttable-1.7.0 tifffile-2026.3.3 tzdata-2026.2 tzlocal-5.4.4 universal-analytics-python3-1.1.1 urllib3-2.7.0 voxel51-eta-0.16.0 wcwidth-0.8.2 wrapt-2.2.2 wsproto-1.3.2 xmltodict-1.0.4
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python download_not_leaf.py
+Traceback (most recent call last):
+  File "D:\DAT301m_Project\Final_Pipeline\download_not_leaf.py", line 10, in <module>
+    dataset = foz.load_zoo_dataset(
+              ^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'fiftyone' has no attribute 'load_zoo_dataset'. Did you mean: 'load_dataset'?
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python download_not_leaf.py
+⏳ Đang tải ảnh...
+Downloading split 'validation' to 'C:\Users\huang\fiftyone\open-images-v7\validation' if necessary
+Downloading 'https://storage.googleapis.com/openimages/2018_04/validation/validation-images-with-rotation.csv' to 'C:\Users\huang\fiftyone\open-images-v7\validation\metadata\image_ids.csv'
+Downloading 'https://storage.googleapis.com/openimages/v5/class-descriptions-boxable.csv' to 'C:\Users\huang\fiftyone\open-images-v7\validation\metadata\classes.csv'
+Ignoring invalid classes ['Hand', 'Soil', 'Grass', 'Field', 'Potted plant', 'Ground', 'Wood', 'Trunk', 'Branch', 'Bark']
+You can view the available classes via `fiftyone.utils.openimages.get_classes()`
+Downloading 'https://storage.googleapis.com/openimages/2018_04/bbox_labels_600_hierarchy.json' to 'C:\Users\huang\AppData\Local\Temp\tmp8jh7kglt\metadata\hierarchy.json'
+Downloading 'https://storage.googleapis.com/openimages/v5/validation-annotations-human-imagelabels-boxable.csv' to 'C:\Users\huang\fiftyone\open-images-v7\validation\labels\classifications.csv'
+Downloading 3500 images
+ 100% |███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3500/3500 [2.5m elapsed, 0s remaining, 24.6 files/s]      
+Dataset info written to 'C:\Users\huang\fiftyone\open-images-v7\info.json'
+Loading 'open-images-v7' split 'validation'
+Traceback (most recent call last):
+  File "D:\DAT301m_Project\Final_Pipeline\download_not_leaf.py", line 14, in <module>
+    dataset = foz.load_zoo_dataset(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\fiftyone\zoo\datasets\__init__.py", line 445, in load_zoo_dataset
+    dataset_importer, _ = foud.build_dataset_importer(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: fiftyone.utils.data.importers.build_dataset_importer() got multiple values for keyword argument 'dataset_dir'
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -c "from fiftyone.utils.openimages import get_classes; print(get_classes())"
+['Accordion', 'Adhesive tape', 'Aircraft', 'Airplane', 'Alarm clock', 'Alpaca', 'Ambulance', 'Animal', 'Ant', 'Antelope', 'Apple', 'Armadillo', 'Artichoke', 'Auto part', 'Axe', 'Backpack', 'Bagel', 'Baked goods', 'Balance beam', 'Ball', 'Balloon', 'Banana', 'Band-aid', 'Banjo', 'Barge', 'Barrel', 'Baseball bat', 'Baseball glove', 'Bat (Animal)', 'Bathroom accessory', 'Bathroom cabinet', 'Bathtub', 'Beaker', 'Bear', 'Bed', 'Bee', 'Beehive', 'Beer', 'Beetle', 'Bell pepper', 'Belt', 'Bench', 'Bicycle', 'Bicycle helmet', 'Bicycle wheel', 'Bidet', 'Billboard', 'Billiard table', 'Binoculars', 'Bird', 'Blender', 'Blue jay', 'Boat', 'Bomb', 'Book', 'Bookcase', 'Boot', 'Bottle', 'Bottle opener', 'Bow and arrow', 'Bowl', 'Bowling equipment', 'Box', 'Boy', 'Brassiere', 'Bread', 'Briefcase', 'Broccoli', 'Bronze sculpture', 'Brown bear', 'Building', 'Bull', 'Burrito', 'Bus', 'Bust', 'Butterfly', 'Cabbage', 'Cabinetry', 'Cake', 'Cake stand', 'Calculator', 'Camel', 'Camera', 'Can opener', 'Canary', 'Candle', 'Candy', 'Cannon', 'Canoe', 'Cantaloupe', 'Car', 'Carnivore', 'Carrot', 'Cart', 'Cassette deck', 'Castle', 'Cat', 'Cat furniture', 'Caterpillar', 'Cattle', 'Ceiling fan', 'Cello', 'Centipede', 'Chainsaw', 'Chair', 'Cheese', 'Cheetah', 'Chest of drawers', 'Chicken', 'Chime', 'Chisel', 'Chopsticks', 'Christmas tree', 'Clock', 'Closet', 'Clothing', 'Coat', 'Cocktail', 'Cocktail shaker', 'Coconut', 'Coffee', 'Coffee cup', 'Coffee table', 'Coffeemaker', 'Coin', 'Common fig', 'Common sunflower', 'Computer keyboard', 'Computer monitor', 'Computer mouse', 'Container', 'Convenience store', 'Cookie', 'Cooking spray', 'Corded phone', 'Cosmetics', 'Couch', 'Countertop', 'Cowboy hat', 'Crab', 'Cream', 'Cricket ball', 'Crocodile', 'Croissant', 'Crown', 'Crutch', 'Cucumber', 'Cupboard', 'Curtain', 'Cutting board', 'Dagger', 'Dairy Product', 'Deer', 'Desk', 'Dessert', 'Diaper', 'Dice', 'Digital clock', 'Dinosaur', 'Dishwasher', 'Dog', 'Dog bed', 'Doll', 'Dolphin', 'Door', 'Door handle', 'Doughnut', 'Dragonfly', 'Drawer', 'Dress', 'Drill (Tool)', 'Drink', 'Drinking straw', 'Drum', 'Duck', 'Dumbbell', 'Eagle', 'Earrings', 'Egg (Food)', 'Elephant', 'Envelope', 'Eraser', 'Face powder', 'Facial tissue holder', 'Falcon', 'Fashion accessory', 'Fast food', 'Fax', 'Fedora', 'Filing cabinet', 'Fire hydrant', 'Fireplace', 'Fish', 'Flag', 'Flashlight', 'Flower', 'Flowerpot', 'Flute', 'Flying disc', 'Food', 'Food processor', 'Football', 'Football helmet', 'Footwear', 'Fork', 'Fountain', 'Fox', 'French fries', 'French horn', 'Frog', 'Fruit', 'Frying pan', 'Furniture', 'Garden Asparagus', 'Gas stove', 'Giraffe', 'Girl', 'Glasses', 'Glove', 'Goat', 'Goggles', 'Goldfish', 'Golf ball', 'Golf cart', 'Gondola', 'Goose', 'Grape', 'Grapefruit', 'Grinder', 'Guacamole', 'Guitar', 'Hair dryer', 'Hair spray', 'Hamburger', 'Hammer', 'Hamster', 'Hand dryer', 'Handbag', 'Handgun', 'Harbor seal', 'Harmonica', 'Harp', 'Harpsichord', 'Hat', 'Headphones', 'Heater', 'Hedgehog', 'Helicopter', 'Helmet', 'High heels', 'Hiking equipment', 'Hippopotamus', 'Home appliance', 'Honeycomb', 'Horizontal bar', 'Horse', 'Hot dog', 'House', 'Houseplant', 'Human arm', 'Human beard', 'Human body', 'Human ear', 'Human eye', 'Human face', 'Human foot', 'Human hair', 'Human hand', 'Human head', 'Human leg', 'Human mouth', 'Human nose', 'Humidifier', 'Ice cream', 'Indoor rower', 'Infant bed', 'Insect', 'Invertebrate', 'Ipod', 'Isopod', 'Jacket', 'Jacuzzi', 'Jaguar (Animal)', 'Jeans', 'Jellyfish', 'Jet ski', 'Jug', 'Juice', 'Kangaroo', 'Kettle', 'Kitchen & dining room table', 'Kitchen appliance', 'Kitchen knife', 'Kitchen utensil', 'Kitchenware', 'Kite', 'Knife', 'Koala', 'Ladder', 'Ladle', 'Ladybug', 'Lamp', 'Land vehicle', 'Lantern', 'Laptop', 'Lavender (Plant)', 'Lemon', 'Leopard', 'Light bulb', 'Light switch', 'Lighthouse', 'Lily', 'Limousine', 'Lion', 'Lipstick', 'Lizard', 'Lobster', 'Loveseat', 'Luggage and bags', 'Lynx', 'Magpie', 'Mammal', 'Man', 'Mango', 'Maple', 'Maracas', 'Marine invertebrates', 'Marine mammal', 'Measuring cup', 'Mechanical fan', 'Medical equipment', 'Microphone', 'Microwave oven', 'Milk', 'Miniskirt', 'Mirror', 'Missile', 'Mixer', 'Mixing bowl', 'Mobile phone', 'Monkey', 'Moths and butterflies', 'Motorcycle', 'Mouse', 'Muffin', 'Mug', 'Mule', 'Mushroom', 'Musical instrument', 'Musical keyboard', 'Nail (Construction)', 'Necklace', 'Nightstand', 'Oboe', 'Office building', 'Office supplies', 'Orange', 'Organ (Musical Instrument)', 'Ostrich', 'Otter', 'Oven', 'Owl', 'Oyster', 'Paddle', 'Palm tree', 'Pancake', 'Panda', 'Paper cutter', 'Paper towel', 'Parachute', 'Parking meter', 'Parrot', 'Pasta', 'Pastry', 'Peach', 'Pear', 'Pen', 'Pencil case', 'Pencil sharpener', 'Penguin', 'Perfume', 'Person', 'Personal care', 'Personal flotation device', 'Piano', 'Picnic basket', 'Picture frame', 'Pig', 'Pillow', 'Pineapple', 'Pitcher (Container)', 'Pizza', 'Pizza cutter', 'Plant', 'Plastic bag', 'Plate', 'Platter', 'Plumbing fixture', 'Polar bear', 'Pomegranate', 'Popcorn', 'Porch', 'Porcupine', 'Poster', 'Potato', 'Power plugs and sockets', 'Pressure cooker', 'Pretzel', 'Printer', 'Pumpkin', 'Punching bag', 'Rabbit', 'Raccoon', 'Racket', 'Radish', 'Ratchet (Device)', 'Raven', 'Rays and skates', 'Red panda', 'Refrigerator', 'Remote control', 'Reptile', 'Rhinoceros', 'Rifle', 'Ring binder', 'Rocket', 'Roller skates', 'Rose', 'Rugby ball', 'Ruler', 'Salad', 'Salt and pepper shakers', 'Sandal', 'Sandwich', 'Saucer', 'Saxophone', 'Scale', 'Scarf', 'Scissors', 'Scoreboard', 'Scorpion', 'Screwdriver', 'Sculpture', 'Sea lion', 'Sea turtle', 'Seafood', 'Seahorse', 'Seat belt', 'Segway', 'Serving tray', 'Sewing machine', 'Shark', 'Sheep', 'Shelf', 'Shellfish', 'Shirt', 'Shorts', 'Shotgun', 'Shower', 'Shrimp', 'Sink', 'Skateboard', 'Ski', 'Skirt', 'Skull', 'Skunk', 'Skyscraper', 'Slow cooker', 'Snack', 'Snail', 'Snake', 'Snowboard', 'Snowman', 'Snowmobile', 'Snowplow', 'Soap dispenser', 'Sock', 'Sofa bed', 'Sombrero', 'Sparrow', 'Spatula', 'Spice rack', 'Spider', 'Spoon', 'Sports equipment', 'Sports uniform', 'Squash (Plant)', 'Squid', 'Squirrel', 'Stairs', 'Stapler', 'Starfish', 'Stationary bicycle', 'Stethoscope', 'Stool', 'Stop sign', 'Strawberry', 'Street light', 'Stretcher', 'Studio couch', 'Submarine', 'Submarine sandwich', 'Suit', 'Suitcase', 'Sun hat', 'Sunglasses', 'Surfboard', 'Sushi', 'Swan', 'Swim cap', 'Swimming pool', 'Swimwear', 'Sword', 'Syringe', 'Table', 'Table tennis racket', 'Tablet computer', 'Tableware', 'Taco', 'Tank', 'Tap', 'Tart', 'Taxi', 'Tea', 'Teapot', 'Teddy bear', 'Telephone', 'Television', 'Tennis ball', 'Tennis racket', 'Tent', 'Tiara', 'Tick', 'Tie', 'Tiger', 'Tin can', 'Tire', 'Toaster', 'Toilet', 'Toilet paper', 'Tomato', 'Tool', 'Toothbrush', 'Torch', 'Tortoise', 'Towel', 'Tower', 'Toy', 'Traffic light', 'Traffic sign', 'Train', 'Training bench', 'Treadmill', 'Tree', 'Tree house', 'Tripod', 'Trombone', 'Trousers', 'Truck', 'Trumpet', 'Turkey', 'Turtle', 'Umbrella', 'Unicycle', 'Van', 'Vase', 'Vegetable', 'Vehicle', 'Vehicle registration plate', 'Violin', 'Volleyball (Ball)', 'Waffle', 'Waffle iron', 'Wall clock', 'Wardrobe', 'Washing machine', 'Waste container', 'Watch', 'Watercraft', 'Watermelon', 'Weapon', 'Whale', 'Wheel', 'Wheelchair', 'Whisk', 'Whiteboard', 'Willow', 'Window', 'Window blind', 'Wine', 'Wine glass', 'Wine rack', 'Winter melon', 'Wok', 'Woman', 'Wood-burning stove', 'Woodpecker', 'Worm', 'Wrench', 'Zebra', 'Zucchini']
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python download_not_leaf.py
+⏳ Đang tải ảnh...
+Downloading split 'validation' to 'C:\Users\huang\fiftyone\open-images-v7\validation' if necessary
+Ignoring invalid classes ['Cup']
+You can view the available classes via `fiftyone.utils.openimages.get_classes()`
+Found 2980 images, downloading the remaining 520
+ 100% |█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 520/520 [23.2s elapsed, 0s remaining, 24.7 files/s]      
+Dataset info written to 'C:\Users\huang\fiftyone\open-images-v7\info.json'
+Loading 'open-images-v7' split 'validation'
+Ignoring invalid classes ['Cup']
+You can view the available classes via `fiftyone.utils.openimages.get_classes()`
+ 100% |█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3500/3500 [13.0s elapsed, 0s remaining, 264.6 samples/s]      
+Dataset 'open-images-v7-validation-3500' created
+✅ Đã tải 3500 ảnh.
+Traceback (most recent call last):
+  File "D:\DAT301m_Project\Final_Pipeline\download_not_leaf.py", line 31, in <module>
+    train_split, calib_split, val_split = dataset.split(
+                                          ^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\fiftyone\core\dataset.py", line 425, in __getattribute__
+    return super().__getattribute__(name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'Dataset' object has no attribute 'split'
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python download_not_leaf.py
+⏳ Đang tải ảnh...
+Downloading split 'validation' to 'C:\Users\huang\fiftyone\open-images-v7\validation' if necessary
+Necessary images already downloaded
+Existing download of split 'validation' is sufficient
+Loading 'open-images-v7' split 'validation'
+ 100% |█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3500/3500 [13.1s elapsed, 0s remaining, 270.9 samples/s]      
+Dataset 'open-images-v7-validation-3500' created
+✅ Đã tải 3500 ảnh.
+Directory 'D:/DAT301m_Project/Final_Pipeline/data/leaf_gate\train\not_leaf' already exists; export will be merged with existing files
+ 100% |█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2800/2800 [22.0s elapsed, 0s remaining, 126.8 samples/s]      
+Directory 'D:/DAT301m_Project/Final_Pipeline/data/leaf_gate\calib\not_leaf' already exists; export will be merged with existing files
+ 100% |███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 350/350 [2.9s elapsed, 0s remaining, 128.2 samples/s]      
+Directory 'D:/DAT301m_Project/Final_Pipeline/data/leaf_gate\val\not_leaf' already exists; export will be merged with existing files
+ 100% |███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 350/350 [2.7s elapsed, 0s remaining, 127.8 samples/s]      
+✅ Export thành công vào D:/DAT301m_Project/Fipython -m src.data.split_builder --species all --seed 42
+>> env) PS D:\DAT301m_Project\Final_Pipeline> 
+[apple] 12778 ảnh thường + 0 lớp hiếm -> D:/DAT301m_Project/Final_Pipeline/data/splits\apple_split_v1.json
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\DAT301m_Project\Final_Pipeline\src\data\split_builder.py", line 123, in <module>
+    build_species(sp, args.seed)
+  File "D:\DAT301m_Project\Final_Pipeline\src\data\split_builder.py", line 74, in build_species
+    class_images = list_class_images(species_dir)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\src\data\split_builder.py", line 33, in list_class_images
+    classes = sorted(c for c in os.listdir(species_dir)
+                                ^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 3] The system cannot find the path specified: 'D:/DAT301m_Project/data/2. FINETUNE DATASET\\corn'
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> dir "D:\DAT301m_Project\data\2. FINETUNE DATASET\"
+
+
+    Directory: D:\DAT301m_Project\data\2. FINETUNE DATASET
+
+
+Mode                 LastWriteTime         Length Name                                                                                                
+----                 -------------         ------ ----                                                                                                
+d-----          7/3/2026   5:08 AM                Apple                                                                                               
+d-----          7/3/2026   5:08 AM                Corn                                                                                                
+d-----          7/3/2026   5:09 AM                Grape                                                                                               
+d-----          7/3/2026   5:09 AM                Pepper,_bell                                                                                        
+d-----          7/3/2026   5:09 AM                Tomato                                                                                              
+
+
+(.venv) PS D:\DAT301m_Project\Final_Pipeline>  dir "D:\DAT301m_Project\data\2. FINETUNE DATASET\"
+
+
+    Directory: D:\DAT301m_Project\data\2. FINETUNE DATASET
+
+
+Mode                 LastWriteTime         Length Name                                                                                                
+----                 -------------         ------ ----                                                                                                
+d-----          7/3/2026   5:08 AM                Apple                                                                                               
+d-----          7/3/2026   5:08 AM                Corn_(maize)                                                                                        
+d-----          7/3/2026   5:09 AM                Grape                                                                                               
+d-----          7/3/2026   5:09 AM                Pepper,_bell                                                                                        
+d-----          7/3/2026   5:09 AM                Tomato                                                                                              
+
+
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.data.split_builder --species all --seed 42
+[apple] 12778 ảnh thường + 0 lớp hiếm -> D:/DAT301m_Project/Final_Pipeline/data/splits\apple_split_v1.json
+[corn] 2461 ảnh thường + 0 lớp hiếm -> D:/DAT301m_Project/Final_Pipeline/data/splits\corn_split_v1.json
+[grape] 204 ảnh thường + 0 lớp hiếm -> D:/DAT301m_Project/Final_Pipeline/data/splits\grape_split_v1.json
+[pepper_bell] 268 ảnh thường + 0 lớp hiếm -> D:/DAT301m_Project/Final_Pipeline/data/splits\pepper_bell_split_v1.json
+[tomato] 2636 ảnh thường + 1 lớp hiếm -> D:/DAT301m_Project/Final_Pipeline/data/splits\tomato_split_v1.json
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_pretrain  --config configs/pretrain_effv2s.yaml
+Traceback (most recent call last):
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\albumentations\core\validation.py", line 67, in _validate_parameters
+    config = schema_cls(**schema_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\pydantic\main.py", line 263, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for InitSchema
+size
+  Input should be a valid tuple [type=tuple_type, input_value=224, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/tuple_type
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_pretrain.py", line 108, in <module>
+    train_pretrain(ap.parse_args().config)
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_pretrain.py", line 67, in train_pretrain
+    tl, vl, soft = build_dataloaders(cfg)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_pretrain.py", line 43, in build_dataloaders
+    train_tf = get_pretrain_transforms(True, d["img_size"])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\src\data\augmentation.py", line 37, in get_pretrain_transforms
+    A.RandomResizedCrop(img_size, img_size, scale=(0.7, 1.0), p=1.0),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\albumentations\core\validation.py", line 105, in custom_init
+    validated_kwargs = cls._validate_parameters(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\albumentations\core\validation.py", line 71, in _validate_parameters
+    raise ValueError(str(e)) from e
+ValueError: 1 validation error for InitSchema
+size
+  Input should be a valid tuple [type=tuple_type, input_value=224, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.13/v/tuple_type
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_pretrain --config configs/pretrain_effv2s.yaml
+[domain_aug] 18354 nền field, p=0.4
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+model.safetensors: 100%|█████████████████████████████████████████████████████████████████████████████████████████| 86.5M/86.5M [00:12<00:00, 7.15MB/s]
+[probe_vram] bs=16: 1.40 GB
+[pretrain] ep 1/30 loss=1.2422 val_macro_f1=0.9683
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9683)
+[pretrain] ep 2/30 loss=1.0574 val_macro_f1=0.9880
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9880)
+[pretrain] ep 3/30 loss=1.0150 val_macro_f1=0.9886
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9886)
+[pretrain] ep 4/30 loss=1.0092 val_macro_f1=0.9899
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9899)
+[pretrain] ep 5/30 loss=0.9981 val_macro_f1=0.9910
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9910)
+[pretrain] ep 6/30 loss=0.9736 val_macro_f1=0.9658
+[pretrain] ep 7/30 loss=0.9705 val_macro_f1=0.9929
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9929)
+[pretrain] ep 8/30 loss=0.9293 val_macro_f1=0.9875
+[pretrain] ep 9/30 loss=0.9542 val_macro_f1=0.9900
+[pretrain] ep 10/30 loss=0.9373 val_macro_f1=0.9890
+[pretrain] ep 11/30 loss=0.9235 val_macro_f1=0.9894
+[pretrain] ep 12/30 loss=0.9130 val_macro_f1=0.9865
+[pretrain] ep 13/30 loss=0.9207 val_macro_f1=0.9919
+[pretrain] ep 14/30 loss=0.9107 val_macro_f1=0.9839
+[pretrain] ep 15/30 loss=0.8927 val_macro_f1=0.9607
+[pretrain] ep 16/30 loss=0.8923 val_macro_f1=0.9940
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9940)
+[pretrain] ep 17/30 loss=0.8827 val_macro_f1=0.9934
+[pretrain] ep 18/30 loss=0.8844 val_macro_f1=0.9967
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9967)
+[pretrain] ep 19/30 loss=0.8717 val_macro_f1=0.9692
+[pretrain] ep 20/30 loss=0.8685 val_macro_f1=0.9916
+[pretrain] ep 21/30 loss=0.8495 val_macro_f1=0.9920
+[pretrain] ep 22/30 loss=0.8733 val_macro_f1=0.9968
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9968)
+[pretrain] ep 23/30 loss=0.8548 val_macro_f1=0.9955
+[pretrain] ep 24/30 loss=0.8560 val_macro_f1=0.9646
+[pretrain] ep 25/30 loss=0.8518 val_macro_f1=0.9901
+[pretrain] ep 26/30 loss=0.8441 val_macro_f1=0.9768
+[pretrain] ep 27/30 loss=0.8498 val_macro_f1=0.9977
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt (macro-F1=0.9977)
+[pretrain] ep 28/30 loss=0.8369 val_macro_f1=0.9949
+[pretrain] ep 29/30 loss=0.8527 val_macro_f1=0.9967
+[pretrain] ep 30/30 loss=0.8500 val_macro_f1=0.9907
+[pretrain] done — best val macro-F1: 0.9977   python -m src.train.train_leaf_gate --config configs/leaf_gate.yaml
+>> env) PS D:\DAT301m_Project\Final_Pipeline> 
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_leaf_gate.py", line 104, in <module>
+    train_leaf_gate(ap.parse_args().config)
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_leaf_gate.py", line 69, in train_leaf_gate
+    tl = DataLoader(LeafGateDataset(os.path.join(d["root"], "train"), train_tf),
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\torch\utils\data\dataloader.py", line 376, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\torch\utils\data\sampler.py", line 164, in __init__
+    raise ValueError(
+ValueError: num_samples should be a positive integer value, but got num_samples=0
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.data.build_leaf_gate_dataset --per-species 700 --seed 42
+>> 
+[apple] leaf chọn 700 ảnh -> {'train': 560, 'calib': 70, 'val': 70}
+[corn] leaf chọn 700 ảnh -> {'train': 560, 'calib': 70, 'val': 70}
+[grape] leaf chọn 144 ảnh -> {'train': 115, 'calib': 14, 'val': 15}
+[pepper_bell] leaf chọn 187 ảnh -> {'train': 149, 'calib': 18, 'val': 20}
+[tomato] leaf chọn 700 ảnh -> {'train': 560, 'calib': 70, 'val': 70}
+
+TỔNG leaf: {'train': 1944, 'calib': 242, 'val': 245} (= 2431 ảnh) tại D:/DAT301m_Project/data/leaf_gate/<split>/leaf/
+Tiếp theo: tự thêm ảnh not_leaf vào <split>/not_leaf/ theo tiêu chí ở README.
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_leaf_gate --config configs/leaf_gate.yaml
+>> 
+[leaf_gate] train: 560 ảnh (leaf=560, not_leaf=0)
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_leaf_gate.py", line 124, in <module>
+    train_leaf_gate(ap.parse_args().config)
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_leaf_gate.py", line 86, in train_leaf_gate
+    _check(train_ds, "train")
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_leaf_gate.py", line 84, in _check
+    raise RuntimeError(f"Split '{split}' thiếu MỘT lớp (leaf={n_leaf}, not_leaf={n_not}). "
+RuntimeError: Split 'train' thiếu MỘT lớp (leaf=560, not_leaf=0). Cần đủ cả hai lớp để train nhị phân.
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> Remove-Item -Recurse -Force D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\train\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\calib\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\val\leaf -ErrorAction SilentlyContinue
+>> 
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> Remove-Item -Recurse -Force D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\train\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\calib\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\val\leaf -ErrorAction SilentlyContinue
+>>                                            Remove-Item -Recurse -Force D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\train\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\calib\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\val\leaf -ErrorAction SilentlyContinue
+>> env) PS D:\DAT301m_Project\Final_Pipeline> 
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> Remove-Item -Recurse -Force D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\train\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\calib\leaf, D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\val\leaf -ErrorAction SilentlyContinue
+>> 
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.data.build_leaf_gate_dataset --per-species 700 --seed 42
+>> 
+[apple] leaf chọn 700 ảnh -> {'train': 560, 'calib': 70, 'val': 70}
+[corn] leaf chọn 700 ảnh -> {'train': 560, 'calib': 70, 'val': 70}
+[grape] leaf chọn 144 ảnh -> {'train': 115, 'calib': 14, 'val': 15}
+[pepper_bell] leaf chọn 187 ảnh -> {'train': 149, 'calib': 18, 'val': 20}
+[tomato] leaf chọn 700 ảnh -> {'train': 560, 'calib': 70, 'val': 70}
+
+TỔNG leaf: {'train': 1944, 'calib': 242, 'val': 245} (= 2431 ảnh) tại D:/DAT301m_Project/Final_Pipeline/data/leaf_gate/<split>/leaf/
+Tiếp theo: tự thêm ảnh not_leaf vào <split>/not_leaf/, hoặc chạy lại với --not-leaf-src <thư_mục_ảnh_not_leaf>.
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_leaf_gate --config configs/leaf_gate.yaml
+>> 
+[leaf_gate] train: 4743 ảnh (leaf=1944, not_leaf=2799)
+[leaf_gate] val: 593 ảnh (leaf=245, not_leaf=348)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+model.safetensors: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10.2M/10.2M [00:02<00:00, 4.60MB/s]
+[leaf_gate] ep 1/15 loss=1.6786 macro_f1=0.8413 leaf_recall=0.9796 notleaf_recall=0.7443
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.8413)
+[leaf_gate] ep 2/15 loss=0.5312 macro_f1=0.8984 leaf_recall=0.9143 notleaf_recall=0.8908
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.8984)
+[leaf_gate] ep 3/15 loss=0.4487 macro_f1=0.9268 leaf_recall=0.9061 notleaf_recall=0.9454
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.9268)
+[leaf_gate] ep 4/15 loss=0.3561 macro_f1=0.9235 leaf_recall=0.9102 notleaf_recall=0.9368
+[leaf_gate] ep 5/15 loss=0.3431 macro_f1=0.9294 leaf_recall=0.9551 notleaf_recall=0.9138
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.9294)
+[leaf_gate] ep 6/15 loss=0.3444 macro_f1=0.3831 leaf_recall=0.0122 notleaf_recall=1.0000
+[leaf_gate] ep 7/15 loss=0.3829 macro_f1=0.9305 leaf_recall=0.9224 notleaf_recall=0.9397
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.9305)
+[leaf_gate] ep 8/15 loss=0.3090 macro_f1=0.9388 leaf_recall=0.9102 notleaf_recall=0.9626
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.9388)
+[leaf_gate] ep 9/15 loss=0.2839 macro_f1=0.9179 leaf_recall=0.9714 notleaf_recall=0.8822
+[leaf_gate] ep 10/15 loss=0.3029 macro_f1=0.8136 leaf_recall=0.6327 notleaf_recall=0.9713
+[leaf_gate] ep 11/15 loss=0.3338 macro_f1=0.9394 leaf_recall=0.9429 notleaf_recall=0.9397
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.9394)
+[leaf_gate] ep 12/15 loss=0.2647 macro_f1=0.9320 leaf_recall=0.9102 notleaf_recall=0.9511
+[leaf_gate] ep 13/15 loss=0.2475 macro_f1=0.9407 leaf_recall=0.9224 notleaf_recall=0.9569
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.9407)
+[leaf_gate] ep 14/15 loss=0.2547 macro_f1=0.9373 leaf_recall=0.9224 notleaf_recall=0.9511
+[leaf_gate] ep 15/15 loss=0.2450 macro_f1=0.9479 leaf_recall=0.9429 notleaf_recall=0.9540
+  -> saved D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt (macro-F1=0.9479)
+[leaf_gate] done — best macro-F1: 0.9479. Tiếppython -m src.train.train_finetune --config configs/finetune_apple.yaml
+>> env) PS D:\DAT301m_Project\Final_Pipeline> 
+[apple] Chế độ 1 — 3 lớp thường: {'Apple___Apple_scab': 3887, 'Apple___Cedar_apple_rust': 1405, 'Apple___healthy': 3649}
+D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py:35: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(ckpt_path, map_location=device)
+  [load_pretrained] nạp 780/782 tensor (head khởi tạo mới)
+[probe_vram] bs=16: 1.40 GB
+
+===== [apple] BƯỚC 1: head_only =====
+  [PEFT head_only] trainable 3,843/20,181,331 (0.02%)
+[warmup] ep 1/3 loss=0.4630 val_macro_f1=0.5351
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.5351)
+[warmup] ep 2/3 loss=0.3453 val_macro_f1=0.6051
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.6051)
+[warmup] ep 3/3 loss=0.3093 val_macro_f1=0.6373
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.6373)
+
+===== [apple] BƯỚC 2: head_bn_lastblock =====
+  [PEFT head_bn_lastblock] trainable 14,622,011/20,181,331 (72.45%)
+[full] ep 1/20 loss=0.2817 val_macro_f1=0.6932
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.6932)
+[full] ep 2/20 loss=0.2604 val_macro_f1=0.7282
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.7282)
+[full] ep 3/20 loss=0.2384 val_macro_f1=0.7589
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.7589)
+[full] ep 4/20 loss=0.2296 val_macro_f1=0.7823
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.7823)
+[full] ep 5/20 loss=0.2229 val_macro_f1=0.7810
+[full] ep 6/20 loss=0.2115 val_macro_f1=0.8044
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.8044)
+[full] ep 7/20 loss=0.2028 val_macro_f1=0.8002
+[full] ep 8/20 loss=0.2013 val_macro_f1=0.7921
+[full] ep 9/20 loss=0.1953 val_macro_f1=0.8304
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.8304)
+[full] ep 10/20 loss=0.1897 val_macro_f1=0.8281
+[full] ep 11/20 loss=0.1900 val_macro_f1=0.8250
+[full] ep 12/20 loss=0.1856 val_macro_f1=0.8319
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.8319)
+[full] ep 13/20 loss=0.1770 val_macro_f1=0.8399
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.8399)
+[full] ep 14/20 loss=0.1811 val_macro_f1=0.8486
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.8486)
+[full] ep 15/20 loss=0.1782 val_macro_f1=0.8424
+[full] ep 16/20 loss=0.1724 val_macro_f1=0.8561
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.8561)
+[full] ep 17/20 loss=0.1681 val_macro_f1=0.8504
+[full] ep 18/20 loss=0.1655 val_macro_f1=0.8541
+[full] ep 19/20 loss=0.1736 val_macro_f1=0.8619
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_apple.pt (macro-F1=0.8619)
+[full] ep 20/20 loss=0.1632 val_macro_f1=0.8601
+
+===== [apple] BƯỚC 3: decoupled re-training =====
+  [PEFT head_only] trainable 3,843/20,181,331 (0.02%)
+[decoupled] ep 1/3 loss=0.4224 val_macro_f1=0.8162
+[decoupled] ep 2/3 loss=0.4052 val_macro_f1=0.8095
+[decoupled] ep 3/3 loss=0.3915 val_macro_f1=0.8310
+
+[apple] Chế độ 1 DONE — best macro-F1: 0.8619
+[apple] không có lớp hiếm — bỏ qua Chế độ 2.
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_finetune --config configs/finetune_corn.yaml
+>> 
+[corn] Chế độ 1 — 4 lớp thường: {'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot': 156, 'Corn_(maize)___Common_rust_': 80, 'Corn_(maize)___Northern_Leaf_Blight': 1380, 'Corn_(maize)___healthy': 107}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py:35: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(ckpt_path, map_location=device)
+  [load_pretrained] nạp 780/782 tensor (head khởi tạo mới)
+[probe_vram] bs=16: 1.40 GB
+
+===== [corn] BƯỚC 1: head_only =====
+  [PEFT head_only] trainable 5,124/20,182,612 (0.03%)
+[warmup] ep 1/4 loss=0.2942 val_macro_f1=0.2066
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.2066)
+[warmup] ep 2/4 loss=0.2451 val_macro_f1=0.2662
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.2662)
+[warmup] ep 3/4 loss=0.2056 val_macro_f1=0.3499
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.3499)
+[warmup] ep 4/4 loss=0.1870 val_macro_f1=0.3665
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.3665)
+
+===== [corn] BƯỚC 2: head_bn_lastblock =====
+  [PEFT head_bn_lastblock] trainable 14,623,292/20,182,612 (72.45%)
+[full] ep 1/25 loss=0.1718 val_macro_f1=0.3875
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.3875)
+[full] ep 2/25 loss=0.1719 val_macro_f1=0.4331
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.4331)
+[full] ep 3/25 loss=0.1516 val_macro_f1=0.4391
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.4391)
+[full] ep 4/25 loss=0.1512 val_macro_f1=0.4488
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.4488)
+[full] ep 5/25 loss=0.1543 val_macro_f1=0.4700
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.4700)
+[full] ep 6/25 loss=0.1369 val_macro_f1=0.4702
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.4702)
+[full] ep 7/25 loss=0.1498 val_macro_f1=0.5155
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.5155)
+[full] ep 8/25 loss=0.1326 val_macro_f1=0.5081
+[full] ep 9/25 loss=0.1370 val_macro_f1=0.5080
+[full] ep 10/25 loss=0.1263 val_macro_f1=0.5057
+[full] ep 11/25 loss=0.1259 val_macro_f1=0.5332
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.5332)
+[full] ep 12/25 loss=0.1381 val_macro_f1=0.5483
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.5483)
+[full] ep 13/25 loss=0.1313 val_macro_f1=0.5377
+[full] ep 14/25 loss=0.1232 val_macro_f1=0.5599
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.5599)
+[full] ep 15/25 loss=0.1187 val_macro_f1=0.5568
+[full] ep 16/25 loss=0.1194 val_macro_f1=0.5378
+[full] ep 17/25 loss=0.1170 val_macro_f1=0.5534
+[full] ep 18/25 loss=0.1103 val_macro_f1=0.5297
+[full] ep 19/25 loss=0.1038 val_macro_f1=0.5446
+[full] ep 20/25 loss=0.1087 val_macro_f1=0.5459
+[full] ep 21/25 loss=0.1077 val_macro_f1=0.5608
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.5608)
+[full] ep 22/25 loss=0.1007 val_macro_f1=0.5607
+[full] ep 23/25 loss=0.1093 val_macro_f1=0.5447
+[full] ep 24/25 loss=0.1075 val_macro_f1=0.5604
+[full] ep 25/25 loss=0.1096 val_macro_f1=0.5630
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_corn.pt (macro-F1=0.5630)
+
+===== [corn] BƯỚC 3: decoupled re-training =====
+  [PEFT head_only] trainable 5,124/20,182,612 (0.03%)
+[decoupled] ep 1/4 loss=0.6293 val_macro_f1=0.5291
+[decoupled] ep 2/4 loss=0.5090 val_macro_f1=0.4316
+[decoupled] ep 3/4 loss=0.4712 val_macro_f1=0.4085
+[decoupled] ep 4/4 loss=0.4590 val_macro_f1=0.3743
+
+[corn] Chế độ 1 DONE — best macro-F1: 0.5630
+[corn] không có lớp hiếm — bỏ qua Chế độ 2.
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_finetune --config configs/finetune_grape.yaml
+>> 
+[grape] Chế độ 1 — 2 lớp thường: {'Grape___Black_rot': 94, 'Grape___healthy': 50}
+D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py:35: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(ckpt_path, map_location=device)
+  [load_pretrained] nạp 780/782 tensor (head khởi tạo mới)
+[probe_vram] bs=16: 1.40 GB
+
+===== [grape] BƯỚC 1: head_only =====
+  [PEFT head_only] trainable 2,562/20,180,050 (0.01%)
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py", line 269, in <module>
+    train_finetune(ap.parse_args().config)
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py", line 222, in train_finetune
+    best = _train_phase(model, tl, vl, opt, crit_cb, device, epochs=t["epochs_warmup"],
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py", line 111, in _train_phase
+    loss = train_one_epoch_finetune(model, tl, opt, crit, device, accumulation_steps,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py", line 88, in train_one_epoch_finetune
+    loss = crit(logits, targets)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\.venv\Lib\site-packages\torch\nn\modules\module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DAT301m_Project\Final_Pipeline\src\train\losses.py", line 46, in forward
+    raw_ce = -(soft_targets * log_probs).sum(dim=1)         # soft-CE, chưa nhân weight
+               ~~~~~~~~~~~~~^~~~~~~~~~~
+RuntimeError: The size of tensor a (16) must match the size of tensor b (2) at non-singleton dimension 1
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_finetune --config configs/finetune_grape.yaml
+[grape] Chế độ 1 — 2 lớp thường: {'Grape___Black_rot': 94, 'Grape___healthy': 50}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py:35: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(ckpt_path, map_location=device)
+  [load_pretrained] nạp 780/782 tensor (head khởi tạo mới)
+[probe_vram] bs=16: 1.40 GB
+
+===== [grape] BƯỚC 1: head_only =====
+  [PEFT head_only] trainable 2,562/20,180,050 (0.01%)
+[warmup] ep 1/6 loss=0.7621 val_macro_f1=0.3067
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.3067)
+[warmup] ep 2/6 loss=0.8679 val_macro_f1=0.3067
+[warmup] ep 3/6 loss=0.7461 val_macro_f1=0.4373
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.4373)
+[warmup] ep 4/6 loss=0.7824 val_macro_f1=0.4373
+[warmup] ep 5/6 loss=0.8844 val_macro_f1=0.4373
+[warmup] ep 6/6 loss=0.6404 val_macro_f1=0.4373
+
+===== [grape] BƯỚC 2: head_bn_lastblock =====
+  [PEFT head_bn_lastblock] trainable 14,620,730/20,180,050 (72.45%)
+[full] ep 1/12 loss=0.6792 val_macro_f1=0.4373
+[full] ep 2/12 loss=0.4995 val_macro_f1=0.4373
+[full] ep 3/12 loss=0.6120 val_macro_f1=0.4373
+[full] ep 4/12 loss=0.4886 val_macro_f1=0.4949
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.4949)
+[full] ep 5/12 loss=0.4484 val_macro_f1=0.4949
+[full] ep 6/12 loss=0.4419 val_macro_f1=0.4949
+[full] ep 7/12 loss=0.4014 val_macro_f1=0.4949
+[full] ep 8/12 loss=0.4244 val_macro_f1=0.4949
+[full] ep 9/12 loss=0.3951 val_macro_f1=0.4949
+[full] ep 10/12 loss=0.3605 val_macro_f1=0.4949
+[full] ep 11/12 loss=0.3512 val_macro_f1=0.5489
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.5489)
+[full] ep 12/12 loss=0.2825 val_macro_f1=0.5489
+
+===== [grape] BƯỚC 3: decoupled re-training =====
+  [PEFT head_only] trainable 2,562/20,180,050 (0.01%)
+[decoupled] ep 1/3 loss=0.6876 val_macro_f1=0.6491
+    -> saved (decoupled) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.6491)
+[decoupled] ep 2/3 loss=0.7032 val_macro_f1=0.7000
+    -> saved (decoupled) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.7000)
+[decoupled] ep 3/3 loss=0.6168 val_macro_f1=0.7980
+    -> saved (decoupled) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.7980)
+
+[grape] Chế độ 1 DONE — best macro-F1: 0.7980
+[grape] không có lớp hiếm — bỏ qua Chế độ 2.
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_finetune --config configs/finetune_grape.yaml
+[grape] Chế độ 1 — 2 lớp thường: {'Grape___Black_rot': 94, 'Grape___healthy': 50}
+D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py:35: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(ckpt_path, map_location=device)
+  [load_pretrained] nạp 780/782 tensor (head khởi tạo mới)
+[probe_vram] bs=16: 1.40 GB
+
+===== [grape] BƯỚC 1: head_only =====
+  [PEFT head_only] trainable 2,562/20,180,050 (0.01%)
+[warmup] ep 1/6 loss=0.8023 val_macro_f1=0.3732
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.3732)
+[warmup] ep 2/6 loss=0.9666 val_macro_f1=0.3750
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.3750)
+[warmup] ep 3/6 loss=0.6953 val_macro_f1=0.4373
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.4373)
+[warmup] ep 4/6 loss=0.7622 val_macro_f1=0.4373
+[warmup] ep 5/6 loss=0.6370 val_macro_f1=0.4373
+[warmup] ep 6/6 loss=0.6810 val_macro_f1=0.4949
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.4949)
+
+===== [grape] BƯỚC 2: head_bn_lastblock =====
+  [PEFT head_bn_lastblock] trainable 14,620,730/20,180,050 (72.45%)
+[full] ep 1/12 loss=0.6962 val_macro_f1=0.4949
+[full] ep 2/12 loss=0.4735 val_macro_f1=0.4949
+[full] ep 3/12 loss=0.6849 val_macro_f1=0.4949
+[full] ep 4/12 loss=0.4785 val_macro_f1=0.4949
+[full] ep 5/12 loss=0.4683 val_macro_f1=0.4949
+[full] ep 6/12 loss=0.5311 val_macro_f1=0.4949
+[full] ep 7/12 loss=0.3754 val_macro_f1=0.4949
+[full] ep 8/12 loss=0.4187 val_macro_f1=0.4949
+[full] ep 9/12 loss=0.4037 val_macro_f1=0.4949
+[full] ep 10/12 loss=0.3919 val_macro_f1=0.6000
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.6000)
+[full] ep 11/12 loss=0.2827 val_macro_f1=0.6000
+[full] ep 12/12 loss=0.3657 val_macro_f1=0.6970
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_grape.pt (macro-F1=0.6970)
+
+===== [grape] BƯỚC 3: decoupled re-training =====
+  [PEFT head_only] trainable 2,562/20,180,050 (0.01%)
+[decoupled] ep 1/3 loss=0.6823 val_macro_f1=0.6491
+[decoupled] ep 2/3 loss=0.7825 val_macro_f1=0.6491
+[decoupled] ep 3/3 loss=0.6138 val_macro_f1=0.6970
+
+[grape] Chế độ 1 DONE — best macro-F1: 0.6970
+[grape] không có lớp hiếm — bỏ qua Chế độ 2.
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_finetune --config configs/finetune_pepper_bell.yaml
+[pepper_bell] Chế độ 1 — 2 lớp thường: {'Pepper,_bell___Bacterial_spot': 120, 'Pepper,_bell___healthy': 67}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py:35: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(ckpt_path, map_location=device)
+  [load_pretrained] nạp 780/782 tensor (head khởi tạo mới)
+[probe_vram] bs=16: 1.40 GB
+
+===== [pepper_bell] BƯỚC 1: head_only =====
+  [PEFT head_only] trainable 2,562/20,180,050 (0.01%)
+[warmup] ep 1/2 loss=0.8277 val_macro_f1=0.4722
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_pepper_bell.pt (macro-F1=0.4722)
+[warmup] ep 2/2 loss=0.7335 val_macro_f1=0.5534
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_pepper_bell.pt (macro-F1=0.5534)
+
+===== [pepper_bell] BƯỚC 2: head_bn_lastblock =====
+  [PEFT head_bn_lastblock] trainable 14,620,730/20,180,050 (72.45%)
+[full] ep 1/10 loss=0.6805 val_macro_f1=0.6932
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_pepper_bell.pt (macro-F1=0.6932)
+[full] ep 2/10 loss=0.6045 val_macro_f1=0.6165
+[full] ep 3/10 loss=0.6171 val_macro_f1=0.6165
+[full] ep 4/10 loss=0.6185 val_macro_f1=0.6165
+[full] ep 5/10 loss=0.5635 val_macro_f1=0.6165
+[full] ep 6/10 loss=0.4938 val_macro_f1=0.5835
+[full] ep 7/10 loss=0.4671 val_macro_f1=0.6250
+[full] ep 8/10 loss=0.4777 val_macro_f1=0.6250
+[full] ep 9/10 loss=0.4094 val_macro_f1=0.6250
+[full] ep 10/10 loss=0.3837 val_macro_f1=0.6592
+
+===== [pepper_bell] BƯỚC 3: decoupled re-training =====
+  [PEFT head_only] trainable 2,562/20,180,050 (0.01%)
+[decoupled] ep 1/3 loss=0.7545 val_macro_f1=0.6592
+[decoupled] ep 2/3 loss=0.7798 val_macro_f1=0.6648
+[decoupled] ep 3/3 loss=0.7117 val_macro_f1=0.6291
+
+[pepper_bell] Chế độ 1 DONE — best macro-F1: 0.6932
+[pepper_bell] không có lớp hiếm — bỏ qua Chế độ 2.
+PS D:\DAT301m_Project\Final_Pipeline> (Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& d:\DAT301m_Project\Final_Pipeline\.venv\Scripts\Activate.ps1)
+(.venv) PS D:\DAT301m_Project\Final_Pipeline> python -m src.train.train_finetune --config configs/finetune_tomato.yaml
+[tomato] Chế độ 1 — 9 lớp thường: {'Tomato___Bacterial_spot': 99, 'Tomato___Early_blight': 347, 'Tomato___Late_blight': 154, 'Tomato___Leaf_Mold': 416, 'Tomato___Septoria_leaf_spot': 214, 'Tomato___Spider_mites Two-spotted_spider_mite': 37, 'Tomato___Tomato_Yellow_Leaf_Curl_Virus': 255, 'Tomato___Tomato_mosaic_virus': 93, 'Tomato___healthy': 266}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+D:\DAT301m_Project\Final_Pipeline\src\train\train_finetune.py:35: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  ckpt = torch.load(ckpt_path, map_location=device)
+  [load_pretrained] nạp 780/782 tensor (head khởi tạo mới)
+[probe_vram] bs=16: 1.40 GB
+
+===== [tomato] BƯỚC 1: head_only =====
+  [PEFT head_only] trainable 11,529/20,189,017 (0.06%)
+[warmup] ep 1/5 loss=1.0719 val_macro_f1=0.1948
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.1948)
+[warmup] ep 2/5 loss=0.9323 val_macro_f1=0.2926
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.2926)
+[warmup] ep 3/5 loss=0.8653 val_macro_f1=0.3367
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.3367)
+[warmup] ep 4/5 loss=0.8370 val_macro_f1=0.3612
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.3612)
+[warmup] ep 5/5 loss=0.8070 val_macro_f1=0.3745
+    -> saved (warmup) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.3745)
+
+===== [tomato] BƯỚC 2: head_bn_lastblock =====
+  [PEFT head_bn_lastblock] trainable 14,629,697/20,189,017 (72.46%)
+[full] ep 1/25 loss=0.7799 val_macro_f1=0.4013
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4013)
+[full] ep 2/25 loss=0.7521 val_macro_f1=0.3724
+[full] ep 3/25 loss=0.7701 val_macro_f1=0.4282
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4282)
+[full] ep 4/25 loss=0.7470 val_macro_f1=0.4294
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4294)
+[full] ep 5/25 loss=0.7199 val_macro_f1=0.4639
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4639)
+[full] ep 6/25 loss=0.7068 val_macro_f1=0.4680
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4680)
+[full] ep 7/25 loss=0.7170 val_macro_f1=0.4515
+[full] ep 8/25 loss=0.6908 val_macro_f1=0.4575
+[full] ep 9/25 loss=0.7088 val_macro_f1=0.4729
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4729)
+[full] ep 10/25 loss=0.6904 val_macro_f1=0.4794
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4794)
+[full] ep 11/25 loss=0.6755 val_macro_f1=0.4677
+[full] ep 12/25 loss=0.6894 val_macro_f1=0.4872
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.4872)
+[full] ep 13/25 loss=0.6599 val_macro_f1=0.5035
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.5035)
+[full] ep 14/25 loss=0.6472 val_macro_f1=0.5044
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.5044)
+[full] ep 15/25 loss=0.6324 val_macro_f1=0.5086
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.5086)
+[full] ep 16/25 loss=0.6283 val_macro_f1=0.5221
+    -> saved (full) D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt (macro-F1=0.5221)
+[full] ep 17/25 loss=0.6331 val_macro_f1=0.4927
+[full] ep 18/25 loss=0.6149 val_macro_f1=0.4885
+[full] ep 19/25 loss=0.6244 val_macro_f1=0.4943
+[full] ep 20/25 loss=0.6406 val_macro_f1=0.4972
+[full] ep 21/25 loss=0.6148 val_macro_f1=0.4892
+[full] ep 22/25 loss=0.5995 val_macro_f1=0.4849
+[full] ep 23/25 loss=0.5904 val_macro_f1=0.4913
+[full] ep 24/25 loss=0.5923 val_macro_f1=0.5181
+[full] ep 25/25 loss=0.5800 val_macro_f1=0.5043
+
+===== [tomato] BƯỚC 3: decoupled re-training =====
+  [PEFT head_only] trainable 11,529/20,189,017 (0.06%)
+[decoupled] ep 1/4 loss=1.3417 val_macro_f1=0.4631
+[decoupled] ep 2/4 loss=1.2802 val_macro_f1=0.4634
+[decoupled] ep 3/4 loss=1.2527 val_macro_f1=0.4399
+[decoupled] ep 4/4 loss=1.2539 val_macro_f1=0.4313
+
+[tomato] Chế độ 1 DONE — best macro-F1: 0.5221
+[tomato] không có lớp hiếm — bỏ qua Chế độ 2.

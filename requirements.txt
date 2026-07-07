@@ -1,0 +1,13 @@
+# Môi trường TRAIN (tách khỏi requirements-serve.txt)
+torch>=2.2            # + CUDA build khớp driver máy
+timm>=0.9
+albumentations>=1.4
+opencv-python>=4.9
+scikit-learn>=1.4
+onnx>=1.16
+onnxruntime>=1.17
+onnxconverter-common>=1.14   # cho convert FP16
+pyyaml>=6.0
+numpy>=1.24
+pillow>=10.0
+pytest>=8.0
