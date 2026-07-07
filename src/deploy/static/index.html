@@ -263,7 +263,7 @@
                 </div>
                 <div class="hero-stats">
                     <div><strong>20</strong> <span data-i18n="hero_stat1">Diagnostic Classes</span></div>
-                    <div><strong>&ge;90%</strong> <span data-i18n="hero_stat2">Target Macro-F1 (Apple/Tomato)</span></div>
+                    <div><strong>&ge;99%</strong> <span data-i18n="hero_stat2">Pretrain Accuracy (≥99%)</span></div>
                     <div><strong>5</strong> <span data-i18n="hero_stat3">Crop Species</span></div>
                 </div>
             </div>
@@ -681,7 +681,7 @@
                 hero_scan: "Start Scanning",
                 hero_learn: "Learn More",
                 hero_stat1: "Diagnostic Classes",
-                hero_stat2: "Target Macro-F1 (Apple/Tomato)",
+                hero_stat2: "Pretrain Accuracy (≥99%)",
                 hero_stat3: "Crop Species",
                 mock_leaf: "Upload leaf image",
                 mock_disease1: "Apple Scab",
@@ -831,7 +831,7 @@
                 hero_scan: "Bắt đầu quét",
                 hero_learn: "Tìm hiểu thêm",
                 hero_stat1: "Lớp chẩn đoán",
-                hero_stat2: "Mục tiêu Macro-F1 (Táo/Cà chua)",
+                hero_stat2: "Độ chính xác trên mô hình Pretrain (≥99%)",
                 hero_stat3: "Loài cây",
                 mock_leaf: "Tải ảnh lá",
                 mock_disease1: "Ghẻ táo",
@@ -974,67 +974,72 @@
         function applyLanguage(lang) {
             const t = translations[lang];
             if (!t) return;
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (t[key] !== undefined) {
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        if (el.type !== 'button' && el.type !== 'submit') {
-                            el.placeholder = t[key];
+
+            // FADE OUT
+            document.body.classList.add('fade-out');
+            setTimeout(() => {
+                // Áp dụng ngôn ngữ
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (t[key] !== undefined) {
+                        if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                            if (el.type !== 'button' && el.type !== 'submit') {
+                                el.placeholder = t[key];
+                            } else {
+                                el.innerHTML = t[key];
+                            }
+                        } else if (el.tagName === 'OPTION' && el.value === '') {
+                            el.textContent = t[key];
                         } else {
                             el.innerHTML = t[key];
                         }
-                    } else if (el.tagName === 'OPTION' && el.value === '') {
-                        el.textContent = t[key];
-                    } else if (el.tagName === 'BUTTON' && el.classList.contains('quick-actions')) {
-                        // Xử lý nút quick action: giữ data-question, thay text
-                        el.textContent = t[key];
+                    }
+                });
+
+                // Cập nhật tooltip
+                document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                    const key = el.getAttribute('data-i18n-title');
+                    if (t[key] !== undefined) el.setAttribute('title', t[key]);
+                });
+
+                // Cập nhật nút đổi ngôn ngữ
+                const langToggle = document.getElementById('langToggle');
+                if (langToggle) {
+                    langToggle.innerHTML = `<span id="langIcon">${lang === 'vi' ? '🇬🇧' : '🇻🇳'}</span>`;
+                    langToggle.setAttribute('title', lang === 'vi' ? 'Switch to English' : 'Đổi sang tiếng Việt');
+                }
+
+                // Cập nhật tin nhắn chào bot
+                const chatMessages = document.getElementById('chatMessages');
+                const firstMsg = chatMessages.querySelector('.msg-bot');
+                if (firstMsg) {
+                    const welcomeSpan = firstMsg.querySelector('[data-i18n="chat_welcome"]');
+                    if (welcomeSpan) {
+                        welcomeSpan.textContent = t.chat_welcome || 'Please select...';
                     } else {
-                        el.innerHTML = t[key];
+                        firstMsg.innerHTML = `<strong>🌱 PhytoScan:</strong> ${t.chat_welcome || 'Please select...'}`;
                     }
                 }
-            });
 
-            // Cập nhật các tooltip (title) có data-i18n-title
-            document.querySelectorAll('[data-i18n-title]').forEach(el => {
-                const key = el.getAttribute('data-i18n-title');
-                if (t[key] !== undefined) el.setAttribute('title', t[key]);
-            });
+                localStorage.setItem('phytoscan_lang', lang);
+                currentLang = lang;
 
-            // Cập nhật nút đổi ngôn ngữ
-            const langToggle = document.getElementById('langToggle');
-            if (langToggle) {
-                langToggle.innerHTML = `<span id="langIcon">${lang === 'vi' ? '🇬🇧' : '🇻🇳'}</span>`;
-                langToggle.setAttribute('title', lang === 'vi' ? 'Switch to English' : 'Đổi sang tiếng Việt');
-            }
+                // Tải lại danh sách loài & bệnh
+                loadSpecies().then(refreshDiseases);
 
-            // Cập nhật tin nhắn chào bot
-            const chatMessages = document.getElementById('chatMessages');
-            const firstMsg = chatMessages.querySelector('.msg-bot');
-            if (firstMsg) {
-                const welcomeSpan = firstMsg.querySelector('[data-i18n="chat_welcome"]');
-                if (welcomeSpan) {
-                    welcomeSpan.textContent = t.chat_welcome || 'Please select...';
-                } else {
-                    firstMsg.innerHTML = `<strong>🌱 PhytoScan:</strong> ${t.chat_welcome || 'Please select...'}`;
-                }
-            }
-
-            localStorage.setItem('phytoscan_lang', lang);
-            currentLang = lang;
-            // Tải lại tên loài + tên bệnh theo ngôn ngữ mới (giữ nguyên lựa chọn hiện tại nếu còn hợp lệ)
-            loadSpecies().then(refreshDiseases);
+                // FADE IN
+                document.body.classList.remove('fade-out');
+            }, 300);
         }
 
-        // ===== HÀM LOAD SPECIES & DISEASES (đã dịch theo currentLang) =====
+        // ===== HÀM LOAD SPECIES & DISEASES =====
         async function loadSpecies() {
             try {
                 const res = await fetch(`/api/species?language=${currentLang}`);
                 const data = await res.json();
-                // items = [{value, label}] đã dịch; fallback nếu backend cũ chỉ trả `species`
                 const items = data.items || (data.species || []).map(s => ({ value: s, label: s }));
                 const uploadSel = document.getElementById('speciesSelect');
                 const chatSel = document.getElementById('chatSpecies');
-                // Giữ lựa chọn hiện tại (nếu có) để không mất khi đổi ngôn ngữ
                 const prevUpload = uploadSel.value;
                 const prevChat = chatSel.value;
                 uploadSel.innerHTML = `<option value="">${translations[currentLang].select_species_upload}</option>`;
@@ -1067,7 +1072,6 @@
             try {
                 const res = await fetch(`/api/diseases?species=${encodeURIComponent(species)}&language=${currentLang}`);
                 const data = await res.json();
-                // items = [{value, label}] đã dịch; fallback nếu backend cũ chỉ trả `diseases`
                 const items = data.items || (data.diseases || []).map(d => ({ value: d, label: d }));
                 diseaseSel.innerHTML = `<option value="">${translations[currentLang].default_disease_option}</option>`;
                 items.forEach(item => {
@@ -1094,14 +1098,13 @@
 
         // ===== DOMContentLoaded =====
         document.addEventListener('DOMContentLoaded', () => {
-            applyLanguage(currentLang); // đã bao gồm loadSpecies() + refreshDiseases()
+            applyLanguage(currentLang);
 
             // Nút đổi ngôn ngữ
             document.getElementById('langToggle').addEventListener('click', function(e) {
                 e.preventDefault();
                 const newLang = currentLang === 'vi' ? 'en' : 'vi';
                 applyLanguage(newLang);
-                // Cập nhật lại danh sách bệnh (đã có trong applyLanguage)
             });
 
             // Khi thay đổi loài trong chat, refresh diseases
@@ -1152,15 +1155,13 @@
                 const msg = document.getElementById('chatInput').value.trim();
                 const speciesSel = document.getElementById('chatSpecies');
                 const diseaseSel = document.getElementById('chatDisease');
-                const species = speciesSel.value;      // khoá nội bộ (vd: "pepper_bell")
-                const disease = diseaseSel.value;       // tên lớp gốc (vd: "Bacterial_spot")
+                const species = speciesSel.value;
+                const disease = diseaseSel.value;
                 if (!msg) return;
                 if (!species || !disease) {
                     addMessage(translations[currentLang].error_no_species, false);
                     return;
                 }
-                // Tên hiển thị đã dịch (đọc trực tiếp từ text đang hiện trên dropdown)
-                // -> gửi cho LLM để câu trả lời tự nhiên và đúng ngôn ngữ đang chọn.
                 const speciesLabel = speciesSel.options[speciesSel.selectedIndex].text;
                 const diseaseLabel = diseaseSel.options[diseaseSel.selectedIndex].text;
                 addMessage(msg, true);
@@ -1187,7 +1188,7 @@
                 if (e.key === 'Enter') document.getElementById('sendBtn').click();
             });
 
-            // QUICK ACTION BUTTONS - dùng data-question / data-question-vi
+            // QUICK ACTION BUTTONS
             document.querySelectorAll('.quick-actions button').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const diseaseSel = document.getElementById('chatDisease');
@@ -1200,7 +1201,6 @@
                     let question = currentLang === 'vi'
                         ? btn.getAttribute('data-question-vi')
                         : btn.getAttribute('data-question');
-                    // Thay placeholder bằng tên bệnh đã dịch, hiển thị tự nhiên trong chat
                     question = question.replace('this disease', diseaseLabel).replace('bệnh này', diseaseLabel);
                     document.getElementById('chatInput').value = question;
                     document.getElementById('sendBtn').click();

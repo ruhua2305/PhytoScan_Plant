@@ -19,7 +19,6 @@ model_bundles/
 
 # Logs & temporary files
 *.log
-*.txt
 logs/
 checkpoints/
 experiments/
