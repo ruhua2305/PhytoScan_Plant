@@ -1,0 +1,31 @@
+seed: 42
+species: "tomato"
+data:
+  split_manifest: "D:/DAT301m_Project/Final_Pipeline/data/splits/tomato_split_v1.json"
+  img_size: 224
+  num_workers: 2
+  rare_class_threshold: 30    # ranh giới Chế độ 1 / Chế độ 2 (Mục 2.3)
+model:
+  arch: "tf_efficientnetv2_s.in1k"
+  pretrained_ckpt: "D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt"
+train:
+  batch_size: 16
+  accumulation_steps: 4
+  epochs_warmup: 5            # Bước 1 — head_only
+  epochs_full: 25             # Bước 2 — head_bn_lastblock
+  epochs_decoupled: 10         # Bước 3 — decoupled re-training (Kang et al., 2019)
+  early_stop_patience: 7
+  lr_head: 1.0e-3
+  lr_backbone: 1.0e-5
+  weight_decay: 1.0e-4
+  use_amp: true
+  cutmix_mixup: {enabled: true, alpha: 0.2, cutmix_prob: 0.5, p: 0.5}
+  class_balanced_loss: {beta: 0.9999, gamma: 2.0}
+  domain_mmd:                 # MMD (Mục 4.6) — TẮT mặc định, bật khi thử nghiệm
+    enabled: false
+    lambda_max: 0.1
+    warmup_epochs: 5
+    source_dir: "D:/DAT301m_Project/Final_Pipeline/data/1. PRETRAIN DATASET/train"
+checkpoint:
+  out_path: "D:/DAT301m_Project/Final_Pipeline/checkpoints/model_tomato.pt"
+  metric: "macro_f1"

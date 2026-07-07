@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhytoScan – AI Plant Disease Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* ---- GIỮ NGUYÊN TOÀN BỘ CSS CŨ ---- */
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #66BB6A;
+            --secondary: #00E676;
+            --accent: #8BC34A;
+            --bg-dark: #050805;
+            --text-light: #E8F5E9;
+            --text-muted: #A5D6A7;
+            --white: #FFFFFF;
+            --shadow: 0 12px 40px rgba(0,0,0,0.6);
+            --shadow-lg: 0 24px 64px rgba(0,0,0,0.8);
+            --radius: 20px;
+            --transition: 0.4s cubic-bezier(0.4,0,0.2,1);
+            --max-width: 1200px;
+            --nav-height: 72px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; scroll-padding-top:var(--nav-height); }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: opacity 0.3s ease;
+        }
+        body.fade-out { opacity: 0; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; position: relative; z-index: 3; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 14px 32px; border-radius: 60px; font-weight: 600; font-size: 1rem;
+            border: none; cursor: pointer; transition: var(--transition); white-space: nowrap;
+        }
+        .btn-primary { background: var(--primary); color: var(--bg-dark); box-shadow: 0 4px 14px rgba(76,175,80,0.3); }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 30px rgba(76,175,80,0.5); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: var(--bg-dark); transform: translateY(-2px) scale(1.04); }
+
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; height: var(--nav-height);
+            background: rgba(10,15,10,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(76,175,80,0.1); z-index: 999; display: flex; align-items: center;
+            transition: var(--transition);
+        }
+        nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.5rem; color: var(--text-light); }
+        .logo i { font-size: 2rem; color: var(--secondary); display: inline-block; line-height: 1; }
+        .nav-links { display: flex; align-items: center; gap: 32px; }
+        .nav-links a { font-size: 0.95rem; font-weight: 500; color: var(--text-muted); transition: var(--transition); position: relative; }
+        .nav-links a:hover { color: var(--white); }
+        .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--secondary); transition: var(--transition); }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-cta { padding: 10px 24px; font-size: 0.9rem; }
+        .nav-lang a { display: flex; align-items: center; font-size: 1.3rem; padding: 0 12px; transition: var(--transition); }
+        .nav-lang a:hover { transform: scale(1.1); }
+        .hamburger { display: none; font-size: 1.5rem; color: var(--text-light); cursor: pointer; }
+
+        #scroll-progress { position: fixed; top: var(--nav-height); left: 0; width: 0; height: 3px; background: linear-gradient(90deg, var(--secondary), var(--primary)); z-index: 1000; transition: width 0.1s linear; }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at center, #0a1f0a 0%, #020502 100%); }
+
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #020502; z-index: 9999; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        #preloader.hidden { opacity: 0; visibility: hidden; }
+        .preloader-logo {
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+        }
+        .preloader-logo i {
+            font-size: 5rem; color: var(--secondary);
+            animation: spinPulse 1.4s ease-in-out infinite;
+            display: block;
+        }
+        .preloader-logo span {
+            font-size: 2rem; font-weight: 700; color: #fff; letter-spacing: 1px;
+        }
+        .preloader-logo.zoom-out i {
+            animation: zoomOut 0.7s forwards;
+        }
+        @keyframes spinPulse {
+            0% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 0.9; }
+        }
+        @keyframes zoomOut {
+            0% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        #backToTop {
+            position: fixed; bottom: 30px; right: 30px; z-index: 1001;
+            width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(76,175,80,0.2); backdrop-filter: blur(10px);
+            border: 1px solid rgba(76,175,80,0.4); color: var(--secondary);
+            font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.4s; opacity: 0; transform: translateY(20px);
+            pointer-events: none;
+        }
+        #backToTop.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        #backToTop:hover { background: var(--primary); color: #020502; border-color: var(--primary); box-shadow: 0 0 20px rgba(76,175,80,0.6); }
+
+        .reveal { opacity: 0; transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1), transform 0.8s cubic-bezier(0.4,0,0.2,1); will-change: opacity, transform; }
+        .reveal-up { transform: translateY(50px); }
+        .reveal-left { transform: translateX(-50px); }
+        .reveal-right { transform: translateX(50px); }
+        .reveal-scale { transform: scale(0.92); }
+        .reveal.visible { opacity: 1; transform: translate(0) scale(1); }
+
+        section { padding: 100px 0; position: relative; z-index: 1; }
+        section:nth-child(even) { background: rgba(10,15,10,0.3); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+        .section-title { font-size: 2.8rem; font-weight: 700; line-height: 1.15; margin-bottom: 16px; color: var(--white); }
+        .section-title span { color: var(--secondary); }
+        .section-subtitle { font-size: 1.2rem; color: var(--text-muted); max-width: 620px; margin-bottom: 48px; }
+        .text-center { text-align: center; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+
+        .hero { padding: calc(var(--nav-height) + 60px) 0 80px; min-height: 100vh; display: flex; align-items: center; }
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .hero-content h1 { font-size: 3.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; color: var(--white); }
+        .hero-content h1 span { color: var(--secondary); }
+        .hero-content p { font-size: 1.2rem; color: var(--text-muted); max-width: 520px; margin-bottom: 32px; min-height: 4rem; }
+        .hero-actions { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .hero-actions .btn { font-size: 1.1rem; padding: 16px 36px; min-width: 180px; }
+        .hero-stats { display: flex; justify-content: center; gap: 48px; margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .hero-stats strong { font-size: 1.8rem; color: var(--secondary); }
+        .hero-stats span { font-size: 0.95rem; color: var(--text-muted); }
+
+        .hero-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); padding: 32px; border-radius: var(--radius); box-shadow: var(--shadow-lg); max-width: 480px; margin: 0 auto; border: 1px solid rgba(76,175,80,0.15); transform-style: preserve-3d; transition: transform 0.1s ease; }
+        .mock-leaf { background: rgba(76,175,80,0.15); border-radius: 16px; padding: 40px 20px; text-align: center; margin-bottom: 20px; border: 2px dashed var(--primary); }
+        .mock-leaf i { font-size: 4rem; color: var(--secondary); opacity: 0.8; }
+        .badge-acc { background: rgba(76,175,80,0.2); color: var(--secondary); padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; }
+
+        .upload-section { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border-radius: var(--radius); padding: 32px; margin-top: 40px; border: 1px solid rgba(255,255,255,0.05); }
+        .upload-section form { display: flex; flex-direction: column; gap: 20px; }
+        .upload-section select, .upload-section input[type="file"] { padding: 12px 16px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: var(--white); font-size: 1rem; }
+        .result-box { margin-top: 20px; padding: 20px; background: rgba(0,230,118,0.1); border-radius: 16px; display: none; }
+        .result-box.show { display: block; }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 32px; }
+        .feature-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(8px); padding: 32px 24px; border-radius: var(--radius); box-shadow: var(--shadow); transition: var(--transition); border: 1px solid rgba(255,255,255,0.05); text-align: center; transform-style: preserve-3d; }
+        .feature-card:hover { transform: translateY(-8px) scale(1.02); border-color: var(--primary); }
+        .feature-card i { font-size: 2.8rem; color: var(--secondary); margin-bottom: 16px; }
+
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; counter-reset: step; }
+        .step-item { background: rgba(255,255,255,0.05); backdrop-filter: blur(8px); padding: 32px 20px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.05); transition: var(--transition); color: var(--text-light); counter-increment: step; }
+        .step-item:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .step-item::before { content: counter(step); position: absolute; top: -16px; left: 50%; transform: translateX(-50%); background: var(--primary); color: var(--bg-dark); font-weight: 700; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .step-item i { font-size: 2.2rem; color: var(--secondary); margin: 8px 0 12px; }
+
+        .table-wrap { overflow-x: auto; background: rgba(255,255,255,0.05); backdrop-filter: blur(8px); border-radius: var(--radius); box-shadow: var(--shadow); padding: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        table { width: 100%; border-collapse: collapse; color: var(--text-light); }
+        th { background: var(--primary); color: var(--bg-dark); padding: 16px 20px; text-align: left; }
+        td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        .consult-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+        .chat-box { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; max-height: 600px; }
+        .chat-header { background: rgba(76,175,80,0.2); padding: 16px 24px; display: flex; align-items: center; gap: 12px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .chat-messages { flex: 1; padding: 24px; overflow-y: auto; min-height: 220px; max-height: 300px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 12px; }
+        .msg { padding: 12px 18px; border-radius: 16px; max-width: 85%; font-size: 0.95rem; line-height: 1.5; animation: fadeSlide 0.3s ease; }
+        .msg-user { background: var(--primary); color: var(--bg-dark); align-self: flex-end; }
+        .msg-bot { background: rgba(255,255,255,0.1); align-self: flex-start; }
+        @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: translateY(0); } }
+        .chat-input { display: flex; gap: 8px; padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); }
+        .chat-input input { flex: 1; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; background: rgba(0,0,0,0.3); color: var(--white); outline: none; }
+        .chat-input button { background: var(--primary); border: none; color: var(--bg-dark); width: 48px; height: 48px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; }
+        .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 20px 16px; background: rgba(0,0,0,0.2); }
+        .quick-actions button { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 40px; font-size: 0.8rem; cursor: pointer; color: var(--text-muted); transition: var(--transition); }
+        .quick-actions button:hover { background: var(--primary); color: var(--bg-dark); }
+
+        .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+        .tech-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(8px); padding: 24px; border-radius: var(--radius); text-align: center; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.05); transition: var(--transition); color: var(--text-light); }
+        .tech-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .tech-card i { font-size: 2.2rem; color: var(--secondary); margin-bottom: 12px; }
+
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; margin-top: 16px; }
+        .pricing-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(8px); padding: 32px 24px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .pricing-card.popular { border-color: var(--secondary); background: rgba(0,230,118,0.05); }
+        .price { font-size: 2.8rem; font-weight: 700; color: var(--secondary); margin: 16px 0; }
+
+        footer { position: relative; z-index: 2; background: rgba(4, 12, 4, 0.92); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-top: 1px solid rgba(76, 175, 80, 0.25); }
+        .footer-grid-custom { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 32px; }
+        .footer-col h4 { color: #fff; font-size: 0.95rem; font-weight: 600; margin-bottom: 16px; letter-spacing: 0.3px; }
+        .footer-col a { display: block; padding: 4px 0; margin-bottom: 6px; transition: var(--transition); color: #b8e6b8; }
+        .footer-col a:hover { color: #fff; padding-left: 6px; }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 20px; text-align: center; font-size: 0.85rem; color: #a5d6a7; }
+
+        @media (max-width: 992px) {
+            .hero-grid { grid-template-columns: 1fr; }
+            .consult-wrapper { grid-template-columns: 1fr; }
+            .footer-grid-custom { grid-template-columns: 1fr 1fr; }
+            .section-title { font-size: 2.2rem; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; flex-direction: column; background: rgba(10,15,10,0.95); position: absolute; top: var(--nav-height); left: 0; width: 100%; padding: 24px; gap: 16px; }
+            .nav-links.open { display: flex; }
+            .hamburger { display: block; }
+            .hero-content { text-align: center; }
+            .hero-stats { justify-content: center; flex-wrap: wrap; }
+            .hero-content h1 { font-size: 2rem; }
+            .hero-actions { flex-direction: column; align-items: stretch; }
+            .hero-actions .btn { width: 100%; }
+            .footer-grid-custom { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <div class="preloader-logo">
+            <i class="fas fa-leaf"></i>
+            <span>PhytoScan</span>
+        </div>
+    </div>
+
+    <div id="scroll-progress"></div>
+    <div id="bg-canvas"></div>
+    <button id="backToTop" title="Back to top" data-i18n-title="backtotop_title"><i class="fas fa-arrow-up"></i></button>
+
+    <nav id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo" data-i18n="brand"><i class="fas fa-leaf"></i> PhytoScan</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#features" data-i18n="nav_features">Features</a></li>
+                <li><a href="#how-it-works" data-i18n="nav_how">How It Works</a></li>
+                <li><a href="#crops" data-i18n="nav_crops">Crops</a></li>
+                <li><a href="#pipeline" data-i18n="nav_pipeline">Pipeline</a></li>
+                <li><a href="#consult" data-i18n="nav_consult">AI Consult</a></li>
+                <li><a href="#pricing" data-i18n="nav_pricing">Pricing</a></li>
+                <li><a href="#demo" class="btn btn-primary nav-cta" data-i18n="nav_trydemo">Try Demo</a></li>
+                <li class="nav-lang"><a href="#" id="langToggle" title="Đổi ngôn ngữ"><span id="langIcon">🇻🇳</span></a></li>
+            </ul>
+            <div class="hamburger" id="hamburger"><i class="fas fa-bars"></i></div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="home">
+        <div class="container hero-grid">
+            <div class="hero-content reveal reveal-up">
+                <h1 data-i18n="hero_title">Scan. <span>Diagnose.</span> Protect.</h1>
+                <p id="typing-text" data-i18n="hero_desc">Empower your farming with AI-driven plant disease detection and expert consultation.</p>
+                <div class="hero-actions">
+                    <a href="#demo" class="btn btn-primary" data-i18n="hero_scan"><i class="fas fa-camera"></i> Start Scanning</a>
+                    <a href="#features" class="btn btn-outline" data-i18n="hero_learn">Learn More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="hero-stats">
+                    <div><strong>20</strong> <span data-i18n="hero_stat1">Diagnostic Classes</span></div>
+                    <div><strong>&ge;90%</strong> <span data-i18n="hero_stat2">Target Macro-F1 (Apple/Tomato)</span></div>
+                    <div><strong>5</strong> <span data-i18n="hero_stat3">Crop Species</span></div>
+                </div>
+            </div>
+            <div class="hero-visual reveal reveal-right" id="heroCardContainer">
+                <div class="hero-card" id="heroCard">
+                    <div class="mock-leaf"><i class="fas fa-seedling"></i><p data-i18n="mock_leaf">Upload leaf image</p></div>
+                    <div style="display:flex; gap:8px; justify-content:center; margin-bottom:12px;">
+                        <span class="badge-acc" data-i18n="mock_disease1">Apple Scab</span>
+                        <span class="badge-acc" data-i18n="mock_acc">High confidence</span>
+                    </div>
+                    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                        <span style="background:rgba(76,175,80,0.2);padding:4px 12px;border-radius:40px;" data-i18n="mock_apple">🍎 Apple</span>
+                        <span style="background:rgba(76,175,80,0.2);padding:4px 12px;border-radius:40px;" data-i18n="mock_corn">🌽 Corn</span>
+                        <span style="background:rgba(76,175,80,0.2);padding:4px 12px;border-radius:40px;" data-i18n="mock_grape">🍇 Grape</span>
+                        <span style="background:rgba(76,175,80,0.2);padding:4px 12px;border-radius:40px;" data-i18n="mock_pepper">🫑 Bell Pepper</span>
+                        <span style="background:rgba(76,175,80,0.2);padding:4px 12px;border-radius:40px;" data-i18n="mock_tomato">🍅 Tomato</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEMO SECTION -->
+    <section id="demo" style="background:rgba(10,15,10,0.4);">
+        <div class="container">
+            <div class="text-center reveal reveal-up">
+                <h2 class="section-title" data-i18n="demo_title">Live <span>Diagnosis</span></h2>
+                <p class="section-subtitle mx-auto" data-i18n="demo_subtitle">Select crop species and upload a leaf image to get AI-powered results instantly.</p>
+            </div>
+            <div class="upload-section reveal reveal-scale" style="max-width:600px;margin:0 auto;">
+                <form id="predictForm">
+                    <label style="color:var(--text-muted);" data-i18n="demo_species_label">Crop Species</label>
+                    <select id="speciesSelect" required>
+                        <option value="" data-i18n="select_species_upload">-- Select species --</option>
+                    </select>
+                    <label style="color:var(--text-muted);" data-i18n="demo_file_label">Leaf Image</label>
+                    <input type="file" id="imageInput" accept="image/*" required />
+                    <button type="submit" class="btn btn-primary" style="width:100%;" data-i18n="demo_analyze">Analyze <i class="fas fa-microscope"></i></button>
+                </form>
+                <div id="resultBox" class="result-box">
+                    <div id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section id="features">
+        <div class="container">
+            <div class="text-center reveal reveal-up">
+                <h2 class="section-title" data-i18n="features_title">Why <span>PhytoScan</span>?</h2>
+                <p class="section-subtitle mx-auto" data-i18n="features_sub">Advanced AI meets agricultural expertise to protect your crops.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card tilt-card reveal reveal-up"><i class="fas fa-brain"></i><h3 data-i18n="feat1_title">AI-Powered Detection</h3><p data-i18n="feat1_desc">Deep learning (EfficientNetV2-S) with calibrated, per-species confidence scoring.</p></div>
+                <div class="feature-card tilt-card reveal reveal-up"><i class="fas fa-robot"></i><h3 data-i18n="feat2_title">LLM Consultation</h3><p data-i18n="feat2_desc">Get expert-level advice from our AI consultant in real-time.</p></div>
+                <div class="feature-card tilt-card reveal reveal-up"><i class="fas fa-mobile-alt"></i><h3 data-i18n="feat3_title">Multi-Platform</h3><p data-i18n="feat3_desc">Web, mobile, offline support for remote areas.</p></div>
+                <div class="feature-card tilt-card reveal reveal-up"><i class="fas fa-globe-americas"></i><h3 data-i18n="feat4_title">Multilingual</h3><p data-i18n="feat4_desc">English, Vietnamese, Bengali & more.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section id="how-it-works" style="background:rgba(10,15,10,0.4);">
+        <div class="container">
+            <div class="text-center reveal reveal-up">
+                <h2 class="section-title" data-i18n="how_title">How <span>PhytoScan</span> Works</h2>
+                <p class="section-subtitle mx-auto" data-i18n="how_sub">From leaf scan to actionable insights in five simple steps.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-item reveal reveal-up"><i class="fas fa-camera"></i><h4 data-i18n="step1_title">1. Upload</h4><p data-i18n="step1_desc">Capture or upload a photo of the affected leaf.</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-microchip"></i><h4 data-i18n="step2_title">2. Detect</h4><p data-i18n="step2_desc">AI processes the image and identifies the disease.</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-file-medical-alt"></i><h4 data-i18n="step3_title">3. Diagnose</h4><p data-i18n="step3_desc">Get disease name, confidence score, and severity.</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-comment-dots"></i><h4 data-i18n="step4_title">4. Consult</h4><p data-i18n="step4_desc">Ask AI consultant about treatment, prevention, and more.</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-check-circle"></i><h4 data-i18n="step5_title">5. Act</h4><p data-i18n="step5_desc">Implement science-based recommendations.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CROPS TABLE SECTION -->
+    <section id="crops">
+        <div class="container">
+            <div class="text-center reveal reveal-up">
+                <h2 class="section-title" data-i18n="crops_title">Supported <span>Crops &amp; Diseases</span></h2>
+                <p class="section-subtitle mx-auto" data-i18n="crops_sub">Continuously expanding to cover more species and pathogens.</p>
+            </div>
+            <div class="table-wrap reveal reveal-scale">
+                <table>
+                    <thead><tr><th data-i18n="table_crop">Crop</th><th data-i18n="table_diseases">Diseases Detected</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong data-i18n="crop_apple">🍎 Apple</strong></td><td data-i18n="apple_diseases">Apple Scab, Cedar Apple Rust, Healthy</td></tr>
+                        <tr><td><strong data-i18n="crop_corn">🌽 Corn</strong></td><td data-i18n="corn_diseases">Cercospora Leaf Spot, Common Rust, Northern Leaf Blight, Healthy</td></tr>
+                        <tr><td><strong data-i18n="crop_grape">🍇 Grape</strong></td><td data-i18n="grape_diseases">Black Rot, Healthy</td></tr>
+                        <tr><td><strong data-i18n="crop_pepper">🫑 Bell Pepper</strong></td><td data-i18n="pepper_diseases">Bacterial Spot, Healthy</td></tr>
+                        <tr><td><strong data-i18n="crop_tomato">🍅 Tomato</strong></td><td data-i18n="tomato_diseases">Bacterial Spot, Early Blight, Late Blight, Leaf Mold, Septoria Leaf Spot, Spider Mites, Yellow Leaf Curl Virus, Mosaic Virus, Healthy</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="text-align:center; margin-top:16px; color:var(--text-muted); font-size:0.9rem;" data-i18n="crops_footer">
+                <i class="fas fa-flask"></i> Pretrained on PlantVillage-style data (53,599 images / 38 classes) • Fine-tuned per species on real field images (18,354 images / 20 classes) • Temperature-calibrated confidence
+            </p>
+        </div>
+    </section>
+
+    <!-- PIPELINE SECTION -->
+    <section id="pipeline" style="background: rgba(10,15,10,0.4);">
+        <div class="container">
+            <div class="text-center reveal reveal-up">
+                <h2 class="section-title" data-i18n="pipeline_title">Our <span>Training Pipeline</span></h2>
+                <p class="section-subtitle mx-auto" data-i18n="pipeline_sub">From raw field images to accurate, robust disease diagnosis.</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-item reveal reveal-up"><i class="fas fa-database"></i><h4 data-i18n="pipeline_step1">1. Data Collection</h4><p data-i18n="pipeline_step1_desc">PlantVillage-style pretrain set (53,599 images / 38 classes) + real-world field fine-tune set (18,354 images / 20 classes, 5 crops)</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-broom"></i><h4 data-i18n="pipeline_step2">2. Cleaning &amp; Dedup</h4><p data-i18n="pipeline_step2_desc">SHA256-verified, hash-locked 70/10/10/10 train/calib/val/holdout split with an immutable manifest</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-magic"></i><h4 data-i18n="pipeline_step3">3. Advanced Augmentation</h4><p data-i18n="pipeline_step3_desc">CoarseDropout, MixUp, RandAugment, CutMix, brightness/contrast shifts, noise</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-microchip"></i><h4 data-i18n="pipeline_step4">4. Two‑Stage Training</h4><p data-i18n="pipeline_step4_desc">Pre‑train on PlantVillage-style data (EfficientNetV2-S) → Fine‑tune per species with Class‑Balanced Focal Loss &amp; PEFT</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-thermometer-half"></i><h4 data-i18n="pipeline_step5">5. Temperature Calibration</h4><p data-i18n="pipeline_step5_desc">Per‑species temperature scaling to improve prediction confidence</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-shield-alt"></i><h4 data-i18n="pipeline_step6">6. Leaf Gate &amp; OOD Check</h4><p data-i18n="pipeline_step6_desc">Rejects non-leaf images, wrong species, and out-of-distribution inputs before diagnosis</p></div>
+                <div class="step-item reveal reveal-up"><i class="fas fa-cloud-upload-alt"></i><h4 data-i18n="pipeline_step7">7. ONNX Export</h4><p data-i18n="pipeline_step7_desc">Models exported to ONNX with dynamic quantization, ready for edge deployment</p></div>
+            </div>
+            <div class="tech-grid" style="margin-top:48px;">
+                <div class="tech-card reveal reveal-up"><i class="fas fa-cubes"></i><h4 data-i18n="tech1">EfficientNetV2-S Backbone</h4><p data-i18n="tech1_desc">ImageNet‑1k pretrained, fine‑tuned per species with PEFT on our field dataset</p></div>
+                <div class="tech-card reveal reveal-up"><i class="fas fa-balance-scale"></i><h4 data-i18n="tech2">Class‑Balanced Loss</h4><p data-i18n="tech2_desc">Focal Loss + effective number of samples to handle class imbalance</p></div>
+                <div class="tech-card reveal reveal-up"><i class="fas fa-chart-line"></i><h4 data-i18n="tech3">Field‑Holdout Evaluation</h4><p data-i18n="tech3_desc">Evaluated by macro-F1 on a locked field holdout, across all 5 crops and 20 diagnostic classes</p></div>
+                <div class="tech-card reveal reveal-up"><i class="fas fa-robot"></i><h4 data-i18n="tech4">LLM‑Enhanced Consultation</h4><p data-i18n="tech4_desc">A configurable external LLM API powers real‑time expert advice</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONSULT SECTION -->
+    <section id="consult" style="background:rgba(10,15,10,0.4);">
+        <div class="container">
+            <div class="consult-wrapper">
+                <div class="consult-info reveal reveal-left">
+                    <h2 class="section-title" data-i18n="consult_title">AI Consultation <span>Powered by LLM</span></h2>
+                    <p style="color:var(--text-muted); margin-bottom:24px;" data-i18n="consult_sub">Select crop species and disease for focused, expert advice.</p>
+                    <ul style="color:var(--text-muted);">
+                        <li><i class="fas fa-check-circle" style="color:var(--secondary);"></i> <span data-i18n="consult_li1">Targeted advice for specific diseases</span></li>
+                        <li><i class="fas fa-check-circle" style="color:var(--secondary);"></i> <span data-i18n="consult_li2">Personalized treatment plans</span></li>
+                        <li><i class="fas fa-check-circle" style="color:var(--secondary);"></i> <span data-i18n="consult_li3">Preventive measures</span></li>
+                        <li><i class="fas fa-check-circle" style="color:var(--secondary);"></i> <span data-i18n="consult_li4">Expert insights</span></li>
+                    </ul>
+                </div>
+                <div class="chat-box reveal reveal-right">
+                    <div class="chat-header">
+                        <i class="fas fa-robot"></i> <span data-i18n="chat_header">PhytoScan AI Consultant</span>
+                        <span style="font-size:0.7rem; background:rgba(76,175,80,0.3); padding:2px 12px; border-radius:40px; margin-left:auto;" data-i18n="chat_status">Live</span>
+                    </div>
+                    <div style="padding: 16px 20px; background: rgba(0,0,0,0.2); border-bottom:1px solid rgba(255,255,255,0.05); display:flex; gap:12px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:150px;">
+                            <label style="color:var(--text-muted); font-size:0.8rem;" data-i18n="chat_species_label">Species</label>
+                            <select id="chatSpecies" style="width:100%; padding:8px 12px; border-radius:8px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:var(--white);">
+                                <option value="" data-i18n="default_species_option">-- Select --</option>
+                            </select>
+                        </div>
+                        <div style="flex:2; min-width:180px;">
+                            <label style="color:var(--text-muted); font-size:0.8rem;" data-i18n="chat_disease_label">Disease</label>
+                            <select id="chatDisease" style="width:100%; padding:8px 12px; border-radius:8px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:var(--white);">
+                                <option value="" data-i18n="default_disease_option">-- Select a disease --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="msg msg-bot"><strong>🌱 PhytoScan:</strong> <span data-i18n="chat_welcome">Please select a crop and disease above, then ask your question.</span></div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" data-i18n="chat_placeholder" placeholder="Ask about treatment, prevention, symptoms..." />
+                        <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                    <div class="quick-actions">
+                        <button data-question="What fungicide should I use for this disease?" data-question-vi="Tôi nên dùng loại thuốc trừ nấm nào cho bệnh này?" data-i18n="quick1">🧪 Treatment</button>
+                        <button data-question="How can I prevent this disease next season?" data-question-vi="Làm sao để phòng ngừa bệnh này vào vụ sau?" data-i18n="quick2">🛡️ Prevention</button>
+                        <button data-question="What are the early symptoms of this disease?" data-question-vi="Các triệu chứng sớm của bệnh này là gì?" data-i18n="quick3">🔍 Symptoms</button>
+                        <button data-question="Is this disease contagious to other crops?" data-question-vi="Bệnh này có lây sang cây trồng khác không?" data-i18n="quick4">🌾 Spread</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING SECTION -->
+    <section id="pricing" style="background:rgba(10,15,10,0.4);">
+        <div class="container">
+            <div class="text-center reveal reveal-up">
+                <h2 class="section-title" data-i18n="pricing_title">Choose Your <span>Plan</span></h2>
+                <p class="section-subtitle mx-auto" data-i18n="pricing_sub">Affordable solutions for farmers, agronomists, and enterprises.</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card reveal reveal-up"><h3 data-i18n="free_plan">Free</h3><div class="price">$0</div><ul><li><i class="fas fa-check"></i> <span data-i18n="free_feature">5 diagnoses/month</span></li></ul><a href="#demo" class="btn btn-outline" style="width:100%;" data-i18n="free_btn">Get Started</a></div>
+                <div class="pricing-card popular reveal reveal-up"><h3 data-i18n="pro_plan">Pro</h3><div class="price">$19.99<small>/mo</small></div><ul><li><i class="fas fa-check"></i> <span data-i18n="pro_feature">Unlimited diagnoses</span></li></ul><a href="#demo" class="btn btn-primary" style="width:100%;" data-i18n="pro_btn">Start Trial</a></div>
+                <div class="pricing-card reveal reveal-up"><h3 data-i18n="enterprise_plan">Enterprise</h3><div class="price" data-i18n="enterprise_price">Contact</div><ul><li><i class="fas fa-check"></i> <span data-i18n="enterprise_feature">Custom models</span></li></ul><a href="#" class="btn btn-outline" style="width:100%;" data-i18n="ent_btn">Talk to Sales</a></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container" style="padding: 48px 24px 24px;">
+            <div class="footer-grid-custom">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                        <i class="fas fa-leaf" style="color: #00E676; font-size: 1.5rem;"></i>
+                        <span style="font-weight: 700; font-size: 1.3rem; color: #fff;">PhytoScan</span>
+                    </div>
+                    <p style="color: #b8e6b8; font-size: 0.9rem; line-height: 1.6; max-width: 280px; margin-bottom: 18px;" data-i18n="footer_about">AI‑powered plant disease detection and consultation. Empowering farmers worldwide.</p>
+                    <div style="display: flex; gap: 14px;">
+                        <a href="#" style="color: #a5d6a7; font-size: 1.1rem; transition: color 0.3s;" onmouseover="this.style.color='#00E676'" onmouseout="this.style.color='#a5d6a7'"><i class="fab fa-github"></i></a>
+                        <a href="#" style="color: #a5d6a7; font-size: 1.1rem; transition: color 0.3s;" onmouseover="this.style.color='#00E676'" onmouseout="this.style.color='#a5d6a7'"><i class="fab fa-twitter"></i></a>
+                        <a href="#" style="color: #a5d6a7; font-size: 1.1rem; transition: color 0.3s;" onmouseover="this.style.color='#00E676'" onmouseout="this.style.color='#a5d6a7'"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 data-i18n="footer_product">Product</h4>
+                    <a href="#features" data-i18n="footer_features">Features</a>
+                    <a href="#how-it-works" data-i18n="footer_how">How It Works</a>
+                    <a href="#pipeline" data-i18n="footer_pipeline">Pipeline</a>
+                    <a href="#pricing" data-i18n="footer_pricing">Pricing</a>
+                </div>
+                <div class="footer-col">
+                    <h4 data-i18n="footer_resources">Resources</h4>
+                    <a href="#" data-i18n="footer_docs">Documentation</a>
+                    <a href="#" data-i18n="footer_api">API Reference</a>
+                    <a href="#" data-i18n="footer_research">Research</a>
+                    <a href="#" data-i18n="footer_blog">Blog</a>
+                </div>
+                <div class="footer-col">
+                    <h4 data-i18n="footer_support">Support</h4>
+                    <a href="mailto:support@phytoscan.ai" data-i18n="footer_email"><i class="far fa-envelope"></i> Email Us</a>
+                    <a href="#" data-i18n="footer_community">Community</a>
+                    <a href="#" data-i18n="footer_privacy">Privacy Policy</a>
+                    <a href="#" data-i18n="footer_terms">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p data-i18n="footer_copyright">&copy; 2026 PhytoScan. Built on EfficientNetV2-S &amp; an external LLM API. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ===== PRELOADER ZOOM OUT =====
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            const logo = document.querySelector('.preloader-logo');
+            if (logo) {
+                logo.classList.add('zoom-out');
+                logo.addEventListener('animationend', function handler() {
+                    logo.removeEventListener('animationend', handler);
+                    if (preloader) preloader.classList.add('hidden');
+                    setTimeout(() => {
+                        if (preloader && preloader.parentNode) preloader.parentNode.removeChild(preloader);
+                    }, 600);
+                });
+            }
+        });
+
+        // ===== BACK TO TOP =====
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) backToTop.classList.add('visible');
+            else backToTop.classList.remove('visible');
+        });
+        backToTop.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+        // ===== TYPING EFFECT =====
+        const typingElement = document.getElementById('typing-text');
+        if (typingElement) {
+            const originalText = typingElement.textContent.trim();
+            typingElement.textContent = '';
+            let i = 0;
+            function typeWriter() {
+                if (i < originalText.length) {
+                    typingElement.textContent += originalText.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 25);
+                }
+            }
+            setTimeout(typeWriter, 400);
+        }
+
+        // ===== 3D TILT =====
+        function applyTilt(element) {
+            element.addEventListener('mousemove', (e) => {
+                const rect = element.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+                element.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+            });
+            element.addEventListener('mouseleave', () => {
+                element.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+            });
+        }
+        const heroCard = document.getElementById('heroCard');
+        if (heroCard) applyTilt(heroCard);
+        document.querySelectorAll('.tilt-card').forEach(card => applyTilt(card));
+
+        // ===== THREE.JS DYNAMIC BACKGROUND + MOUSE =====
+        (function() {
+            const container = document.getElementById('bg-canvas');
+            if (!container) return;
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, container.clientWidth/container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 0, 12);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+
+            function createGlowTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+                gradient.addColorStop(0, 'rgba(180, 255, 120, 1)');
+                gradient.addColorStop(0.2, 'rgba(140, 255, 80, 0.95)');
+                gradient.addColorStop(0.5, 'rgba(60, 220, 50, 0.8)');
+                gradient.addColorStop(0.8, 'rgba(0, 180, 30, 0.4)');
+                gradient.addColorStop(1, 'rgba(0, 80, 10, 0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 128, 128);
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            const particleCount = 180;
+            const geometry = new THREE.BufferGeometry();
+            const posArray = new Float32Array(particleCount * 3);
+            const basePositions = new Float32Array(particleCount * 3);
+            const angles = new Float32Array(particleCount);
+            const speedFactors = new Float32Array(particleCount);
+
+            for (let i = 0; i < particleCount; i++) {
+                const i3 = i * 3;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const r = 2.5 + Math.random() * 7.5;
+                basePositions[i3] = Math.sin(phi) * Math.cos(theta) * r;
+                basePositions[i3+1] = Math.sin(phi) * Math.sin(theta) * r;
+                basePositions[i3+2] = Math.cos(phi) * r * 0.6 - 1;
+                posArray[i3] = basePositions[i3];
+                posArray[i3+1] = basePositions[i3+1];
+                posArray[i3+2] = basePositions[i3+2];
+                angles[i] = Math.random() * Math.PI * 2;
+                speedFactors[i] = 0.2 + Math.random() * 0.5;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const material = new THREE.PointsMaterial({
+                size: 0.45,
+                map: createGlowTexture(),
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                transparent: true,
+                opacity: 0.9,
+                color: 0xaaffaa,
+                sizeAttenuation: true,
+            });
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            let mouseX = 0, mouseY = 0;
+            window.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            let scrollProgress = 0;
+            window.addEventListener('scroll', () => {
+                const d = document.documentElement.scrollHeight - window.innerHeight;
+                scrollProgress = d > 0 ? Math.min(window.scrollY / d, 1) : 0;
+            });
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            (function animate() {
+                requestAnimationFrame(animate);
+                const time = Date.now() * 0.001;
+                const amp = 0.5 + scrollProgress * 0.8;
+                for (let i = 0; i < particleCount; i++) {
+                    const i3 = i * 3;
+                    angles[i] += (0.3 + speedFactors[i] * 0.4) * 0.008;
+                    posArray[i3] = basePositions[i3] + Math.cos(angles[i]) * amp + mouseX * 0.2;
+                    posArray[i3+1] = basePositions[i3+1] + Math.sin(angles[i] * 1.3) * amp * 0.8 + mouseY * 0.2;
+                    posArray[i3+2] = basePositions[i3+2] + Math.cos(angles[i] * 0.7 + time) * amp * 0.6;
+                }
+                geometry.attributes.position.needsUpdate = true;
+                material.size = 0.45 * (1 + scrollProgress * 0.3);
+                points.rotation.y += 0.0004 + scrollProgress * 0.0006 + mouseX * 0.0001;
+                points.rotation.x = Math.sin(time * 0.02) * 0.03 + scrollProgress * 0.05 + mouseY * 0.02;
+                renderer.render(scene, camera);
+            })();
+        })();
+
+        // ===== ĐA NGÔN NGỮ & HIỆU ỨNG FADE =====
+        const translations = {
+            en: {
+                brand: "PhytoScan",
+                nav_features: "Features",
+                nav_how: "How It Works",
+                nav_crops: "Crops",
+                nav_pipeline: "Pipeline",
+                nav_consult: "AI Consult",
+                nav_pricing: "Pricing",
+                nav_trydemo: "Try Demo",
+                hero_title: 'Scan. <span>Diagnose.</span> Protect.',
+                hero_desc: "Empower your farming with AI-driven plant disease detection and expert consultation. Upload a leaf photo and get instant diagnosis with tailored treatment recommendations.",
+                hero_scan: "Start Scanning",
+                hero_learn: "Learn More",
+                hero_stat1: "Diagnostic Classes",
+                hero_stat2: "Target Macro-F1 (Apple/Tomato)",
+                hero_stat3: "Crop Species",
+                mock_leaf: "Upload leaf image",
+                mock_disease1: "Apple Scab",
+                mock_acc: "High confidence",
+                mock_apple: "🍎 Apple",
+                mock_corn: "🌽 Corn",
+                mock_grape: "🍇 Grape",
+                mock_pepper: "🫑 Bell Pepper",
+                mock_tomato: "🍅 Tomato",
+                demo_title: 'Live <span>Diagnosis</span>',
+                demo_subtitle: "Select crop species and upload a leaf image to get AI-powered results instantly.",
+                demo_species_label: "Crop Species",
+                demo_file_label: "Leaf Image",
+                demo_analyze: "Analyze",
+                features_title: 'Why <span>PhytoScan</span>?',
+                features_sub: "Advanced AI meets agricultural expertise to protect your crops.",
+                feat1_title: "AI-Powered Detection",
+                feat1_desc: "Deep learning (EfficientNetV2-S) with calibrated, per-species confidence scoring.",
+                feat2_title: "LLM Consultation",
+                feat2_desc: "Get expert-level advice from our AI consultant in real-time.",
+                feat3_title: "Multi-Platform",
+                feat3_desc: "Web, mobile, offline support for remote areas.",
+                feat4_title: "Multilingual",
+                feat4_desc: "English, Vietnamese, Bengali & more.",
+                how_title: 'How <span>PhytoScan</span> Works',
+                how_sub: "From leaf scan to actionable insights in five simple steps.",
+                step1_title: "1. Upload",
+                step1_desc: "Capture or upload a photo of the affected leaf.",
+                step2_title: "2. Detect",
+                step2_desc: "AI processes the image and identifies the disease.",
+                step3_title: "3. Diagnose",
+                step3_desc: "Get disease name, confidence score, and severity.",
+                step4_title: "4. Consult",
+                step4_desc: "Ask AI consultant about treatment, prevention, and more.",
+                step5_title: "5. Act",
+                step5_desc: "Implement science-based recommendations.",
+                crops_title: 'Supported <span>Crops &amp; Diseases</span>',
+                crops_sub: "Continuously expanding to cover more species and pathogens.",
+                table_crop: "Crop",
+                table_diseases: "Diseases Detected",
+                crop_apple: "🍎 Apple",
+                crop_corn: "🌽 Corn",
+                crop_grape: "🍇 Grape",
+                crop_pepper: "🫑 Bell Pepper",
+                crop_tomato: "🍅 Tomato",
+                apple_diseases: "Apple Scab, Cedar Apple Rust, Healthy",
+                corn_diseases: "Cercospora Leaf Spot, Common Rust, Northern Leaf Blight, Healthy",
+                grape_diseases: "Black Rot, Healthy",
+                pepper_diseases: "Bacterial Spot, Healthy",
+                tomato_diseases: "Bacterial Spot, Early Blight, Late Blight, Leaf Mold, Septoria Leaf Spot, Spider Mites, Yellow Leaf Curl Virus, Mosaic Virus, Healthy",
+                crops_footer: "Pretrained on PlantVillage-style data (53,599 images / 38 classes) • Fine-tuned per species on real field images (18,354 images / 20 classes) • Temperature-calibrated confidence",
+                pipeline_title: 'Our <span>Training Pipeline</span>',
+                pipeline_sub: "From raw field images to accurate, robust disease diagnosis.",
+                pipeline_step1: "1. Data Collection",
+                pipeline_step1_desc: "PlantVillage-style pretrain set (53,599 images / 38 classes) + real-world field fine-tune set (18,354 images / 20 classes, 5 crops)",
+                pipeline_step2: "2. Cleaning & Dedup",
+                pipeline_step2_desc: "SHA256-verified, hash-locked 70/10/10/10 train/calib/val/holdout split with an immutable manifest",
+                pipeline_step3: "3. Advanced Augmentation",
+                pipeline_step3_desc: "CoarseDropout, MixUp, RandAugment, CutMix, brightness/contrast shifts, noise",
+                pipeline_step4: "4. Two‑Stage Training",
+                pipeline_step4_desc: "Pre‑train on PlantVillage-style data (EfficientNetV2-S) → Fine‑tune per species with Class‑Balanced Focal Loss & PEFT",
+                pipeline_step5: "5. Temperature Calibration",
+                pipeline_step5_desc: "Per‑species temperature scaling to improve prediction confidence",
+                pipeline_step6: "6. Leaf Gate & OOD Check",
+                pipeline_step6_desc: "Rejects non-leaf images, wrong species, and out-of-distribution inputs before diagnosis",
+                pipeline_step7: "7. ONNX Export",
+                pipeline_step7_desc: "Models exported to ONNX with dynamic quantization, ready for edge deployment",
+                tech1: "EfficientNetV2-S Backbone",
+                tech1_desc: "ImageNet‑1k pretrained, fine‑tuned per species with PEFT on our field dataset",
+                tech2: "Class‑Balanced Loss",
+                tech2_desc: "Focal Loss + effective number of samples to handle class imbalance",
+                tech3: "Field‑Holdout Evaluation",
+                tech3_desc: "Evaluated by macro-F1 on a locked field holdout, across all 5 crops and 20 diagnostic classes",
+                tech4: "LLM‑Enhanced Consultation",
+                tech4_desc: "A configurable external LLM API powers real‑time expert advice",
+                consult_title: 'AI Consultation <span>Powered by LLM</span>',
+                consult_sub: "Select crop species and disease for focused, expert advice.",
+                consult_li1: "Targeted advice for specific diseases",
+                consult_li2: "Personalized treatment plans",
+                consult_li3: "Preventive measures",
+                consult_li4: "Expert insights",
+                chat_header: "PhytoScan AI Consultant",
+                chat_status: "Live",
+                chat_species_label: "Species",
+                chat_disease_label: "Disease",
+                chat_placeholder: "Ask about treatment, prevention, symptoms...",
+                chat_welcome: "Please select a crop and disease above, then ask your question.",
+                quick1: "🧪 Treatment",
+                quick2: "🛡️ Prevention",
+                quick3: "🔍 Symptoms",
+                quick4: "🌾 Spread",
+                pricing_title: 'Choose Your <span>Plan</span>',
+                pricing_sub: "Affordable solutions for farmers, agronomists, and enterprises.",
+                free_plan: "Free",
+                free_feature: "5 diagnoses/month",
+                free_btn: "Get Started",
+                pro_plan: "Pro",
+                pro_feature: "Unlimited diagnoses",
+                pro_btn: "Start Trial",
+                enterprise_plan: "Enterprise",
+                enterprise_price: "Contact",
+                enterprise_feature: "Custom models",
+                ent_btn: "Talk to Sales",
+                footer_about: "AI-powered plant disease detection and consultation. Empowering farmers worldwide.",
+                footer_product: "Product",
+                footer_features: "Features",
+                footer_how: "How It Works",
+                footer_pipeline: "Pipeline",
+                footer_pricing: "Pricing",
+                footer_resources: "Resources",
+                footer_docs: "Documentation",
+                footer_api: "API Reference",
+                footer_research: "Research",
+                footer_blog: "Blog",
+                footer_support: "Support",
+                footer_email: "Email Us",
+                footer_community: "Community",
+                footer_privacy: "Privacy Policy",
+                footer_terms: "Terms of Service",
+                footer_copyright: "© 2026 PhytoScan. Built on EfficientNetV2-S & an external LLM API. All rights reserved.",
+                select_species_upload: "-- Select species --",
+                default_species_option: "-- Select --",
+                default_disease_option: "-- Select a disease --",
+                error_no_species: "⚠️ Please select both species and disease first.",
+                result_loading: "Analyzing...",
+                backtotop_title: "Back to top",
+                alert_select_species_file: "Please select a species and upload an image first.",
+                result_confidence_label: "Confidence",
+                result_inconclusive: "Inconclusive",
+                result_reason_label: "Reason",
+                result_retake_hint: "Please retake a clearer photo with correct species and simple background.",
+                error_api_connection: "API connection error.",
+                chat_no_response: "No response.",
+                error_consult_connection: "⚠️ Consultation connection error.",
+            },
+            vi: {
+                brand: "PhytoScan",
+                nav_features: "Tính năng",
+                nav_how: "Cách hoạt động",
+                nav_crops: "Cây trồng",
+                nav_pipeline: "Quy trình",
+                nav_consult: "Tư vấn AI",
+                nav_pricing: "Bảng giá",
+                nav_trydemo: "Dùng thử",
+                hero_title: 'Quét. <span>Chẩn đoán.</span> Bảo vệ.',
+                hero_desc: "Ứng dụng AI vào nông nghiệp để phát hiện bệnh cây và tư vấn chuyên gia. Tải ảnh lá cây và nhận kết quả ngay.",
+                hero_scan: "Bắt đầu quét",
+                hero_learn: "Tìm hiểu thêm",
+                hero_stat1: "Lớp chẩn đoán",
+                hero_stat2: "Mục tiêu Macro-F1 (Táo/Cà chua)",
+                hero_stat3: "Loài cây",
+                mock_leaf: "Tải ảnh lá",
+                mock_disease1: "Ghẻ táo",
+                mock_acc: "Độ tin cậy cao",
+                mock_apple: "🍎 Táo",
+                mock_corn: "🌽 Ngô",
+                mock_grape: "🍇 Nho",
+                mock_pepper: "🫑 Ớt chuông",
+                mock_tomato: "🍅 Cà chua",
+                demo_title: 'Chẩn đoán <span>trực tiếp</span>',
+                demo_subtitle: "Chọn loài cây và tải ảnh lá để nhận kết quả từ AI.",
+                demo_species_label: "Loài cây",
+                demo_file_label: "Ảnh lá",
+                demo_analyze: "Phân tích",
+                features_title: 'Tại sao <span>PhytoScan</span>?',
+                features_sub: "Kết hợp AI tiên tiến với chuyên môn nông nghiệp.",
+                feat1_title: "Phát hiện bằng AI",
+                feat1_desc: "Deep learning (EfficientNetV2-S) với độ tin cậy đã hiệu chỉnh theo từng loài.",
+                feat2_title: "Tư vấn LLM",
+                feat2_desc: "Nhận lời khuyên chuyên gia từ trợ lý AI theo thời gian thực.",
+                feat3_title: "Đa nền tảng",
+                feat3_desc: "Web, di động, hỗ trợ ngoại tuyến cho vùng sâu vùng xa.",
+                feat4_title: "Đa ngôn ngữ",
+                feat4_desc: "Tiếng Anh, Việt, Bengali và hơn thế nữa.",
+                how_title: 'Cách <span>PhytoScan</span> hoạt động',
+                how_sub: "Từ ảnh chụp lá đến giải pháp cụ thể qua năm bước.",
+                step1_title: "1. Tải ảnh",
+                step1_desc: "Chụp hoặc tải ảnh lá cây bị bệnh.",
+                step2_title: "2. Phát hiện",
+                step2_desc: "AI xử lý ảnh và xác định bệnh.",
+                step3_title: "3. Chẩn đoán",
+                step3_desc: "Nhận tên bệnh, độ tin cậy và mức độ nghiêm trọng.",
+                step4_title: "4. Tư vấn",
+                step4_desc: "Hỏi trợ lý AI về cách điều trị, phòng ngừa.",
+                step5_title: "5. Hành động",
+                step5_desc: "Thực hiện các khuyến nghị dựa trên khoa học.",
+                crops_title: 'Cây trồng & <span>Bệnh</span> được hỗ trợ',
+                crops_sub: "Liên tục mở rộng để bao phủ nhiều loài và tác nhân gây bệnh hơn.",
+                table_crop: "Cây trồng",
+                table_diseases: "Bệnh phát hiện",
+                crop_apple: "🍎 Táo",
+                crop_corn: "🌽 Ngô",
+                crop_grape: "🍇 Nho",
+                crop_pepper: "🫑 Ớt chuông",
+                crop_tomato: "🍅 Cà chua",
+                apple_diseases: "Ghẻ táo, Gỉ sắt tuyết tùng táo, Khỏe mạnh",
+                corn_diseases: "Đốm lá Cercospora, Gỉ sắt thường, Cháy lá phương Bắc, Khỏe mạnh",
+                grape_diseases: "Thối đen, Khỏe mạnh",
+                pepper_diseases: "Đốm khuẩn, Khỏe mạnh",
+                tomato_diseases: "Đốm khuẩn, Đốm sớm, Mốc sương, Mốc lá, Đốm lá Septoria, Nhện đỏ, Virus xoăn vàng lá, Virus khảm, Khỏe mạnh",
+                crops_footer: "Tiền huấn luyện trên dữ liệu kiểu PlantVillage (53.599 ảnh / 38 lớp) • Tinh chỉnh theo từng loài trên ảnh thực địa (18.354 ảnh / 20 lớp) • Độ tin cậy đã hiệu chỉnh nhiệt độ",
+                pipeline_title: 'Quy trình <span>huấn luyện</span>',
+                pipeline_sub: "Từ ảnh thực địa thô đến chẩn đoán chính xác, mạnh mẽ.",
+                pipeline_step1: "1. Thu thập dữ liệu",
+                pipeline_step1_desc: "Bộ tiền huấn luyện kiểu PlantVillage (53.599 ảnh / 38 lớp) + bộ tinh chỉnh thực địa (18.354 ảnh / 20 lớp, 5 loài)",
+                pipeline_step2: "2. Làm sạch & Loại trùng",
+                pipeline_step2_desc: "Chia tách 70/10/10/10 train/calib/val/holdout, khoá bằng SHA256 với manifest bất biến",
+                pipeline_step3: "3. Tăng cường nâng cao",
+                pipeline_step3_desc: "CoarseDropout, MixUp, RandAugment, CutMix, điều chỉnh sáng/tương phản, nhiễu",
+                pipeline_step4: "4. Huấn luyện hai giai đoạn",
+                pipeline_step4_desc: "Tiền huấn luyện trên dữ liệu kiểu PlantVillage (EfficientNetV2-S) → Tinh chỉnh theo từng loài với Class‑Balanced Focal Loss & PEFT",
+                pipeline_step5: "5. Hiệu chỉnh nhiệt độ",
+                pipeline_step5_desc: "Hiệu chỉnh nhiệt độ theo từng loài để cải thiện độ tin cậy",
+                pipeline_step6: "6. Leaf Gate & Kiểm tra OOD",
+                pipeline_step6_desc: "Từ chối ảnh không phải lá, sai loài, hoặc ngoài phân phối trước khi chẩn đoán",
+                pipeline_step7: "7. Xuất ONNX",
+                pipeline_step7_desc: "Mô hình xuất sang ONNX với lượng tử hóa động, sẵn sàng triển khai trên thiết bị biên",
+                tech1: "Xương sống EfficientNetV2-S",
+                tech1_desc: "Tiền huấn luyện trên ImageNet‑1k, tinh chỉnh theo từng loài bằng PEFT trên bộ dữ liệu thực địa",
+                tech2: "Hàm mất mát Class‑Balanced",
+                tech2_desc: "Focal Loss + số mẫu hiệu quả để xử lý mất cân bằng lớp",
+                tech3: "Đánh giá trên Holdout thực địa",
+                tech3_desc: "Đánh giá bằng macro-F1 trên tập holdout thực địa đã khoá, cho cả 5 loài và 20 lớp chẩn đoán",
+                tech4: "Tư vấn tăng cường LLM",
+                tech4_desc: "Một LLM API bên ngoài có thể cấu hình, cung cấp lời khuyên chuyên gia theo thời gian thực",
+                consult_title: 'Tư vấn AI <span>trang bị LLM</span>',
+                consult_sub: "Chọn loài cây và bệnh để nhận tư vấn chuyên sâu.",
+                consult_li1: "Tư vấn tập trung cho từng bệnh cụ thể",
+                consult_li2: "Kế hoạch điều trị cá nhân hóa",
+                consult_li3: "Biện pháp phòng ngừa",
+                consult_li4: "Kiến thức chuyên gia",
+                chat_header: "Tư vấn AI PhytoScan",
+                chat_status: "Trực tuyến",
+                chat_species_label: "Loài",
+                chat_disease_label: "Bệnh",
+                chat_placeholder: "Hỏi về cách điều trị, phòng ngừa, triệu chứng...",
+                chat_welcome: "Vui lòng chọn loài và bệnh ở trên, sau đó đặt câu hỏi.",
+                quick1: "🧪 Điều trị",
+                quick2: "🛡️ Phòng ngừa",
+                quick3: "🔍 Triệu chứng",
+                quick4: "🌾 Lây lan",
+                pricing_title: 'Chọn <span>Gói</span> của bạn',
+                pricing_sub: "Giải pháp hợp lý cho nông dân, nhà nông học và doanh nghiệp.",
+                free_plan: "Miễn phí",
+                free_feature: "5 chẩn đoán/tháng",
+                free_btn: "Bắt đầu miễn phí",
+                pro_plan: "Pro",
+                pro_feature: "Chẩn đoán không giới hạn",
+                pro_btn: "Dùng thử Pro",
+                enterprise_plan: "Doanh nghiệp",
+                enterprise_price: "Liên hệ",
+                enterprise_feature: "Mô hình tùy chỉnh",
+                ent_btn: "Liên hệ bán hàng",
+                footer_about: "Phát hiện bệnh cây và tư vấn bằng AI. Trao quyền cho nông dân toàn cầu.",
+                footer_product: "Sản phẩm",
+                footer_features: "Tính năng",
+                footer_how: "Cách hoạt động",
+                footer_pipeline: "Quy trình",
+                footer_pricing: "Bảng giá",
+                footer_resources: "Tài nguyên",
+                footer_docs: "Tài liệu",
+                footer_api: "Tham chiếu API",
+                footer_research: "Nghiên cứu",
+                footer_blog: "Blog",
+                footer_support: "Hỗ trợ",
+                footer_email: "Email cho chúng tôi",
+                footer_community: "Cộng đồng",
+                footer_privacy: "Chính sách bảo mật",
+                footer_terms: "Điều khoản dịch vụ",
+                footer_copyright: "© 2026 PhytoScan. Xây dựng trên EfficientNetV2-S & một LLM API bên ngoài. Mọi quyền được bảo lưu.",
+                select_species_upload: "-- Chọn loài --",
+                default_species_option: "-- Chọn --",
+                default_disease_option: "-- Chọn bệnh --",
+                error_no_species: "⚠️ Vui lòng chọn cả loài và bệnh trước khi hỏi.",
+                result_loading: "Đang phân tích...",
+                backtotop_title: "Về đầu trang",
+                alert_select_species_file: "Vui lòng chọn loài cây và tải ảnh lên trước.",
+                result_confidence_label: "Độ tin cậy",
+                result_inconclusive: "Không kết luận",
+                result_reason_label: "Lý do",
+                result_retake_hint: "Vui lòng chụp lại rõ hơn, đúng loài, nền đơn giản.",
+                error_api_connection: "Lỗi kết nối API.",
+                chat_no_response: "Không có phản hồi.",
+                error_consult_connection: "⚠️ Lỗi kết nối tư vấn.",
+            }
+        };
+
+        let currentLang = localStorage.getItem('phytoscan_lang') || 'vi';
+
+        function applyLanguage(lang) {
+            const t = translations[lang];
+            if (!t) return;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key] !== undefined) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        if (el.type !== 'button' && el.type !== 'submit') {
+                            el.placeholder = t[key];
+                        } else {
+                            el.innerHTML = t[key];
+                        }
+                    } else if (el.tagName === 'OPTION' && el.value === '') {
+                        el.textContent = t[key];
+                    } else if (el.tagName === 'BUTTON' && el.classList.contains('quick-actions')) {
+                        // Xử lý nút quick action: giữ data-question, thay text
+                        el.textContent = t[key];
+                    } else {
+                        el.innerHTML = t[key];
+                    }
+                }
+            });
+
+            // Cập nhật các tooltip (title) có data-i18n-title
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (t[key] !== undefined) el.setAttribute('title', t[key]);
+            });
+
+            // Cập nhật nút đổi ngôn ngữ
+            const langToggle = document.getElementById('langToggle');
+            if (langToggle) {
+                langToggle.innerHTML = `<span id="langIcon">${lang === 'vi' ? '🇬🇧' : '🇻🇳'}</span>`;
+                langToggle.setAttribute('title', lang === 'vi' ? 'Switch to English' : 'Đổi sang tiếng Việt');
+            }
+
+            // Cập nhật tin nhắn chào bot
+            const chatMessages = document.getElementById('chatMessages');
+            const firstMsg = chatMessages.querySelector('.msg-bot');
+            if (firstMsg) {
+                const welcomeSpan = firstMsg.querySelector('[data-i18n="chat_welcome"]');
+                if (welcomeSpan) {
+                    welcomeSpan.textContent = t.chat_welcome || 'Please select...';
+                } else {
+                    firstMsg.innerHTML = `<strong>🌱 PhytoScan:</strong> ${t.chat_welcome || 'Please select...'}`;
+                }
+            }
+
+            localStorage.setItem('phytoscan_lang', lang);
+            currentLang = lang;
+            // Tải lại tên loài + tên bệnh theo ngôn ngữ mới (giữ nguyên lựa chọn hiện tại nếu còn hợp lệ)
+            loadSpecies().then(refreshDiseases);
+        }
+
+        // ===== HÀM LOAD SPECIES & DISEASES (đã dịch theo currentLang) =====
+        async function loadSpecies() {
+            try {
+                const res = await fetch(`/api/species?language=${currentLang}`);
+                const data = await res.json();
+                // items = [{value, label}] đã dịch; fallback nếu backend cũ chỉ trả `species`
+                const items = data.items || (data.species || []).map(s => ({ value: s, label: s }));
+                const uploadSel = document.getElementById('speciesSelect');
+                const chatSel = document.getElementById('chatSpecies');
+                // Giữ lựa chọn hiện tại (nếu có) để không mất khi đổi ngôn ngữ
+                const prevUpload = uploadSel.value;
+                const prevChat = chatSel.value;
+                uploadSel.innerHTML = `<option value="">${translations[currentLang].select_species_upload}</option>`;
+                chatSel.innerHTML = `<option value="">${translations[currentLang].default_species_option}</option>`;
+                items.forEach(item => {
+                    const opt1 = document.createElement('option');
+                    opt1.value = item.value;
+                    opt1.textContent = item.label;
+                    uploadSel.appendChild(opt1);
+                    const opt2 = document.createElement('option');
+                    opt2.value = item.value;
+                    opt2.textContent = item.label;
+                    chatSel.appendChild(opt2);
+                });
+                if (prevUpload) uploadSel.value = prevUpload;
+                if (prevChat) chatSel.value = prevChat;
+            } catch(e) {
+                console.error('loadSpecies error', e);
+            }
+        }
+
+        async function refreshDiseases() {
+            const species = document.getElementById('chatSpecies').value;
+            const diseaseSel = document.getElementById('chatDisease');
+            const prevDisease = diseaseSel.value;
+            if (!species) {
+                diseaseSel.innerHTML = `<option value="">${translations[currentLang].default_disease_option}</option>`;
+                return;
+            }
+            try {
+                const res = await fetch(`/api/diseases?species=${encodeURIComponent(species)}&language=${currentLang}`);
+                const data = await res.json();
+                // items = [{value, label}] đã dịch; fallback nếu backend cũ chỉ trả `diseases`
+                const items = data.items || (data.diseases || []).map(d => ({ value: d, label: d }));
+                diseaseSel.innerHTML = `<option value="">${translations[currentLang].default_disease_option}</option>`;
+                items.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.value;
+                    opt.textContent = item.label;
+                    diseaseSel.appendChild(opt);
+                });
+                if (prevDisease) diseaseSel.value = prevDisease;
+            } catch(e) {
+                console.error('refreshDiseases error', e);
+            }
+        }
+
+        // ===== CHAT FUNCTIONS =====
+        function addMessage(text, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'msg ' + (isUser ? 'msg-user' : 'msg-bot');
+            div.innerHTML = isUser ? text : `<strong>🌱 PhytoScan:</strong> ${text}`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // ===== DOMContentLoaded =====
+        document.addEventListener('DOMContentLoaded', () => {
+            applyLanguage(currentLang); // đã bao gồm loadSpecies() + refreshDiseases()
+
+            // Nút đổi ngôn ngữ
+            document.getElementById('langToggle').addEventListener('click', function(e) {
+                e.preventDefault();
+                const newLang = currentLang === 'vi' ? 'en' : 'vi';
+                applyLanguage(newLang);
+                // Cập nhật lại danh sách bệnh (đã có trong applyLanguage)
+            });
+
+            // Khi thay đổi loài trong chat, refresh diseases
+            document.getElementById('chatSpecies').addEventListener('change', refreshDiseases);
+
+            // PREDICT FORM
+            document.getElementById('predictForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const species = document.getElementById('speciesSelect').value;
+                const file = document.getElementById('imageInput').files[0];
+                if (!species || !file) {
+                    alert(translations[currentLang].alert_select_species_file);
+                    return;
+                }
+                const box = document.getElementById('resultBox');
+                const content = document.getElementById('resultContent');
+                content.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${translations[currentLang].result_loading}`;
+                box.classList.add('show');
+                const formData = new FormData();
+                formData.append('species', species);
+                formData.append('file', file);
+                formData.append('language', currentLang);
+                try {
+                    const res = await fetch('/api/predict', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.error) {
+                        content.innerHTML = `<p style="color:#ff8a80">${data.error}</p>`;
+                        return;
+                    }
+                    const tr = translations[currentLang];
+                    if (data.predictions && Object.keys(data.predictions).length) {
+                        let html = `<h4 style="color:var(--secondary);">${data.status}</h4><ul>`;
+                        for (const [d, c] of Object.entries(data.predictions)) {
+                            html += `<li><strong>${d}</strong>: ${(c * 100).toFixed(1)}%</li>`;
+                        }
+                        html += `</ul><p>${tr.result_confidence_label}: <span style="color:var(--secondary);">${data.confidence_level}</span></p>`;
+                        content.innerHTML = html;
+                    } else {
+                        content.innerHTML = `<h4>${tr.result_inconclusive}</h4><p>${tr.result_reason_label}: <strong>${data.reason || data.status}</strong>. ${tr.result_retake_hint}</p>`;
+                    }
+                } catch (err) {
+                    content.innerHTML = `<p style="color:#ff8a80">${translations[currentLang].error_api_connection}</p>`;
+                }
+            });
+
+            // CHAT SEND
+            document.getElementById('sendBtn').addEventListener('click', async () => {
+                const msg = document.getElementById('chatInput').value.trim();
+                const speciesSel = document.getElementById('chatSpecies');
+                const diseaseSel = document.getElementById('chatDisease');
+                const species = speciesSel.value;      // khoá nội bộ (vd: "pepper_bell")
+                const disease = diseaseSel.value;       // tên lớp gốc (vd: "Bacterial_spot")
+                if (!msg) return;
+                if (!species || !disease) {
+                    addMessage(translations[currentLang].error_no_species, false);
+                    return;
+                }
+                // Tên hiển thị đã dịch (đọc trực tiếp từ text đang hiện trên dropdown)
+                // -> gửi cho LLM để câu trả lời tự nhiên và đúng ngôn ngữ đang chọn.
+                const speciesLabel = speciesSel.options[speciesSel.selectedIndex].text;
+                const diseaseLabel = diseaseSel.options[diseaseSel.selectedIndex].text;
+                addMessage(msg, true);
+                document.getElementById('chatInput').value = '';
+                try {
+                    const res = await fetch('/api/consult', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: msg,
+                            species: speciesLabel,
+                            disease: diseaseLabel,
+                            language: currentLang
+                        })
+                    });
+                    const data = await res.json();
+                    addMessage(data.reply || translations[currentLang].chat_no_response, false);
+                } catch(e) {
+                    addMessage(translations[currentLang].error_consult_connection, false);
+                }
+            });
+
+            document.getElementById('chatInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('sendBtn').click();
+            });
+
+            // QUICK ACTION BUTTONS - dùng data-question / data-question-vi
+            document.querySelectorAll('.quick-actions button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const diseaseSel = document.getElementById('chatDisease');
+                    const disease = diseaseSel.value;
+                    if (!disease) {
+                        addMessage(translations[currentLang].error_no_species, false);
+                        return;
+                    }
+                    const diseaseLabel = diseaseSel.options[diseaseSel.selectedIndex].text;
+                    let question = currentLang === 'vi'
+                        ? btn.getAttribute('data-question-vi')
+                        : btn.getAttribute('data-question');
+                    // Thay placeholder bằng tên bệnh đã dịch, hiển thị tự nhiên trong chat
+                    question = question.replace('this disease', diseaseLabel).replace('bệnh này', diseaseLabel);
+                    document.getElementById('chatInput').value = question;
+                    document.getElementById('sendBtn').click();
+                });
+            });
+
+            // HAMBURGER
+            document.getElementById('hamburger').addEventListener('click', () => {
+                document.getElementById('navLinks').classList.toggle('open');
+            });
+
+            // REVEAL ANIMATION
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) e.target.classList.add('visible');
+                    else e.target.classList.remove('visible');
+                });
+            }, { threshold: 0.15 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        });
+
+        // SCROLL PROGRESS & NAVBAR SCROLL
+        window.addEventListener('scroll', () => {
+            const progress = document.getElementById('scroll-progress');
+            const navbar = document.getElementById('navbar');
+            const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            progress.style.width = scrollPercent + '%';
+            if (window.scrollY > 40) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>

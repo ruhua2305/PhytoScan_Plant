@@ -1,0 +1,16 @@
+seed: 42
+data:
+  root: "D:/DAT301m_Project/Final_Pipeline/data/leaf_gate"   # train/calib/val với leaf & not_leaf
+  img_size: 224
+  num_workers: 2
+train:
+  batch_size: 32          # model nhẹ, cho phép batch lớn hơn
+  accumulation_steps: 1
+  epochs: 15
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  label_smoothing: 0.05
+  use_amp: true
+checkpoint:
+  out_path: "D:/DAT301m_Project/Final_Pipeline/checkpoints/leaf_gate.pt"
+  metric: "macro_f1"

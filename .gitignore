@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+ENV/
+
+# Hugging Face cache
+.huggingface/
+hf_cache/
+.cache/
+
+# Model bundles – bỏ qua tất cả
+model_bundles/
+!model_bundles/.gitkeep
+
+# Logs & temporary files
+*.log
+*.txt
+logs/
+checkpoints/
+experiments/
+reports/
+data/
+*.tmp
+
+# Secrets
+.env
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

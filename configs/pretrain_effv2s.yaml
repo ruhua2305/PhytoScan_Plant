@@ -1,0 +1,31 @@
+seed: 42
+data:
+  train_dir: "D:/DAT301m_Project/Final_Pipeline/data/1. PRETRAIN DATASET/train"
+  val_dir:   "D:/DAT301m_Project/Final_Pipeline/data/1. PRETRAIN DATASET/val"
+  img_size: 224
+  num_workers: 2              # 4GB VRAM / 16GB RAM — KHÔNG dùng 8
+model:
+  arch: "tf_efficientnetv2_s.in1k"   # D1 — primary
+  num_classes: 38
+  drop_path_rate: 0.1
+train:
+  batch_size: 16
+  accumulation_steps: 4       # effective batch = 64
+  epochs: 30
+  lr_head: 1.0e-3
+  weight_decay: 1.0e-4
+  label_smoothing: 0.1
+  use_amp: true               # bắt buộc trên 4GB
+  use_grad_checkpoint: false  # bật true nếu thử MobileViT/Swin
+cutmix_mixup:
+  enabled: true
+  alpha: 0.2
+  cutmix_prob: 0.5
+  p: 0.5
+domain_aug:                   # field-background recomposition (Mục 4.6)
+  enabled: true
+  p: 0.4
+  field_background_dir: "D:/DAT301m_Project/Final_Pipeline/data/2. FINETUNE DATASET"
+checkpoint:
+  out_path: "D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt"
+  metric: "macro_f1"

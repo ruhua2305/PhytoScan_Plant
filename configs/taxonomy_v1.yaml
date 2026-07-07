@@ -1,0 +1,33 @@
+taxonomy_version: taxonomy_v1
+# ID ổn định theo loài (Mục 8.1). class_index bất biến do split_builder.py sinh (sort tên lớp).
+species:
+  apple:
+    classes:
+      - {class_id: apple_scab,        class_name: Apple_scab,        display_name: "Apple — Scab"}
+      - {class_id: apple_cedar_rust,  class_name: Cedar_apple_rust,  display_name: "Apple — Cedar apple rust"}
+      - {class_id: apple_healthy,     class_name: healthy,           display_name: "Apple — Healthy"}
+  corn:
+    classes:
+      - {class_id: corn_cercospora,     class_name: Cercospora,      display_name: "Corn — Cercospora leaf spot"}
+      - {class_id: corn_common_rust,    class_name: Common_rust,     display_name: "Corn — Common rust"}
+      - {class_id: corn_northern_blight, class_name: Northern_Blight, display_name: "Corn — Northern leaf blight"}
+      - {class_id: corn_healthy,        class_name: healthy,         display_name: "Corn — Healthy"}
+  grape:
+    classes:
+      - {class_id: grape_black_rot, class_name: Black_rot, display_name: "Grape — Black rot"}
+      - {class_id: grape_healthy,   class_name: healthy,   display_name: "Grape — Healthy"}
+  pepper_bell:
+    classes:
+      - {class_id: pepper_bacterial_spot, class_name: Bacterial_spot, display_name: "Pepper bell — Bacterial spot"}
+      - {class_id: pepper_healthy,        class_name: healthy,        display_name: "Pepper bell — Healthy"}
+  tomato:
+    classes:
+      - {class_id: tomato_bacterial_spot, class_name: Bacterial_spot, display_name: "Tomato — Bacterial spot"}
+      - {class_id: tomato_early_blight,   class_name: Early_blight,   display_name: "Tomato — Early blight"}
+      - {class_id: tomato_late_blight,    class_name: Late_blight,    display_name: "Tomato — Late blight"}
+      - {class_id: tomato_leaf_mold,      class_name: Leaf_Mold,      display_name: "Tomato — Leaf mold"}
+      - {class_id: tomato_septoria,       class_name: Septoria,       display_name: "Tomato — Septoria leaf spot"}
+      - {class_id: tomato_spider_mites,   class_name: Spider_mites,   display_name: "Tomato — Spider mites (Two-spotted)", note: "Rare (7 ảnh) — Chế độ 2 prototype, báo cáo là thiếu dữ liệu"}
+      - {class_id: tomato_tylcv,          class_name: TYLCV,          display_name: "Tomato — Yellow Leaf Curl Virus"}
+      - {class_id: tomato_mosaic_virus,   class_name: mosaic_virus,   display_name: "Tomato — Mosaic virus"}
+      - {class_id: tomato_healthy,        class_name: healthy,        display_name: "Tomato — Healthy"}

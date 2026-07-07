@@ -1,0 +1,27 @@
+seed: 42
+species: "pepper_bell"
+data:
+  split_manifest: "D:/DAT301m_Project/Final_Pipeline/data/splits/pepper_bell_split_v1.json"
+  img_size: 224
+  num_workers: 2
+  rare_class_threshold: 30
+model:
+  arch: "tf_efficientnetv2_s.in1k"
+  pretrained_ckpt: "D:/DAT301m_Project/Final_Pipeline/checkpoints/backbone_pretrained.pt"
+train:
+  batch_size: 16
+  accumulation_steps: 4
+  epochs_warmup: 2            # data nhỏ (268 ảnh) — head hội tụ nhanh
+  epochs_full: 10             # tránh overfit: dừng sớm, backbone LR thấp bù lại
+  epochs_decoupled: 3
+  early_stop_patience: 5
+  lr_head: 1.0e-3
+  lr_backbone: 5.0e-6
+  weight_decay: 1.0e-4
+  use_amp: true
+  cutmix_mixup: {enabled: false, alpha: 0.2, cutmix_prob: 0.5, p: 0.5}
+  class_balanced_loss: {beta: 0.99, gamma: 2.0}
+  domain_mmd: {enabled: false, lambda_max: 0.1, warmup_epochs: 5, source_dir: "D:/DAT301m_Project/Final_Pipeline/data/1. PRETRAIN DATASET/train"}
+checkpoint:
+  out_path: "D:/DAT301m_Project/Final_Pipeline/checkpoints/model_pepper_bell.pt"
+  metric: "macro_f1"
