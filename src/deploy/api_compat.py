@@ -1,26 +1,23 @@
-"""Router /api/* khớp hợp đồng frontend PhytoScan. Bọc quanh inference ở app.py.
-Đã include vào app trong app.py.
-"""
+"""Router /api/* khớp hợp đồng frontend PhytoScan."""
 import os
 import re
 import time
 import httpx
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
-
 from dotenv import load_dotenv
+
 load_dotenv()
 router = APIRouter(prefix="/api")
 
-# --- Cấu hình LLM qua ENV ---
+# --- Cấu hình LLM ---
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
 LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "15"))
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "2048"))
 
-
-# --- i18n cho dropdown ---
+# --- i18n ---
 SPECIES_I18N = {
     "apple": {"en": "Apple", "vi": "Táo"},
     "corn": {"en": "Corn", "vi": "Ngô"},
@@ -62,10 +59,8 @@ DISEASE_I18N = {
     },
 }
 
-
 def _norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", s.strip().lower()).strip("_")
-
 
 DISEASE_KEYWORDS = [
     (("scab",), {"en": "Apple Scab", "vi": "Ghẻ táo"}),
@@ -88,13 +83,11 @@ DISEASE_KEYWORDS = [
     (("healthy",), {"en": "Healthy", "vi": "Khỏe mạnh"}),
 ]
 
-
 def translate_species(species: str, language: str) -> str:
     entry = SPECIES_I18N.get(species)
     if entry is None:
         return species.replace("_", " ").strip().title()
     return entry.get(language, entry["en"])
-
 
 def translate_disease(species: str, class_name: str, language: str) -> str:
     norm = _norm(class_name)
@@ -106,11 +99,9 @@ def translate_disease(species: str, class_name: str, language: str) -> str:
             return kw_entry.get(language, kw_entry["en"])
     return class_name.replace("_", " ").strip().title()
 
-
 def _select_species_disease_msg(language: str) -> str:
     return ("Vui lòng chọn loài và bệnh trước khi hỏi." if language == "vi"
             else "Please select both a species and a disease before asking.")
-
 
 def _fallback_reply(species: str, disease: str, language: str) -> str:
     if language == "vi":
@@ -120,15 +111,12 @@ def _fallback_reply(species: str, disease: str, language: str) -> str:
             f"an expert. Please confirm the symptoms across multiple leaves and your growing "
             f"conditions before taking any action.")
 
-
 def _disclaimer_text(language: str) -> str:
     return ("Chỉ tham khảo, không thay thế chuyên gia nông nghiệp." if language == "vi"
             else "For reference only — not a substitute for an agricultural expert.")
 
-
 def _confidence_level(p):
     return "High" if p >= 0.85 else ("Medium" if p >= 0.6 else "Low")
-
 
 def _call_llm(system_prompt: str, user_prompt: str):
     if not LLM_API_KEY:
@@ -154,8 +142,7 @@ def _call_llm(system_prompt: str, user_prompt: str):
         print(f"[consult] LLM lỗi ({e}) -> fallback tĩnh")
         return None
 
-
-# ==================== ENDPOINTS ====================
+# ========== ENDPOINTS ==========
 
 @router.get("/species")
 def species_list(language: str = "en"):
@@ -166,29 +153,17 @@ def species_list(language: str = "en"):
         "items": [{"value": k, "label": translate_species(k, language)} for k in keys],
     }
 
-
 @router.get("/diseases")
 def diseases(species: str, language: str = "en"):
-    """Trả danh mục lớp bệnh. Fallback sang DISEASE_I18N nếu không load được model."""
-    from src.deploy.app import _load_species_model, _classes
-
-    raw = []
-    try:
-        _load_species_model(species)
-        raw = _classes.get(species, [])
-    except Exception as e:
-        print(f"[diseases] Không load được model {species}, fallback sang DISEASE_I18N: {e}")
-        raw = list(DISEASE_I18N.get(species, {}).keys())
-
-    if not raw:
-        raw = ["healthy"]
-
+    """Trả danh mục bệnh – luôn dùng DISEASE_I18N để dropdown hiển thị ngay."""
+    disease_keys = list(DISEASE_I18N.get(species, {}).keys())
+    if not disease_keys:
+        disease_keys = ["healthy"]
     return {
         "species": species,
-        "diseases": raw,
-        "items": [{"value": c, "label": translate_disease(species, c, language)} for c in raw],
+        "diseases": disease_keys,
+        "items": [{"value": k, "label": translate_disease(species, k, language)} for k in disease_keys],
     }
-
 
 @router.post("/predict")
 async def api_predict(species: str = Form(...), file: UploadFile = File(...),
@@ -214,7 +189,6 @@ async def api_predict(species: str = Form(...), file: UploadFile = File(...),
         "predictions": {},
         "confidence_level": "Low"
     }
-
 
 @router.post("/consult")
 async def consult(payload: dict):
