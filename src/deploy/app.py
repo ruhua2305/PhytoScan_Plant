@@ -7,6 +7,7 @@ import io
 import json
 import os
 import tempfile
+import glob
 import numpy as np
 import onnxruntime as ort
 from fastapi import FastAPI, File, UploadFile, HTTPException
@@ -39,13 +40,11 @@ def _load_session(path):
 
 def _load_model_from_hf(repo_id: str, token: str = None):
     """Tải toàn bộ file của repo về thư mục tạm (có cache) và trả về đường dẫn."""
-    # Dùng thư mục cache mặc định của huggingface-hub (~/.cache/huggingface/hub)
-    # Để tránh lưu vào /tmp (mất khi restart), nhưng Render có thể dùng /tmp
     local_dir = snapshot_download(
         repo_id=repo_id,
         token=token,
-        local_dir_use_symlinks=False,   # copy thực tế để ONNX load nhanh
-        cache_dir=os.path.join(tempfile.gettempdir(), "hf_cache")  # có thể tùy chỉnh
+        local_dir_use_symlinks=False,
+        cache_dir=os.path.join(tempfile.gettempdir(), "hf_cache")
     )
     return local_dir
 
@@ -65,84 +64,80 @@ def _startup():
             print(f"📥 Đang tải model {species} từ {repo_id} ...")
             bundle_dir = _load_model_from_hf(repo_id, token=token)
 
-            # Load ONNX
-            model_path = os.path.join(bundle_dir, "model.onnx")
-            if not os.path.exists(model_path):
-                print(f"[ERROR] Không tìm thấy model.onnx trong {bundle_dir}")
+            # ---- Tìm file .onnx (đệ quy) ----
+            onnx_files = glob.glob(os.path.join(bundle_dir, "**", "*.onnx"), recursive=True)
+            if not onnx_files:
+                print(f"[ERROR] Không tìm thấy file .onnx nào trong {bundle_dir}")
                 continue
+            model_path = onnx_files[0]
+            print(f"[INFO] Tìm thấy ONNX: {os.path.relpath(model_path, bundle_dir)}")
             _sessions[species] = _load_session(model_path)
 
-            # Load class_mapping
-            cm_path = os.path.join(bundle_dir, "class_mapping.json")
-            if os.path.exists(cm_path):
-                with open(cm_path, encoding="utf-8") as f:
+            # ---- Tìm class_mapping.json (đệ quy) ----
+            cm_files = glob.glob(os.path.join(bundle_dir, "**", "class_mapping.json"), recursive=True)
+            if cm_files:
+                with open(cm_files[0], encoding="utf-8") as f:
                     cm = json.load(f)
-                    # Giả định cấu trúc: {"idx_to_class": {"0": "healthy", ...}}
                     if "idx_to_class" in cm:
                         idx_map = cm["idx_to_class"]
-                        # Đảm bảo keys là int
                         _classes[species] = [idx_map[str(i)] for i in range(len(idx_map))]
                     else:
-                        # Fallback: nếu là list trực tiếp
                         _classes[species] = cm if isinstance(cm, list) else list(cm.values())
             else:
-                # Nếu không có, tạo mapping mặc định 0->"unknown"
                 _classes[species] = ["unknown"]
 
-            # Load preprocessing
-            pp_path = os.path.join(bundle_dir, "preprocessing.json")
-            if os.path.exists(pp_path):
-                with open(pp_path, encoding="utf-8") as f:
+            # ---- Tìm preprocessing.json (đệ quy) ----
+            pp_files = glob.glob(os.path.join(bundle_dir, "**", "preprocessing.json"), recursive=True)
+            if pp_files:
+                with open(pp_files[0], encoding="utf-8") as f:
                     _preproc[species] = json.load(f)
             else:
-                # Giá trị mặc định (có thể không chính xác)
                 _preproc[species] = {"img_size": 224, "mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]}
 
-            # Load calibration (temperature)
-            cal_path = os.path.join(bundle_dir, "calibration.json")
-            if os.path.exists(cal_path):
-                with open(cal_path, encoding="utf-8") as f:
+            # ---- Tìm calibration.json (đệ quy) ----
+            cal_files = glob.glob(os.path.join(bundle_dir, "**", "calibration.json"), recursive=True)
+            if cal_files:
+                with open(cal_files[0], encoding="utf-8") as f:
                     _cal[species] = json.load(f)
             else:
                 _cal[species] = {"temperature": 1.0}
 
-            # Load thresholds
-            thr_path = os.path.join(bundle_dir, "thresholds.json")
-            if os.path.exists(thr_path):
-                with open(thr_path, encoding="utf-8") as f:
+            # ---- Tìm thresholds.json (đệ quy) ----
+            thr_files = glob.glob(os.path.join(bundle_dir, "**", "thresholds.json"), recursive=True)
+            if thr_files:
+                with open(thr_files[0], encoding="utf-8") as f:
                     _thr[species] = json.load(f)
             else:
                 _thr[species] = {}
 
-            print(f"✅ Đã tải xong model {species}")
+            print(f"✅ Đã tải xong model {species} (class_mapping: {len(_classes[species])} classes)")
 
         except Exception as e:
             print(f"[ERROR] Không thể tải model {species}: {e}")
-            # Vẫn tiếp tục với các loài khác
 
-    # Tải leaf_gate
+    # ---- Tải leaf_gate ----
     try:
         print(f"📥 Đang tải leaf_gate từ {LEAF_GATE_REPO} ...")
         lg_dir = _load_model_from_hf(LEAF_GATE_REPO, token=token)
-        lg_model = os.path.join(lg_dir, "model.onnx")
-        if os.path.exists(lg_model):
-            _leaf_sess = _load_session(lg_model)
-            # Nhiệt độ cho leaf_gate
-            lg_cal = os.path.join(lg_dir, "calibration.json")
-            if os.path.exists(lg_cal):
-                _leaf_T = json.load(open(lg_cal, encoding="utf-8")).get("temperature", 1.0)
+        lg_onnx = glob.glob(os.path.join(lg_dir, "**", "*.onnx"), recursive=True)
+        if lg_onnx:
+            _leaf_sess = _load_session(lg_onnx[0])
+            print(f"[INFO] Tìm thấy leaf_gate ONNX: {os.path.relpath(lg_onnx[0], lg_dir)}")
+            lg_cal = glob.glob(os.path.join(lg_dir, "**", "calibration.json"), recursive=True)
+            if lg_cal:
+                with open(lg_cal[0], encoding="utf-8") as f:
+                    _leaf_T = json.load(f).get("temperature", 1.0)
             print("✅ Đã tải xong leaf_gate")
         else:
-            print("[WARN] leaf_gate/model.onnx không tồn tại")
+            print("[WARN] Không tìm thấy file .onnx cho leaf_gate")
     except Exception as e:
         print(f"[ERROR] Không thể tải leaf_gate: {e}")
 
     print(f"[startup] loài: {list(_sessions.keys())}; leaf_gate={'on' if _leaf_sess else 'off'}")
 
 
-# ------------------ Các hàm hỗ trợ (giữ nguyên) ------------------
+# ------------------ Các hàm hỗ trợ ------------------
 def validate_image_upload(raw: bytes) -> Image.Image:
-    """Kiểm tra an toàn upload (Mục 7.6) — trả PIL RGB đã fix EXIF."""
     if len(raw) > MAX_BYTES:
         raise HTTPException(413, detail={"code": "file_too_large", "message": "Ảnh vượt quá 8MB."})
     if not any(raw.startswith(sig) for sig in ALLOWED_MAGIC):
@@ -174,7 +169,6 @@ def _energy(logits, T=1.0):
 # ------------------ Endpoints ------------------
 @app.post("/predict")
 async def predict(species: str, file: UploadFile = File(...)):
-    """Chẩn đoán 1 ảnh cho 1 loài. Threshold LẤY TỪ bundle (đã calibration, Mục 5.4)."""
     if species not in _sessions:
         raise HTTPException(404, detail={"code": "species_unavailable",
                                          "message": f"Có: {list(_sessions.keys())}"})
@@ -184,7 +178,6 @@ async def predict(species: str, file: UploadFile = File(...)):
     thr = _thr[species]
     species_logits = _sessions[species].run(["logits"], {"input": x})[0]
 
-    # (1) Leaf-gate + energy OOD
     if _leaf_sess is not None:
         lg = _leaf_sess.run(None, {"input": x})[0]
         p_leaf = float(_softmax(lg / _leaf_T)[0, 1])
@@ -194,7 +187,6 @@ async def predict(species: str, file: UploadFile = File(...)):
             return {"status": "rejected", "reason": "unknown_or_ood",
                     "energy": round(_energy(species_logits, T), 4)}
 
-    # (2) Chẩn đoán loài (đã calibration)
     probs = _softmax(species_logits / T)[0]
     order = probs.argsort()[::-1]
     classes = _classes[species]
@@ -212,20 +204,18 @@ async def predict(species: str, file: UploadFile = File(...)):
 
 @app.get("/health")
 def health():
-    """Liveness cho load balancer / Docker healthcheck."""
     return {"status": "healthy", "species": list(_sessions.keys())}
 
 
 @app.get("/ready")
 def ready():
-    """Readiness: xác nhận bundle đã load đủ + leaf-gate sẵn sàng."""
     ok = len(_sessions) > 0
     return {"status": "ready" if ok else "not_ready", "species_loaded": list(_sessions.keys())}
 
 
-# --- /api/* cho frontend PhytoScan + phục vụ tĩnh (Mục 7.9-7.10) ---
-from fastapi.staticfiles import StaticFiles          # noqa: E402
-from src.deploy.api_compat import router as api_router  # noqa: E402
+# --- /api/* cho frontend PhytoScan + phục vụ tĩnh ---
+from fastapi.staticfiles import StaticFiles
+from src.deploy.api_compat import router as api_router
 
 app.include_router(api_router)
 _STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
