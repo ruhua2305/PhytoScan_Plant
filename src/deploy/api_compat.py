@@ -8,8 +8,8 @@ import httpx
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
-# SỬA: import trực tiếp các biến/hàm cần dùng từ app.py
-from src.deploy.app import _sessions, _classes, predict
+# SỬA: import thêm REPO_MAP và get_model
+from src.deploy.app import REPO_MAP, get_model, _classes, predict
 
 from dotenv import load_dotenv
 load_dotenv()  # tự động đọc .env
@@ -182,13 +182,16 @@ def _call_llm(system_prompt: str, user_prompt: str):
         return None
 
 
+# ==================== SỬA ENDPOINTS ====================
+
 @router.get("/species")
 def species_list(language: str = "en"):
     """Trả danh sách loài đang phục vụ (frontend đổ vào dropdown).
-    - species: khoá nội bộ, GIỮ NGUYÊN để tương thích ngược (không đổi hợp đồng cũ).
+    - species: khoá nội bộ, GIỮ NGUYÊN để tương thích ngược.
     - items: [{value, label}] — value = khoá nội bộ (dùng để gọi /api/diseases),
-      label = tên hiển thị đã dịch theo `language`. Frontend nên ưu tiên dùng `items`."""
-    keys = list(_sessions.keys())        # SỬA: core._sessions -> _sessions
+      label = tên hiển thị đã dịch theo `language`."""
+    # Lấy danh sách loài từ REPO_MAP thay vì _sessions (đang rỗng do lazy loading)
+    keys = list(REPO_MAP.keys())
     return {
         "species": keys,
         "items": [{"value": k, "label": translate_species(k, language)} for k in keys],
@@ -197,10 +200,15 @@ def species_list(language: str = "en"):
 
 @router.get("/diseases")
 def diseases(species: str, language: str = "en"):
-    """Trả danh mục lớp bệnh của 1 loài (cho dropdown tư vấn). Lấy từ class_mapping bundle.
-    - diseases: tên lớp gốc, GIỮ NGUYÊN để tương thích ngược.
-    - items: [{value, label}] — value = tên lớp gốc, label = tên hiển thị đã dịch theo `language`."""
-    raw = _classes.get(species, [])      # SỬA: core._classes -> _classes
+    """Trả danh mục lớp bệnh của 1 loài (cho dropdown tư vấn). Lazy load model nếu chưa có."""
+    # Gọi get_model để lazy load và điền _classes
+    try:
+        get_model(species)
+    except Exception as e:
+        # Nếu không tải được, trả về danh sách rỗng
+        return {"species": species, "diseases": [], "items": []}
+    
+    raw = _classes.get(species, [])
     return {
         "species": species,
         "diseases": raw,
@@ -208,13 +216,15 @@ def diseases(species: str, language: str = "en"):
     }
 
 
+# ==================== CÁC ENDPOINTS KHÁC GIỮ NGUYÊN ====================
+
 @router.post("/predict")
 async def api_predict(species: str = Form(...), file: UploadFile = File(...),
                       language: str = Form("en")):
     """Bọc core.predict -> shape frontend: {status, predictions:{disease:conf}, confidence_level}."""
     t0 = time.time()
     try:
-        result = await predict(species=species, file=file)   # SỬA: core.predict -> predict
+        result = await predict(species=species, file=file)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=400)
 
