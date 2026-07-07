@@ -8,14 +8,11 @@ import httpx
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
-# SỬA: import thêm REPO_MAP và get_model
-from src.deploy.app import REPO_MAP, get_model, _classes, predict
-
 from dotenv import load_dotenv
-load_dotenv()  # tự động đọc .env
+load_dotenv()
 router = APIRouter(prefix="/api")
 
-# --- Cấu hình LLM qua ENV (KHÔNG hard-code khoá) ---
+# --- Cấu hình LLM qua ENV ---
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
@@ -23,9 +20,7 @@ LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "15"))
 LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "2048"))
 
 
-# --- i18n cho dropdown loài & bệnh (Mục 7.9-7.10 — frontend không hard-code,
-# nhưng nhãn hiển thị cần dịch theo `language`; khoá nội bộ species/class_name
-# vẫn giữ nguyên để tra cứu class_mapping/bundle không đổi). ---
+# --- i18n cho dropdown ---
 SPECIES_I18N = {
     "apple": {"en": "Apple", "vi": "Táo"},
     "corn": {"en": "Corn", "vi": "Ngô"},
@@ -34,8 +29,6 @@ SPECIES_I18N = {
     "tomato": {"en": "Tomato", "vi": "Cà chua"},
 }
 
-# Khoá đã chuẩn hoá (lowercase, snake_case) khớp taxonomy Appendix A —
-# dùng _norm() để không phụ thuộc cách viết hoa/thường trong class_mapping.json thực tế.
 DISEASE_I18N = {
     "apple": {
         "apple_scab": {"en": "Apple Scab", "vi": "Ghẻ táo"},
@@ -71,16 +64,9 @@ DISEASE_I18N = {
 
 
 def _norm(s: str) -> str:
-    """Chuẩn hoá tên lớp về chữ thường, chỉ giữ chữ/số, phần còn lại thành '_'.
-    Chịu được mọi kiểu viết: 'Apple_scab', 'apple-scab', 'Apple___Apple_scab' (PlantVillage),
-    'Corn_(maize)___Northern_Leaf_Blight', v.v."""
     return re.sub(r"[^a-z0-9]+", "_", s.strip().lower()).strip("_")
 
 
-# Khớp theo TỪ KHOÁ (all-of) thay vì khớp tuyệt đối — chịu được tiền tố loài,
-# định dạng PlantVillage kiểu "Loài___Bệnh", hoặc cách viết hoa/gạch dưới khác với
-# những gì bảng DISEASE_I18N giả định. Đây là lớp fallback thứ 2, áp dụng SAU khi
-# tra cứu tuyệt đối theo DISEASE_I18N thất bại.
 DISEASE_KEYWORDS = [
     (("scab",), {"en": "Apple Scab", "vi": "Ghẻ táo"}),
     (("cedar", "rust"), {"en": "Cedar Apple Rust", "vi": "Gỉ sắt tuyết tùng táo"}),
@@ -104,7 +90,6 @@ DISEASE_KEYWORDS = [
 
 
 def translate_species(species: str, language: str) -> str:
-    """Tên loài hiển thị theo `language`. Loài lạ (chưa có trong bảng) -> humanize khoá gốc."""
     entry = SPECIES_I18N.get(species)
     if entry is None:
         return species.replace("_", " ").strip().title()
@@ -112,23 +97,13 @@ def translate_species(species: str, language: str) -> str:
 
 
 def translate_disease(species: str, class_name: str, language: str) -> str:
-    """Tên lớp bệnh hiển thị theo `language`. Thứ tự tra cứu:
-    1) Khớp tuyệt đối theo DISEASE_I18N[species] (tên lớp đúng taxonomy Appendix A).
-    2) Khớp theo từ khoá DISEASE_KEYWORDS (chịu được tiền tố loài, định dạng kiểu
-       PlantVillage 'Loài___Bệnh', viết hoa/gạch dưới khác nhau).
-    3) Không nhận diện được -> humanize tên gốc. Lưu ý: nhánh (3) hiển thị GIỐNG NHAU
-       ở cả 2 ngôn ngữ (không có bản dịch) — nếu gặp trường hợp này thường xuyên,
-       nghĩa là cần bổ sung entry/keyword mới ở trên cho đúng với dữ liệu thật."""
     norm = _norm(class_name)
-
     entry = DISEASE_I18N.get(species, {}).get(norm)
     if entry:
         return entry.get(language, entry["en"])
-
     for keywords, kw_entry in DISEASE_KEYWORDS:
         if all(kw in norm for kw in keywords):
             return kw_entry.get(language, kw_entry["en"])
-
     return class_name.replace("_", " ").strip().title()
 
 
@@ -156,8 +131,6 @@ def _confidence_level(p):
 
 
 def _call_llm(system_prompt: str, user_prompt: str):
-    """Gọi LLM ngoài (chat completions). Trả text hoặc None nếu key trống / lỗi.
-    An toàn: chỉ text đi ra ngoài; timeout ngắn; nuốt lỗi để không sập API chính."""
     if not LLM_API_KEY:
         return None
     try:
@@ -182,15 +155,15 @@ def _call_llm(system_prompt: str, user_prompt: str):
         return None
 
 
-# ==================== SỬA ENDPOINTS ====================
+# ==================== ENDPOINTS ====================
+# QUAN TRỌNG: Import các đối tượng từ app.py NGAY TRONG HÀM,
+# để tránh import vòng tròn khi module được nạp.
 
 @router.get("/species")
 def species_list(language: str = "en"):
-    """Trả danh sách loài đang phục vụ (frontend đổ vào dropdown).
-    - species: khoá nội bộ, GIỮ NGUYÊN để tương thích ngược.
-    - items: [{value, label}] — value = khoá nội bộ (dùng để gọi /api/diseases),
-      label = tên hiển thị đã dịch theo `language`."""
-    # Lấy danh sách loài từ REPO_MAP thay vì _sessions (đang rỗng do lazy loading)
+    """Trả danh sách loài."""
+    # Import ngay trong hàm để tránh vòng tròn
+    from src.deploy.app import REPO_MAP
     keys = list(REPO_MAP.keys())
     return {
         "species": keys,
@@ -200,12 +173,14 @@ def species_list(language: str = "en"):
 
 @router.get("/diseases")
 def diseases(species: str, language: str = "en"):
-    """Trả danh mục lớp bệnh của 1 loài (cho dropdown tư vấn). Lazy load model nếu chưa có."""
-    # Gọi get_model để lazy load và điền _classes
+    """Trả danh mục lớp bệnh của 1 loài."""
+    # Import ngay trong hàm
+    from src.deploy.app import _load_species_model, _classes
+    
     try:
-        get_model(species)
+        _load_species_model(species)
     except Exception as e:
-        # Nếu không tải được, trả về danh sách rỗng
+        print(f"[diseases] Lỗi load model {species}: {e}")
         return {"species": species, "diseases": [], "items": []}
     
     raw = _classes.get(species, [])
@@ -216,12 +191,13 @@ def diseases(species: str, language: str = "en"):
     }
 
 
-# ==================== CÁC ENDPOINTS KHÁC GIỮ NGUYÊN ====================
-
 @router.post("/predict")
 async def api_predict(species: str = Form(...), file: UploadFile = File(...),
                       language: str = Form("en")):
-    """Bọc core.predict -> shape frontend: {status, predictions:{disease:conf}, confidence_level}."""
+    """Bọc core.predict -> shape frontend."""
+    # Import ngay trong hàm
+    from src.deploy.app import predict
+    
     t0 = time.time()
     try:
         result = await predict(species=species, file=file)
@@ -246,8 +222,7 @@ async def api_predict(species: str = Form(...), file: UploadFile = File(...),
 
 @router.post("/consult")
 async def consult(payload: dict):
-    """Tư vấn chatbot bằng LLM ngoài. Chỉ gửi TEXT (loài/bệnh/câu hỏi),
-    TUYỆT ĐỐI không gửi ảnh/PII. Fallback tĩnh nếu key trống / lỗi mạng."""
+    """Tư vấn chatbot bằng LLM ngoài."""
     species = payload.get("species", "")
     disease = payload.get("disease", "")
     message = (payload.get("message", "") or "").strip()
@@ -255,14 +230,12 @@ async def consult(payload: dict):
     if not species or not disease:
         return {"reply": _select_species_disease_msg(language)}
 
-    # ---- Phân tích câu hỏi để xác định trọng tâm ----
     msg_lower = message.lower()
     is_fungicide = any(kw in msg_lower for kw in ["fungicide", "thuốc", "diệt nấm", "spray", "phun", "trị", "xử lý"])
     is_prevention = any(kw in msg_lower for kw in ["prevent", "phòng", "tránh", "ngăn", "chặn"])
     is_symptom = any(kw in msg_lower for kw in ["symptom", "triệu chứng", "dấu hiệu", "biểu hiện", "vết"])
     is_spread = any(kw in msg_lower for kw in ["lây lan", "truyền", "lây", "contagious", "spread"])
 
-    # ---- Xây dựng system prompt theo trọng tâm ----
     if is_fungicide:
         focus = (
             "Chỉ trả lời về thuốc đặc trị, bao gồm: tên hoạt chất, tên thương mại, "
@@ -298,7 +271,6 @@ async def consult(payload: dict):
         "Không đưa ra chẩn đoán y tế hay khẳng định tuyệt đối."
     )
 
-    # Thêm yêu cầu ngôn ngữ
     if language == "vi":
         system += " Hãy trả lời bằng tiếng Việt, dễ hiểu, không quá dài dòng."
     else:
