@@ -1,0 +1,716 @@
+﻿
+D:\DAT301m_Project\Final_Pipeline
+  .env
+  .gitignore
+  ... và 12 file khác
+
+D:\DAT301m_Project\Final_Pipeline\checkpoints
+  backbone_pretrained.pt
+  leaf_gate.pt
+  ... và 11 file khác
+
+D:\DAT301m_Project\Final_Pipeline\configs
+  finetune_apple.yaml
+  finetune_corn.yaml
+  ... và 6 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Apple___Apple_scab
+  01a66316-0e98-4d3b-a56f-d78752cd043f___FREC_Scab 3003.JPG
+  01f3deaa-6143-4b6c-9c22-620a46d8be04___FREC_Scab 3112.JPG
+  ... và 502 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Apple___Black_rot
+  0090d05d-d797-4c99-abd4-3b9cb323a5fd___JR_FrgE.S 8727.JPG
+  00e909aa-e3ae-4558-9961-336bb0f35db3___JR_FrgE.S 8593.JPG
+  ... và 494 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Apple___Cedar_apple_rust
+  0321e067-d13b-47d0-b3a6-76ba6f357d02___FREC_C.Rust 3667.JPG
+  0340baaa-e9cc-4c04-8f9b-c204180d9ae3___FREC_C.Rust 3805.JPG
+  ... và 218 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Apple___healthy
+  0055dd26-23a7-4415-ac61-e0b44ebfaf80___RS_HL 5672.JPG
+  00907d8b-6ae6-4306-bfd7-d54471981a86___RS_HL 5709.JPG
+  ... và 1312 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Blueberry___healthy
+  00fee259-67b7-4dd7-8b36-12503bbdba14___RS_HL 2681.JPG
+  011405e4-a92a-44b6-9f04-10fec28d93f5___RS_HL 2311.JPG
+  ... và 1200 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Cherry_(including_sour)___healthy
+  0008f3d3-2f85-4973-be9a-1b520b8b59fc___JR_HL 4092.JPG
+  0048afb8-b950-4c57-9e72-7e26282327ee___JR_HL 9765.JPG
+  ... và 682 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Cherry_(including_sour)___Powdery_mildew
+  00705aa7-5ea2-4419-9440-8ba65e108eb9___FREC_Pwd.M 0267.JPG
+  00b7df55-c789-43d6-a02e-a579ac9d07e6___FREC_Pwd.M 4748.JPG
+  ... và 840 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+  00120a18-ff90-46e4-92fb-2b7a10345bd3___RS_GLSp 9357.JPG
+  00a20f6f-e8bd-4453-9e25-36ea70feb626___RS_GLSp 4655.JPG
+  ... và 408 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Corn_(maize)___Common_rust_
+  RS_Rust 1563.JPG
+  RS_Rust 1564.JPG
+  ... và 951 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Corn_(maize)___healthy
+  00031d74-076e-4aef-b040-e068cd3576eb___R.S_HL 8315 copy 2.jpg
+  00665f92-adb0-41eb-bba7-9eeadecfe10e___R.S_HL 8325 copy 2.jpg
+  ... và 927 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Corn_(maize)___Northern_Leaf_Blight
+  0079c731-80f5-4fea-b6a2-4ff23a7ce139___RS_NLB 4121.JPG
+  008d9af0-7568-4a67-bb1a-0e915836ddc0___RS_NLB 4165 copy 2.jpg
+  ... và 786 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Grape___Black_rot
+  004175d8-dc74-4285-8401-3cc9565730bb___FAM_B.Rot 0626.JPG
+  006efc68-9e46-4168-921c-10ef8065702c___FAM_B.Rot 3470.JPG
+  ... và 942 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Grape___Esca_(Black_Measles)
+  0075b632-2e34-4e4f-9697-fe2b332b7ef8___FAM_B.Msls 4399.JPG
+  00b65fe8-cee1-4b68-8ef4-1211814f2845___FAM_B.Msls 3990.JPG
+  ... và 1105 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Grape___healthy
+  00e00912-bf75-4cf8-8b7d-ad64b73bea5f___Mt.N.V_HL 6067.JPG
+  0163a6aa-fbf8-47c5-965f-59b6efe8bfe5___Mt.N.V_HL 6103.JPG
+  ... và 337 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Grape___Leaf_blight_(Isariopsis_Leaf_Spot)
+  0001aa74-bbd7-433b-a900-1dccab39d521___FAM_L.Blight 4508.JPG
+  002e4d32-15cf-4350-bfba-dde7c8992392___FAM_L.Blight 4740.JPG
+  ... và 859 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Orange___Haunglongbing_(Citrus_greening)
+  000945ae-3cf5-48c2-86a2-a3f1e777f2c7___CREC_HLB 7640.JPG
+  0022b959-3cf3-4e3a-9ed2-94623183c7fb___CREC_HLB 5510.JPG
+  ... và 4403 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Peach___Bacterial_spot
+  00130039-8425-42e9-9dd9-15aead7271ff___Rut._Bact.S 3421.JPG
+  00359c66-5d75-40ce-a5b7-6ef05959d2d2___Rut._Bact.S 1381.JPG
+  ... và 1836 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Peach___healthy
+  017d3d86-12bf-4280-8929-10dcd504ac46___Rutg._HL 3671.JPG
+  02070622-2fd7-40d5-9470-27e513ea8a90___Rutg._HL 3636.JPG
+  ... và 286 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Pepper,_bell___Bacterial_spot
+  0022d6b7-d47c-4ee2-ae9a-392a53f48647___JR_B.Spot 8964.JPG
+  006adb74-934f-448f-a14f-62181742127b___JR_B.Spot 3395.JPG
+  ... và 795 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Pepper,_bell___healthy
+  00208a93-7687-4e8c-b79e-3138687e0f38___JR_HL 7955.JPG
+  002f87b7-e1a5-49e5-a422-bb423630ded5___JR_HL 8068.JPG
+  ... và 1181 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Potato___Early_blight
+  001187a0-57ab-4329-baff-e7246a9edeb0___RS_Early.B 8178.JPG
+  002a55fb-7a3d-4a3a-aca8-ce2d5ebc6925___RS_Early.B 8170.JPG
+  ... và 798 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Potato___healthy
+  00fc2ee5-729f-4757-8aeb-65c3355874f2___RS_HL 1864.JPG
+  03da9931-e514-4cc7-b04a-8f474a133ce5___RS_HL 1830.JPG
+  ... và 119 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Potato___Late_blight
+  00695906-210d-4a9d-822e-986a17384115___RS_LB 4026.JPG
+  006cc01a-1888-4326-9b62-a65cb55a6377___RS_LB 5207.JPG
+  ... và 798 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Raspberry___healthy
+  00a3fc0e-64cc-4e35-ac2f-aef04fda9b22___Mary_HL 9177.JPG
+  020e14fb-6016-4d7f-b489-445e0021b58e___Mary_HL 6324.JPG
+  ... và 295 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Soybean___healthy
+  0007ca44-b81d-475c-b8b5-c226a041f020___RS_HL 6331.JPG
+  00247bff-26dc-445a-8d11-0b2592787ec3___RS_HL 6869.JPG
+  ... và 4070 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Squash___Powdery_mildew
+  0045a100-36d3-45df-b417-d487d6e07eb4___UMD_Powd.M 0003.JPG
+  0061de03-5f84-413a-b30d-1bb575cf3267___UMD_Powd.M 0415.JPG
+  ... và 1466 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Strawberry___healthy
+  00166615-5e7b-4318-8957-5e50df335ee8___RS_HL 1785.JPG
+  00532378-bfb2-4d3b-8b19-903ecc085624___RS_HL 2021.JPG
+  ... và 362 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Strawberry___Leaf_scorch
+  0024203d-6e4c-490f-b9a8-e5926df0b76e___RS_L.Scorch 0795.JPG
+  0112c6b2-72cd-402b-89cd-ca052983403e___RS_L.Scorch 1161.JPG
+  ... và 885 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Bacterial_spot
+  00416648-be6e-4bd4-bc8d-82f43f8a7240___GCREC_Bact.Sp 3110.JPG
+  0045ba29-ed1b-43b4-afde-719cc7adefdb___GCREC_Bact.Sp 6254.JPG
+  ... và 1700 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Early_blight
+  0012b9d2-2130-4a06-a834-b1f3af34f57e___RS_Erly.B 8389.JPG
+  004cbe60-8ff9-4965-92df-e86694d5e9ba___RS_Erly.B 8253.JPG
+  ... và 798 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___healthy
+  000146ff-92a4-4db6-90ad-8fce2ae4fddd___GH_HL Leaf 259.1.JPG
+  000bf685-b305-408b-91f4-37030f8e62db___GH_HL Leaf 308.1.JPG
+  ... và 1267 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Late_blight
+  0003faa8-4b27-4c65-bf42-6d9e352ca1a5___RS_Late.B 4946.JPG
+  00355ec2-f12c-4015-b8f9-94354f69ce22___RS_Late.B 5311.JPG
+  ... và 1520 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Leaf_Mold
+  00694db7-3327-45e0-b4da-a8bb7ab6a4b7___Crnl_L.Mold 6923.JPG
+  0160c3b5-d89e-40e5-a313-49ae1524040a___Crnl_L.Mold 6823.JPG
+  ... và 759 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Septoria_leaf_spot
+  002533c1-722b-44e5-9d2e-91f7747b2543___Keller.St_CG 1831.JPG
+  0025c401-7785-49c5-8bef-780a8a0d3652___Matt.S_CG 2694.JPG
+  ... và 1415 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Spider_mites Two-spotted_spider_mite
+  002835d1-c18e-4471-aa6e-8d8c29585e9b___Com.G_SpM_FL 8584.JPG
+  003b7929-a364-4e74-be1c-37c4c0a6ec63___Com.G_SpM_FL 1414.JPG
+  ... và 1339 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Target_Spot
+  002213fb-b620-4593-b9ac-6a6cc119b100___Com.G_TgS_FL 8360.JPG
+  003a5321-0430-42dd-a38d-30ac4563f4ba___Com.G_TgS_FL 8121.JPG
+  ... và 1121 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Tomato_mosaic_virus
+  000ec6ea-9063-4c33-8abe-d58ca8a88878___PSU_CG 2169.JPG
+  006e354b-c054-4b72-a83c-e3feb038942e___PSU_CG 2330.JPG
+  ... và 297 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\train\Tomato___Tomato_Yellow_Leaf_Curl_Virus
+  0036c89d-7743-4895-9fcf-b8d2c1fc8455___YLCV_NREC 0313.JPG
+  003bce78-28c9-4612-b148-f621e9a23bd4___YLCV_GCREC 5154.JPG
+  ... và 4284 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Apple___Apple_scab
+  00075aa8-d81a-4184-8541-b692b78d398a___FREC_Scab 3335.JPG
+  03354abb-aa1c-4f9d-a1ef-9f40505cd539___FREC_Scab 3355.JPG
+  ... và 123 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Apple___Black_rot
+  0139bc6d-391c-4fd1-bcae-cc74dabfddd7___JR_FrgE.S 2734.JPG
+  01e94c43-0879-4e8c-9b61-c48cfed88dab___JR_FrgE.S 3024.JPG
+  ... và 117 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Apple___Cedar_apple_rust
+  025b2b9a-0ec4-4132-96ac-7f2832d0db4a___FREC_C.Rust 3655.JPG
+  052e3deb-0499-4685-bc39-cea7f1df0700___FREC_C.Rust 3742.JPG
+  ... và 53 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Apple___healthy
+  00a6039c-e425-4f7d-81b1-d6b0e668517e___RS_HL 7669.JPG
+  04125537-801d-4e15-b66c-224b09b4e1a7___RS_HL 7457.JPG
+  ... và 312 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Blueberry___healthy
+  008c85d0-a954-4127-bd26-861dc8a1e6ff___RS_HL 2431.JPG
+  02159532-6430-4006-a245-421593949304___RS_HL 2686.JPG
+  ... và 281 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Cherry_(including_sour)___healthy
+  002efba9-09b3-43de-93b7-5c2460185cde___JR_HL 9655.JPG
+  04585023-ef52-4b9d-9763-50318773c5d7___JR_HL 9791.JPG
+  ... và 152 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Cherry_(including_sour)___Powdery_mildew
+  00e0a4ab-ecbd-4560-a71c-b19d86bb087c___FREC_Pwd.M 4917.JPG
+  012b55cf-de7a-483a-9118-0fd8ff012185___FREC_Pwd.M 0423.JPG
+  ... và 200 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+  065fe7da-dcaf-41be-9332-5ec5ebceb94b___RS_GLSp 9337.JPG
+  06785548-9756-4410-b3c2-55cc089276ce___RS_GLSp 4288.JPG
+  ... và 101 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Corn_(maize)___Common_rust_
+  RS_Rust 1566.JPG
+  RS_Rust 1568.JPG
+  ... và 237 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Corn_(maize)___healthy
+  01c3bf88-d315-42a3-8fa1-fc80a05c97f1___R.S_HL 8189 copy.jpg
+  0630fcdc-33c1-478b-882f-07da48cf8002___R.S_HL 8026 copy.jpg
+  ... và 229 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Corn_(maize)___Northern_Leaf_Blight
+  005318c8-a5fa-4420-843b-23bdda7322c2___RS_NLB 3853 copy.jpg
+  00a14441-7a62-4034-bc40-b196aeab2785___RS_NLB 3932.JPG
+  ... và 193 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Grape___Black_rot
+  003d09ef-e16c-4e8a-badf-847d46cb3dc0___FAM_B.Rot 3184.JPG
+  00cff577-afd4-4e36-ac9c-a52aa6ae5949___FAM_B.Rot 0508.JPG
+  ... và 230 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Grape___Esca_(Black_Measles)
+  044a08aa-3868-4d50-af7c-8aa0c735e85a___FAM_B.Msls 4307.JPG
+  04e2f4d2-ee75-4043-accc-307c6c7f2af0___FAM_B.Msls 1035.JPG
+  ... và 267 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Grape___healthy
+  04991ee7-b17c-420f-90ff-230d4e59361a___Mt.N.V_HL 9055.JPG
+  0681edcd-e6f2-4ebe-8ef9-24d3e058e1ec___Mt.N.V_HL 8948.JPG
+  ... và 78 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Grape___Leaf_blight_(Isariopsis_Leaf_Spot)
+  0012e1ee-fde3-478f-ab27-18648feb2b05___FAM_L.Blight 1647.JPG
+  00a962ad-573b-44b1-97ae-912a6bd6e0b0___FAM_L.Blight 1431.JPG
+  ... và 213 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Orange___Haunglongbing_(Citrus_greening)
+  00045d08-898c-40df-ada6-e7579637a1f9___UF.Citrus_HLB_Lab 1690.JPG
+  005591af-575a-422a-a457-720d9d3b0283___CREC_HLB 7298.JPG
+  ... và 1018 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Peach___Bacterial_spot
+  002eddd0-b6b3-474c-be08-423e53e24f82___Rutg._Bact.S 1955.JPG
+  00ec2d81-1ac8-464f-af9f-40e8c28d67eb___Rutg._Bact.S 2002.JPG
+  ... và 454 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Peach___healthy
+  027b10e5-2d2e-4eb4-9457-7cb45ab2fd17___Rutg._HL 3710.JPG
+  0305b105-d0e7-4c3d-9a10-e9f0d7d3c4e0___Rutg._HL 3564.JPG
+  ... và 70 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Pepper,_bell___Bacterial_spot
+  00f2e69a-1e56-412d-8a79-fdce794a17e4___JR_B.Spot 3132.JPG
+  01613cd0-d3cd-4e96-945c-a312002037bf___JR_B.Spot 3262.JPG
+  ... và 195 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Pepper,_bell___healthy
+  00100ffa-095e-4881-aebf-61fe5af7226e___JR_HL 7886.JPG
+  016ed5ad-be29-4e9d-8ae5-069a016b1327___JR_HL 8536.JPG
+  ... và 272 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Potato___Early_blight
+  00d8f10f-5038-4e0f-bb58-0b885ddc0cc5___RS_Early.B 8722.JPG
+  0267d4ca-522e-4ca0-b1a2-ce925e5b54a2___RS_Early.B 7020.JPG
+  ... và 194 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Potato___healthy
+  111cd9d8-4d27-4225-be9e-d29b21cf56b9___RS_HL 5419.JPG
+  144d2475-21ab-4bdc-a67c-9672a9b711e6___RS_HL 5376.JPG
+  ... và 29 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Potato___Late_blight
+  0051e5e8-d1c4-4a84-bf3a-a426cdad6285___RS_LB 4640.JPG
+  0085ef03-aec3-431a-99a1-de286e10c0cf___RS_LB 2949.JPG
+  ... và 195 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Raspberry___healthy
+  0a1b30a5-f81b-4fe8-9221-78ccba5e3a13___Mary_HL 6221.JPG
+  0f5c8734-f6d1-442f-832a-7c938053ca1e___Mary_HL 9139.JPG
+  ... và 57 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Soybean___healthy
+  004f71b2-7603-4b5a-937b-6e6388396abb___RS_HL 7334.JPG
+  00f1cdb1-82bb-4924-b5cb-768621f07187___RS_HL 5960.JPG
+  ... và 626 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Squash___Powdery_mildew
+  0056878d-a244-4653-ad56-7e97080c7fd2___UMD_Powd.M 9962.JPG
+  007f0b62-a0f0-4c4a-9b1b-119616dd87c2___UMD_Powd.M 0279.JPG
+  ... và 363 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Strawberry___healthy
+  0400adad-86e7-4e42-9141-acc0f226e2e7___RS_HL 2111.JPG
+  04cb725a-632d-44e0-9886-c84e2bbdd3da___RS_HL 2094.JPG
+  ... và 87 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Strawberry___Leaf_scorch
+  01d11a79-f858-4e58-9b14-c3f0619af1f7___RS_L.Scorch 0090.JPG
+  02cd135e-0ef2-45ec-b77d-a329b68cbea7___RS_L.Scorch 0080.JPG
+  ... và 219 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Bacterial_spot
+  00728f4d-83a0-49f1-87f8-374646fcda05___GCREC_Bact.Sp 6326.JPG
+  01d9fc8d-5083-468d-a583-885f33517cdd___GCREC_Bact.Sp 3422.JPG
+  ... và 406 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Early_blight
+  0034a551-9512-44e5-ba6c-827f85ecc688___RS_Erly.B 9432.JPG
+  00e7c4b2-3005-4558-9cfa-235e356cb7a8___RS_Erly.B 7844.JPG
+  ... và 198 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___healthy
+  01f98912-9627-4ce0-8f0f-e451b7acbb6c___RS_HL 0509.JPG
+  02b4afdf-e1de-4c0e-a38d-3f19afeb9ea9___RS_HL 0493.JPG
+  ... và 309 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Late_blight
+  01425d17-4c97-46e3-b395-c1453b78ab78___GHLB2 Leaf 9100.JPG
+  021a9808-21f7-464a-8df2-2eda5ed98eda___RS_Late.B 5356.JPG
+  ... và 374 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Leaf_Mold
+  022a4dfb-84cc-45cb-81c5-a620817e31cb___Crnl_L.Mold 6926.JPG
+  03c6374e-c292-440e-b2e3-a70c5e64562a___Crnl_L.Mold 8935.JPG
+  ... và 186 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Septoria_leaf_spot
+  02ab6821-757a-401b-ac04-919fdceee1f0___Matt.S_CG 1653.JPG
+  041684a2-1a2c-430f-ab09-b17293f015bc___JR_Sept.L.S 8400.JPG
+  ... và 347 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Spider_mites Two-spotted_spider_mite
+  012369f5-ca64-4811-888f-35d75f7f7c2b___Com.G_SpM_FL 8911.JPG
+  0189e941-6286-4aae-bc7a-c87b2d6e0b09___Com.G_SpM_FL 1153.JPG
+  ... và 324 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Target_Spot
+  0118c27a-f34a-41e1-8b2f-d2c564f83c5c___Com.G_TgS_FL 0013.JPG
+  025510ac-15db-4861-b02b-21da82161100___Com.G_TgS_FL 0952.JPG
+  ... và 278 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Tomato_mosaic_virus
+  05a31ee3-d097-4e32-a1fe-ef11f84ff374___PSU_CG 2149.JPG
+  0a7cc59f-b2b0-4201-9c4a-d91eca5c03a3___PSU_CG 2230.JPG
+  ... và 70 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET\val\Tomato___Tomato_Yellow_Leaf_Curl_Virus
+  00139ae8-d881-4edb-925f-46584b0bd68c___YLCV_NREC 2944.JPG
+  004273e3-e283-4ec6-b597-d0de1bfbc590___YLCV_GCREC 2434.JPG
+  ... và 1033 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Apple
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Apple\Apple___Apple_scab
+  MASTER_img_00002500.jpg
+  MASTER_img_00002501.jpg
+  ... và 5553 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Apple\Apple___Cedar_apple_rust
+  PLANTDOC_test_test_Apple rust leaf_1.jpg
+  PLANTDOC_test_test_Apple rust leaf_10.jpg
+  ... và 2006 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Apple\Apple___healthy
+  PLANTDOC_test_test_Apple leaf_1.jpg
+  PLANTDOC_test_test_Apple leaf_2.jpg
+  ... và 5213 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Corn_(maize)
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Corn_(maize)\Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+  FIELDPLANT_000057.jpg
+  FIELDPLANT_000141.jpg
+  ... và 220 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Corn_(maize)\Corn_(maize)___Common_rust_
+  MERGED_Corn rust leaf (1).jpg
+  MERGED_Corn rust leaf (10).jpg
+  ... và 114 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Corn_(maize)\Corn_(maize)___healthy
+  FIELDPLANT_000006.jpg
+  FIELDPLANT_000007.jpg
+  ... và 150 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Corn_(maize)\Corn_(maize)___Northern_Leaf_Blight
+  FIELDPLANT_000001.jpg
+  FIELDPLANT_000002.jpg
+  ... và 1969 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Grape
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Grape\Grape___Black_rot
+  MASTER_img_00003126.jpg
+  MASTER_img_00003127.jpg
+  ... và 131 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Grape\Grape___healthy
+  MASTER_img_00002125.jpg
+  MASTER_img_00002128.jpg
+  ... và 69 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Pepper,_bell
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Pepper,_bell\Pepper,_bell___Bacterial_spot
+  MASTER_img_00003458.jpg
+  MASTER_img_00003459.jpg
+  ... và 169 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Pepper,_bell\Pepper,_bell___healthy
+  MASTER_img_00003688.jpg
+  MASTER_img_00003689.jpg
+  ... và 95 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Bacterial_spot
+  MASTER_img_00003361.jpg
+  MASTER_img_00003362.jpg
+  ... và 139 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Early_blight
+  MASTER_img_00002426.jpg
+  MASTER_img_00002427.jpg
+  ... và 495 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___healthy
+  FIELDPLANT_000053.jpg
+  FIELDPLANT_000054.jpg
+  ... và 378 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Late_blight
+  MASTER_img_00002681.jpg
+  MASTER_img_00002682.jpg
+  ... và 218 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Leaf_Mold
+  MASTER_img_00003604.jpg
+  MASTER_img_00003605.jpg
+  ... và 594 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Septoria_leaf_spot
+  MASTER_img_00002777.jpg
+  MASTER_img_00002778.jpg
+  ... và 302 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Spider_mites Two-spotted_spider_mite
+  1132b903417a009dd12ce1629a78954e.jpg
+  1235236.jpg
+  ... và 53 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Tomato_mosaic_virus
+  FIELDPLANT_000160.jpg
+  FIELDPLANT_000195.jpg
+  ... và 133 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET\Tomato\Tomato___Tomato_Yellow_Leaf_Curl_Virus
+  MASTER_img_00002053.jpg
+  MASTER_img_00002054.jpg
+  ... và 361 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\golden
+  apple.json
+  corn.json
+  ... và 3 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\calib
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\calib\leaf
+  leaf_apple_calib_00000.jpg
+  leaf_apple_calib_00001.jpg
+  ... và 240 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\calib\not_leaf
+  00101a0160a05d31.jpg
+  0035a4bfeda1b637.jpg
+  ... và 348 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\train
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\train\leaf
+  leaf_apple_train_00000.jpg
+  leaf_apple_train_00001.jpg
+  ... và 1942 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\train\not_leaf
+  0007cebe1b2ba653.jpg
+  000a1249af2bc5f0.jpg
+  ... và 2797 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\val
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\val\leaf
+  leaf_apple_val_00000.jpg
+  leaf_apple_val_00001.jpg
+  ... và 243 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\leaf_gate\val\not_leaf
+  02bdd40f68057699.jpg
+  03a83451f0d8239d.jpg
+  ... và 346 file khác
+
+D:\DAT301m_Project\Final_Pipeline\data\splits
+  apple_split_v1.json
+  corn_split_v1.json
+  ... và 3 file khác
+
+D:\DAT301m_Project\Final_Pipeline\experiments
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles
+  active_version_apple.txt
+  active_version_corn.txt
+  ... và 3 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\apple_2026_07_07_effv2s_ab12cd
+  calibration.json
+  checksums.sha256
+  ... và 5 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\corn_2026_07_07_effv2s_ab12cd
+  calibration.json
+  checksums.sha256
+  ... và 5 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\grape_2026_07_07_effv2s_ab12cd
+  calibration.json
+  checksums.sha256
+  ... và 5 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\leaf_gate
+  calibration.json
+  class_mapping.json
+  ... và 1 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\pepper_bell_2026_07_07_effv2s_ab12cd
+  calibration.json
+  checksums.sha256
+  ... và 5 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\tmp
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\tmp\apple
+  class_mapping.json
+  model.onnx
+  ... và 1 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\tmp\corn
+  class_mapping.json
+  model.onnx
+  ... và 1 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\tmp\grape
+  class_mapping.json
+  model.onnx
+  ... và 1 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\tmp\pepper_bell
+  class_mapping.json
+  model.onnx
+  ... và 1 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\tmp\tomato
+  class_mapping.json
+  model.onnx
+  ... và 1 file khác
+
+D:\DAT301m_Project\Final_Pipeline\model_bundles\tomato_2026_07_07_effv2s_ab12cd
+  calibration.json
+  checksums.sha256
+  ... và 6 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src
+  config.py
+  __init__.py
+
+D:\DAT301m_Project\Final_Pipeline\src\cross_test
+  run_cross_test.py
+  __init__.py
+
+D:\DAT301m_Project\Final_Pipeline\src\cross_test\__pycache__
+  run_cross_test.cpython-310.pyc
+
+D:\DAT301m_Project\Final_Pipeline\src\data
+  augmentation.py
+  build_leaf_gate_dataset.py
+  ... và 4 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\data\__pycache__
+  augmentation.cpython-310.pyc
+  augmentation.cpython-311.pyc
+  ... và 9 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\deploy
+  api_compat.py
+  app.py
+  ... và 2 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\deploy\static
+  index.html
+
+D:\DAT301m_Project\Final_Pipeline\src\deploy\__pycache__
+  api_compat.cpython-310.pyc
+  api_compat.cpython-311.pyc
+  ... và 4 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\eval
+  calibration.py
+  evaluate.py
+  ... và 3 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\eval\__pycache__
+  calibration.cpython-310.pyc
+  calibration.cpython-311.pyc
+  ... và 5 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\export
+  build_bundle.py
+  export_onnx.py
+  ... và 2 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\export\__pycache__
+  build_bundle.cpython-310.pyc
+  build_bundle.cpython-311.pyc
+  ... và 6 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\models
+  backbone.py
+  energy_ood.py
+  ... và 1 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\models\__pycache__
+  backbone.cpython-310.pyc
+  backbone.cpython-311.pyc
+  ... và 2 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\tests
+  test_api_upload_security.py
+  test_bundle_checksum.py
+  ... và 8 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\tests\__pycache__
+  test_api_upload_security.cpython-310.pyc
+  test_bundle_checksum.cpython-310.pyc
+  ... và 8 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\train
+  checkpoints.py
+  domain_loss.py
+  ... và 9 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\train\__pycache__
+  checkpoints.cpython-310.pyc
+  domain_loss.cpython-310.pyc
+  ... và 18 file khác
+
+D:\DAT301m_Project\Final_Pipeline\src\__pycache__
+  config.cpython-310.pyc
+  config.cpython-311.pyc
+  ... và 2 file khác

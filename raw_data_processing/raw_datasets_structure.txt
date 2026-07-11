@@ -1,0 +1,401 @@
+
+======================================================================
+DATASET: plantseg
+Path: D:\DAT301m_Project\data\plantseg
+======================================================================
+    ├── plantseg/ (0 ảnh) [.csv: Metadata.csv]
+    │   📄 Metadata.csv: 11458 dòng, cột: ['Name', 'Plant', 'Disease', 'Resolution', 'Label file', 'Mask ratio', 'URL', 'Training/Test']
+    │      Dòng đầu: {'Name': 'apple_black_rot_1.jpg', 'Plant': 'Apple', 'Disease': 'apple black rot ', 'Resolution': '640x480', 'Label file': 'apple_black_rot_1.png', 'Mask ratio': 0.040439453125, 'URL': 'http://www.my478.com/html/20210418/372066.html', 'Training/Test': 'Training'}
+    │   ├── annotations/ (0 ảnh)
+    │   │   └── test/ (2295 ảnh)
+    │       └── train/ (9163 ảnh)
+    │   ├── images/ (0 ảnh)
+    │   │   └── test/ (2295 ảnh)
+    │       └── train/ (9163 ảnh)
+    │   ├── json/ (0 ảnh)
+    │   │   ├── test/ (0 ảnh) [.json (2298 files): apple_black_rot_143.json, apple_black_rot_144.json, apple_black_rot_149.json ...]
+    │   │       📄 JSON files: 2298 files. Samples: apple_black_rot_143.json (keys=['version', 'flags', 'shapes', 'imagePath', 'imageData', 'imageHeight', 'imageWidth'], first=5.4.0.post1); apple_black_rot_144.json (keys=['version', 'flags', 'shapes', 'imagePath', 'imageData', 'imageHeight', 'imageWidth'], first=5.4.0.post1); apple_black_rot_149.json (keys=['version', 'flags', 'shapes', 'imagePath', 'imageData', 'imageHeight', 'imageWidth'], first=5.4.0.post1)
+    │       ├── train/ (0 ảnh) [.json (9182 files): apple_black_rot_1.json, apple_black_rot_11.json, apple_black_rot_12.json ...]
+    │           📄 JSON files: 9182 files. Samples: apple_black_rot_1.json (keys=['version', 'flags', 'shapes', 'imagePath', 'imageData', 'imageHeight', 'imageWidth'], first=5.4.0.post1); apple_black_rot_11.json (keys=['version', 'flags', 'shapes', 'imagePath', 'imageData', 'imageHeight', 'imageWidth'], first=5.4.0.post1); apple_black_rot_12.json (keys=['version', 'flags', 'shapes', 'imagePath', 'imageData', 'imageHeight', 'imageWidth'], first=5.4.0.post1)
+Tổng số ảnh: 22916
+
+======================================================================
+DATASET: PlantVillage
+Path: D:\DAT301m_Project\data\PlantVillage
+======================================================================
+    ├── train/ (0 ảnh)
+    │   └── Apple___Apple_scab/ (504 ảnh)
+    │   └── Apple___Black_rot/ (496 ảnh)
+    │   └── Apple___Cedar_apple_rust/ (220 ảnh)
+    │   └── Apple___healthy/ (1316 ảnh)
+    │   └── Blueberry___healthy/ (1202 ảnh)
+    │   └── Cherry_(including_sour)___Powdery_mildew/ (842 ảnh)
+    │   └── Cherry_(including_sour)___healthy/ (684 ảnh)
+    │   └── Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/ (410 ảnh)
+    │   └── Corn_(maize)___Common_rust_/ (953 ảnh)
+    │   └── Corn_(maize)___Northern_Leaf_Blight/ (788 ảnh)
+    │   └── Corn_(maize)___healthy/ (929 ảnh)
+    │   └── Grape___Black_rot/ (944 ảnh)
+    │   └── Grape___Esca_(Black_Measles)/ (1107 ảnh)
+    │   └── Grape___Leaf_blight_(Isariopsis_Leaf_Spot)/ (861 ảnh)
+    │   └── Grape___healthy/ (339 ảnh)
+    │   └── Orange___Haunglongbing_(Citrus_greening)/ (4405 ảnh)
+    │   └── Peach___Bacterial_spot/ (1838 ảnh)
+    │   └── Peach___healthy/ (288 ảnh)
+    │   └── Pepper,_bell___Bacterial_spot/ (797 ảnh)
+    │   └── Pepper,_bell___healthy/ (1183 ảnh)
+    │   └── Potato___Early_blight/ (800 ảnh)
+    │   └── Potato___Late_blight/ (800 ảnh)
+    │   └── Potato___healthy/ (121 ảnh)
+    │   └── Raspberry___healthy/ (297 ảnh)
+    │   └── Soybean___healthy/ (4072 ảnh)
+    │   └── Squash___Powdery_mildew/ (1468 ảnh)
+    │   └── Strawberry___Leaf_scorch/ (887 ảnh)
+    │   └── Strawberry___healthy/ (364 ảnh)
+    │   └── Tomato___Bacterial_spot/ (1702 ảnh)
+    │   └── Tomato___Early_blight/ (800 ảnh)
+    │   └── Tomato___Late_blight/ (1527 ảnh)
+    │   └── Tomato___Leaf_Mold/ (761 ảnh)
+    │   └── Tomato___Septoria_leaf_spot/ (1417 ảnh)
+    │   └── Tomato___Spider_mites Two-spotted_spider_mite/ (1341 ảnh)
+    │   └── Tomato___Target_Spot/ (1123 ảnh)
+    │   └── Tomato___Tomato_Yellow_Leaf_Curl_Virus/ (4286 ảnh)
+    │   └── Tomato___Tomato_mosaic_virus/ (299 ảnh)
+        └── Tomato___healthy/ (1273 ảnh)
+    ├── val/ (0 ảnh)
+    │   └── Apple___Apple_scab/ (126 ảnh)
+    │   └── Apple___Black_rot/ (125 ảnh)
+    │   └── Apple___Cedar_apple_rust/ (55 ảnh)
+    │   └── Apple___healthy/ (329 ảnh)
+    │   └── Blueberry___healthy/ (300 ảnh)
+    │   └── Cherry_(including_sour)___Powdery_mildew/ (210 ảnh)
+    │   └── Cherry_(including_sour)___healthy/ (170 ảnh)
+    │   └── Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot/ (103 ảnh)
+    │   └── Corn_(maize)___Common_rust_/ (239 ảnh)
+    │   └── Corn_(maize)___Northern_Leaf_Blight/ (197 ảnh)
+    │   └── Corn_(maize)___healthy/ (233 ảnh)
+    │   └── Grape___Black_rot/ (236 ảnh)
+    │   └── Grape___Esca_(Black_Measles)/ (276 ảnh)
+    │   └── Grape___Leaf_blight_(Isariopsis_Leaf_Spot)/ (215 ảnh)
+    │   └── Grape___healthy/ (84 ảnh)
+    │   └── Orange___Haunglongbing_(Citrus_greening)/ (1102 ảnh)
+    │   └── Peach___Bacterial_spot/ (459 ảnh)
+    │   └── Peach___healthy/ (72 ảnh)
+    │   └── Pepper,_bell___Bacterial_spot/ (200 ảnh)
+    │   └── Pepper,_bell___healthy/ (295 ảnh)
+    │   └── Potato___Early_blight/ (200 ảnh)
+    │   └── Potato___Late_blight/ (200 ảnh)
+    │   └── Potato___healthy/ (31 ảnh)
+    │   └── Raspberry___healthy/ (74 ảnh)
+    │   └── Soybean___healthy/ (1018 ảnh)
+    │   └── Squash___Powdery_mildew/ (367 ảnh)
+    │   └── Strawberry___Leaf_scorch/ (222 ảnh)
+    │   └── Strawberry___healthy/ (92 ảnh)
+    │   └── Tomato___Bacterial_spot/ (425 ảnh)
+    │   └── Tomato___Early_blight/ (200 ảnh)
+    │   └── Tomato___Late_blight/ (382 ảnh)
+    │   └── Tomato___Leaf_Mold/ (191 ảnh)
+    │   └── Tomato___Septoria_leaf_spot/ (354 ảnh)
+    │   └── Tomato___Spider_mites Two-spotted_spider_mite/ (335 ảnh)
+    │   └── Tomato___Target_Spot/ (281 ảnh)
+    │   └── Tomato___Tomato_Yellow_Leaf_Curl_Virus/ (1071 ảnh)
+    │   └── Tomato___Tomato_mosaic_virus/ (74 ảnh)
+        └── Tomato___healthy/ (318 ảnh)
+Tổng số ảnh: 54305
+
+======================================================================
+DATASET: PlantDoc
+Path: D:\DAT301m_Project\data\PlantDoc
+======================================================================
+    ├── test/ (0 ảnh)
+    │   └── Apple_Scab_Leaf/ (10 ảnh)
+    │   └── Apple_leaf/ (9 ảnh)
+    │   └── Apple_rust_leaf/ (10 ảnh)
+    │   └── Bell_pepper_leaf/ (8 ảnh)
+    │   └── Bell_pepper_leaf_spot/ (9 ảnh)
+    │   └── Blueberry_leaf/ (11 ảnh)
+    │   └── Cherry_leaf/ (10 ảnh)
+    │   └── Corn_Gray_leaf_spot/ (4 ảnh)
+    │   └── Corn_leaf_blight/ (12 ảnh)
+    │   └── Corn_rust_leaf/ (10 ảnh)
+    │   └── Peach_leaf/ (9 ảnh)
+    │   └── Potato_leaf_early_blight/ (14 ảnh)
+    │   └── Potato_leaf_late_blight/ (8 ảnh)
+    │   └── Raspberry_leaf/ (7 ảnh)
+    │   └── Soyabean_leaf/ (8 ảnh)
+    │   └── Squash_Powdery_mildew_leaf/ (6 ảnh)
+    │   └── Strawberry_leaf/ (8 ảnh)
+    │   └── Tomato_Early_blight_leaf/ (9 ảnh)
+    │   └── Tomato_Septoria_leaf_spot/ (12 ảnh)
+    │   └── Tomato_leaf/ (8 ảnh)
+    │   └── Tomato_leaf_bacterial_spot/ (9 ảnh)
+    │   └── Tomato_leaf_late_blight/ (10 ảnh)
+    │   └── Tomato_leaf_mosaic_virus/ (10 ảnh)
+    │   └── Tomato_leaf_yellow_virus/ (15 ảnh)
+    │   └── Tomato_mold_leaf/ (6 ảnh)
+    │   └── grape_leaf/ (12 ảnh)
+        └── grape_leaf_black_rot/ (8 ảnh)
+    ├── train/ (0 ảnh)
+    │   └── Apple_Scab_Leaf/ (83 ảnh)
+    │   └── Apple_leaf/ (79 ảnh)
+    │   └── Apple_rust_leaf/ (96 ảnh)
+    │   └── Bell_pepper_leaf/ (34 ảnh)
+    │   └── Bell_pepper_leaf_spot/ (74 ảnh)
+    │   └── Blueberry_leaf/ (106 ảnh)
+    │   └── Cherry_leaf/ (47 ảnh)
+    │   └── Corn_Gray_leaf_spot/ (63 ảnh)
+    │   └── Corn_leaf_blight/ (182 ảnh)
+    │   └── Corn_rust_leaf/ (107 ảnh)
+    │   └── Peach_leaf/ (103 ảnh)
+    │   └── Potato_leaf_early_blight/ (157 ảnh)
+    │   └── Potato_leaf_late_blight/ (200 ảnh)
+    │   └── Raspberry_leaf/ (112 ảnh)
+    │   └── Soyabean_leaf/ (57 ảnh)
+    │   └── Squash_Powdery_mildew_leaf/ (124 ảnh)
+    │   └── Strawberry_leaf/ (88 ảnh)
+    │   └── Tomato_Early_blight_leaf/ (79 ảnh)
+    │   └── Tomato_Septoria_leaf_spot/ (145 ảnh)
+    │   └── Tomato_leaf/ (44 ảnh)
+    │   └── Tomato_leaf_bacterial_spot/ (101 ảnh)
+    │   └── Tomato_leaf_late_blight/ (101 ảnh)
+    │   └── Tomato_leaf_mosaic_virus/ (44 ảnh)
+    │   └── Tomato_leaf_yellow_virus/ (223 ảnh)
+    │   └── Tomato_mold_leaf/ (85 ảnh)
+    │   └── Tomato_two_spotted_spider_mites_leaf/ (2 ảnh)
+    │   └── grape_leaf/ (63 ảnh)
+        └── grape_leaf_black_rot/ (71 ảnh)
+Tổng số ảnh: 2922
+
+======================================================================
+DATASET: Tomato-Village-main
+Path: D:\DAT301m_Project\data\Tomato-Village-main
+======================================================================
+    ├── Variant-a(Multiclass Classification)/ (0 ảnh)
+    │   ├── test/ (0 ảnh)
+    │   │   └── Early_blight/ (50 ảnh)
+    │   │   └── Healthy/ (22 ảnh)
+    │   │   └── Late_blight/ (92 ảnh)
+    │   │   └── Leaf Miner/ (104 ảnh)
+    │   │   └── Magnesium Deficiency/ (95 ảnh)
+    │   │   └── Nitrogen Deficiency/ (37 ảnh)
+    │   │   └── Pottassium Deficiency/ (8 ảnh)
+    │       └── Spotted Wilt Virus/ (53 ảnh)
+    │   ├── train/ (0 ảnh)
+    │   │   └── Early_blight/ (347 ảnh)
+    │   │   └── Healthy/ (151 ảnh)
+    │   │   └── Late_blight/ (632 ảnh)
+    │   │   └── Leaf Miner/ (716 ảnh)
+    │   │   ├── Magnesium Deficiency/ (654 ảnh) [.ini: desktop.ini]
+    │   │   └── Nitrogen Deficiency/ (251 ảnh)
+    │   │   └── Pottassium Deficiency/ (50 ảnh)
+    │       └── Spotted Wilt Virus/ (361 ảnh)
+        ├── val/ (0 ảnh)
+        │   └── Early_blight/ (99 ảnh)
+        │   └── Healthy/ (43 ảnh)
+        │   └── Late_blight/ (180 ảnh)
+        │   └── Leaf Miner/ (204 ảnh)
+        │   └── Magnesium Deficiency/ (187 ảnh)
+        │   └── Nitrogen Deficiency/ (72 ảnh)
+        │   └── Pottassium Deficiency/ (14 ảnh)
+            └── Spotted Wilt Virus/ (103 ảnh)
+    ├── Variant-b(MultiLabel Classification)/ (0 ảnh) [.csv: Multi-Label dataset - with augmented.csv]
+    │   📄 Multi-Label dataset - with augmented.csv: 5653 dòng, cột: ['dataset', 'filename', 'path', 'Early blight', 'Healthy', 'Late blight', 'Leaf Miner', 'Magnesium Deficiency', 'Nitrogen Deficiency', 'Pottassium Deficiency', 'Spotted Wilt Virus', 'SUM']
+    │      Dòng đầu: {'dataset': 'test', 'filename': 'IMG20220323100545_1.jpg', 'path': '\\test\\Early_blight', 'Early blight': 1.0, 'Healthy': nan, 'Late blight': nan, 'Leaf Miner': nan, 'Magnesium Deficiency': nan, 'Nitrogen Deficiency': nan, 'Pottassium Deficiency': nan, 'Spotted Wilt Virus': nan, 'SUM': 1}
+    │   ├── test/ (584 ảnh) [.ini: desktop.ini]
+    │   ├── train/ (3945 ảnh) [.ini: desktop.ini]
+    │   ├── val/ (1124 ảnh) [.ini: desktop.ini]
+    ├── Variant-c(Object Detection)/ (0 ảnh) [.txt: Varient-C Labels.txt]
+    │   ├── train/ (0 ảnh)
+    │   │   └── images/ (11493 ảnh)
+    │   │   ├── pascal_voc/ (0 ảnh) [.xml (11493 files): IMG20220323081448.xml, IMG20220323081448_aug3.xml, IMG20220323081448_aug4.xml ...]
+    │       ├── yolo/ (0 ảnh) [.txt (11493 files): IMG20220323081448.txt, IMG20220323081448_aug3.txt, IMG20220323081448_aug4.txt ...]
+    │   ├── val/ (0 ảnh)
+    │   │   └── images/ (2875 ảnh)
+    │   │   ├── pascal_voc/ (0 ảnh) [.xml (2875 files): IMG20220323081448_aug1.xml, IMG20220323081448_aug2.xml, IMG20220323081453_aug4.xml ...]
+    │       ├── yolo/ (0 ảnh) [.txt (2875 files): IMG20220323081448_aug1.txt, IMG20220323081448_aug2.txt, IMG20220323081453_aug4.txt ...]
+Tổng số ảnh: 24546
+
+======================================================================
+DATASET: TomatoDataset
+Path: D:\DAT301m_Project\data\TomatoDataset
+======================================================================
+    └── Tomato___Bacterial_spot/ (108 ảnh)
+    └── Tomato___Early_blight/ (298 ảnh)
+    └── Tomato___Late_blight/ (111 ảnh)
+    └── Tomato___Leaf_Mold/ (400 ảnh)
+    └── Tomato___Septoria_leaf_spot/ (106 ảnh)
+    └── Tomato___Spider_mites Two-spotted_spider_mite/ (121 ảnh)
+    └── Tomato___Target_Spot/ (99 ảnh)
+    └── Tomato___Tomato_Yellow_Leaf_Curl_Virus/ (100 ảnh)
+    └── Tomato___Tomato_mosaic_virus/ (109 ảnh)
+    └── Tomato___healthy/ (157 ảnh)
+Tổng số ảnh: 1609
+
+======================================================================
+DATASET: FieldPlant
+Path: D:\DAT301m_Project\data\FieldPlant
+======================================================================
+    ├── train/ (5156 ảnh) [.csv: _annotations.csv]
+        📄 _annotations.csv: 8580 dòng, cột: ['filename', 'width', 'height', 'class', 'xmin', 'ymin', 'xmax', 'ymax']
+           Dòng đầu: {'filename': 'Manioc_Mosaique-839-_jpg.rf.40e7fcfcbd934d0e5ee1660c83f688c8.jpg', 'width': 4160, 'height': 2340, 'class': 'Cassava Mosaic', 'xmin': 172, 'ymin': 86, 'xmax': 3255, 'ymax': 2340}
+Tổng số ảnh: 5156
+
+======================================================================
+DATASET: Plant Pathology 2020
+Path: D:\DAT301m_Project\data\Plant Pathology 2020
+======================================================================
+│   📄 sample_submission.csv: 1821 dòng, cột: ['image_id', 'healthy', 'multiple_diseases', 'rust', 'scab']
+│      Dòng đầu: {'image_id': 'Test_0', 'healthy': 0.25, 'multiple_diseases': 0.25, 'rust': 0.25, 'scab': 0.25}
+│   📄 test.csv: 1821 dòng, cột: ['image_id']
+│      Dòng đầu: {'image_id': 'Test_0'}
+│   📄 train.csv: 1821 dòng, cột: ['image_id', 'healthy', 'multiple_diseases', 'rust', 'scab']
+│      Dòng đầu: {'image_id': 'Train_0', 'healthy': 0, 'multiple_diseases': 0, 'rust': 0, 'scab': 1}
+    └── images/ (3642 ảnh)
+Tổng số ảnh: 3642
+
+======================================================================
+DATASET: Plant Pathology 2021
+Path: D:\DAT301m_Project\data\Plant Pathology 2021
+======================================================================
+│   📄 sample_submission.csv: 3 dòng, cột: ['image', 'labels']
+│      Dòng đầu: {'image': '85f8cb619c66b863.jpg', 'labels': 'healthy'}
+│   📄 train.csv: 18632 dòng, cột: ['image', 'labels']
+│      Dòng đầu: {'image': '800113bb65efe69e.jpg', 'labels': 'healthy'}
+    └── test_images/ (3 ảnh)
+    └── train_images/ (18632 ảnh)
+Tổng số ảnh: 18635
+
+======================================================================
+DATASET: Niphad Grape Leaf Disease Dataset (NGLD)
+Path: D:\DAT301m_Project\data\Niphad Grape Leaf Disease Dataset (NGLD)
+======================================================================
+    ├── Niphad Grape Leaf Disease Dataset (NGLD)/ (0 ảnh)
+        ├── Grapes Disease Dataset/ (0 ảnh)
+        │   └── Bacterial Leaf Spot/ (100 ảnh)
+        │   ├── Downy Mildew/ (966 ảnh) [.ini: desktop.ini]
+        │   └── Healthy Leaves/ (1254 ảnh)
+            └── Powdery Mildew/ (406 ảnh)
+Tổng số ảnh: 2726
+
+======================================================================
+DATASET: Master Plant Disease Dataset
+Path: D:\DAT301m_Project\data\Master Plant Disease Dataset
+======================================================================
+    ├── master_images/ (0 ảnh)
+        ├── master_images/ (0 ảnh)
+            └── images/ (66953 ảnh)
+    ├── metadata/ (0 ảnh)
+        ├── metadata/ (0 ảnh) [.csv (5 files): class_id_map.csv, class_map.csv, dataset_manifest.csv ...]
+            📄 class_id_map.csv: 281 dòng, cột: ['canonical_class', 'class_id']
+               Dòng đầu: {'canonical_class': 'Apple - Healthy', 'class_id': 0}
+            📄 class_map.csv: 89 dòng, cột: ['source_dataset_path', 'source_class', 'canonical_class', 'crop']
+               Dòng đầu: {'source_dataset_path': 'blackgram/BPLD', 'source_class': 'yellow mosaic', 'canonical_class': 'Blackgram - Yellow Mosaic', 'crop': 'Blackgram'}
+            📄 dataset_manifest.csv: 66953 dòng, cột: ['image_id', 'image_path', 'canonical_class', 'class_id', 'crop', 'source_dataset', 'width', 'height', 'original_filename', 'mask_path']
+               Dòng đầu: {'image_id': 'img_00000000', 'image_path': 'images/img_00000000.jpg', 'canonical_class': 'Blackgram - Yellow Mosaic', 'class_id': 59, 'crop': 'Blackgram', 'source_dataset': 'blackgram/BPLD', 'width': 512, 'height': 512, 'original_filename': '144y.jpg', 'mask_path': nan}
+            📄 dedup_manifest.csv: 66953 dòng, cột: ['image_path', 'source_dataset', 'source_class', 'canonical_class', 'crop', 'original_filename']
+               Dòng đầu: {'image_path': '/home/hari/Professional/Projects/Plant Disease Predictor/plant_disease_project/raw/blackgram/BPLD/yellow mosaic/144y.jpg', 'source_dataset': 'blackgram/BPLD', 'source_class': 'yellow mosaic', 'canonical_class': 'Blackgram - Yellow Mosaic', 'crop': 'Blackgram', 'original_filename': '144y.jpg'}
+            📄 source_manifest_full.csv: 70457 dòng, cột: ['image_path', 'source_dataset', 'source_class', 'canonical_class', 'crop', 'original_filename']
+               Dòng đầu: {'image_path': '/home/hari/Professional/Projects/Plant Disease Predictor/plant_disease_project/raw/blackgram/BPLD/yellow mosaic/144y.jpg', 'source_dataset': 'blackgram/BPLD', 'source_class': 'yellow mosaic', 'canonical_class': 'Blackgram - Yellow Mosaic', 'crop': 'Blackgram', 'original_filename': '144y.jpg'}
+    ├── outputs/ (0 ảnh)
+        ├── outputs/ (0 ảnh) [.csv: test_split.csv, train_split.csv, val_split.csv]
+            📄 test_split.csv: 6671 dòng, cột: ['image_id', 'image_path', 'canonical_class', 'class_id', 'crop', 'source_dataset', 'width', 'height', 'original_filename', 'mask_path']
+               Dòng đầu: {'image_id': 'img_00000382', 'image_path': 'images/img_00000382.jpg', 'canonical_class': 'Blackgram - Anthracnose', 'class_id': 47, 'crop': 'Blackgram', 'source_dataset': 'blackgram/BPLD', 'width': 512, 'height': 512, 'original_filename': '204a.jpg', 'mask_path': nan}
+            📄 train_split.csv: 53360 dòng, cột: ['image_id', 'image_path', 'canonical_class', 'class_id', 'crop', 'source_dataset', 'width', 'height', 'original_filename', 'mask_path']
+               Dòng đầu: {'image_id': 'img_00025856', 'image_path': 'images/img_00025856.JPG', 'canonical_class': 'Tomato - Spider Mites', 'class_id': 228, 'crop': 'Tomato', 'source_dataset': 'PlantVillageDataset/PlantVillage', 'width': 256, 'height': 256, 'original_filename': '42338037-ae62-45f9-a040-ea9e900272a9___Com.G_SpM_FL 8464.JPG', 'mask_path': nan}
+            📄 val_split.csv: 6670 dòng, cột: ['image_id', 'image_path', 'canonical_class', 'class_id', 'crop', 'source_dataset', 'width', 'height', 'original_filename', 'mask_path']
+               Dòng đầu: {'image_id': 'img_00036873', 'image_path': 'images/img_00036873.jpg', 'canonical_class': 'Citrus - citrus canker ', 'class_id': 91, 'crop': 'Citrus', 'source_dataset': 'plantseg', 'width': 640, 'height': 490, 'original_filename': 'citrus_canker_189.jpg', 'mask_path': nan}
+Tổng số ảnh: 66953
+
+======================================================================
+DATASET: Plant Disease Classification Merged Dataset
+Path: D:\DAT301m_Project\data\Plant Disease Classification Merged Dataset
+======================================================================
+    └── Apple__black_rot/ (621 ảnh)
+    └── Apple__healthy/ (1649 ảnh)
+    └── Apple__rust/ (357 ảnh)
+    └── Apple__scab/ (700 ảnh)
+    └── Cassava__bacterial_blight/ (486 ảnh)
+    └── Cassava__brown_streak_disease/ (558 ảnh)
+    └── Cassava__green_mottle/ (471 ảnh)
+    └── Cassava__healthy/ (677 ảnh)
+    └── Cassava__mosaic_disease/ (444 ảnh)
+    └── Cherry__healthy/ (906 ảnh)
+    └── Cherry__powdery_mildew/ (1052 ảnh)
+    └── Chili__healthy/ (100 ảnh)
+    └── Chili__leaf curl/ (100 ảnh)
+    └── Chili__leaf spot/ (100 ảnh)
+    └── Chili__whitefly/ (100 ảnh)
+    └── Chili__yellowish/ (100 ảnh)
+    └── Coffee__cercospora_leaf_spot/ (55 ảnh)
+    └── Coffee__healthy/ (439 ảnh)
+    └── Coffee__red_spider_mite/ (167 ảnh)
+    └── Coffee__rust/ (442 ảnh)
+    └── Corn__common_rust/ (1308 ảnh)
+    └── Corn__gray_leaf_spot/ (1094 ảnh)
+    └── Corn__healthy/ (1162 ảnh)
+    └── Corn__northern_leaf_blight/ (1223 ảnh)
+    └── Cucumber__diseased/ (350 ảnh)
+    └── Cucumber__healthy/ (341 ảnh)
+    └── Gauva__diseased/ (142 ảnh)
+    └── Gauva__healthy/ (277 ảnh)
+    └── Grape__black_measles/ (1383 ảnh)
+    └── Grape__black_rot/ (11390 ảnh)
+    └── Grape__healthy/ (470 ảnh)
+    └── Grape__leaf_blight_(isariopsis_leaf_spot)/ (889 ảnh)
+    └── Jamun__diseased/ (345 ảnh)
+    └── Jamun__healthy/ (279 ảnh)
+    └── Lemon__diseased/ (77 ảnh)
+    └── Lemon__healthy/ (159 ảnh)
+    └── Mango__diseased/ (265 ảnh)
+    └── Mango__healthy/ (170 ảnh)
+    └── Peach__bacterial_spot/ (2297 ảnh)
+    └── Peach__healthy/ (363 ảnh)
+    └── Pepper_bell__bacterial_spot/ (1067 ảnh)
+    └── Pepper_bell__healthy/ (1539 ảnh)
+    └── Pomegranate__diseased/ (272 ảnh)
+    └── Pomegranate__healthy/ (287 ảnh)
+    └── Potato__early_blight/ (1096 ảnh)
+    └── Potato__healthy/ (152 ảnh)
+    └── Potato__late_blight/ (1093 ảnh)
+    └── Rice__brown_spot/ (653 ảnh)
+    └── Rice__healthy/ (1488 ảnh)
+    └── Rice__hispa/ (565 ảnh)
+    └── Rice__leaf_blast/ (981 ảnh)
+    └── Rice__neck_blast/ (1000 ảnh)
+    └── Soybean__bacterial_blight/ (56 ảnh)
+    └── Soybean__caterpillar/ (3309 ảnh)
+    └── Soybean__diabrotica_speciosa/ (2205 ảnh)
+    └── Soybean__downy_mildew/ (51 ảnh)
+    └── Soybean__healthy/ (5998 ảnh)
+    └── Soybean__mosaic_virus/ (22 ảnh)
+    └── Soybean__powdery_mildew/ (77 ảnh)
+    └── Soybean__rust/ (65 ảnh)
+    └── Soybean__southern_blight/ (62 ảnh)
+    └── Strawberry___leaf_scorch/ (1109 ảnh)
+    └── Strawberry__healthy/ (456 ảnh)
+    └── Sugarcane__bacterial_blight/ (100 ảnh)
+    └── Sugarcane__healthy/ (180 ảnh)
+    └── Sugarcane__red_rot/ (174 ảnh)
+    └── Sugarcane__red_stripe/ (53 ảnh)
+    └── Sugarcane__rust/ (93 ảnh)
+    └── Tea__algal_leaf/ (339 ảnh)
+    └── Tea__anthracnose/ (300 ảnh)
+    └── Tea__bird_eye_spot/ (300 ảnh)
+    └── Tea__brown_blight/ (339 ảnh)
+    └── Tea__healthy/ (222 ảnh)
+    └── Tea__red_leaf_spot/ (429 ảnh)
+    └── Tomato__bacterial_spot/ (2136 ảnh)
+    └── Tomato__early_blight/ (1009 ảnh)
+    └── Tomato__healthy/ (1598 ảnh)
+    └── Tomato__late_blight/ (1919 ảnh)
+    └── Tomato__leaf_mold/ (957 ảnh)
+    └── Tomato__mosaic_virus/ (382 ảnh)
+    └── Tomato__septoria_leaf_spot/ (1782 ảnh)
+    └── Tomato__spider_mites_(two_spotted_spider_mite)/ (1676 ảnh)
+    └── Tomato__target_spot/ (1404 ảnh)
+    └── Tomato__yellow_leaf_curl_virus/ (3214 ảnh)
+    ├── Wheat__brown_rust/ (915 ảnh) [.db: Thumbs.db]
+    └── Wheat__healthy/ (1225 ảnh)
+    └── Wheat__septoria/ (97 ảnh)
+    └── Wheat__yellow_rust/ (1132 ảnh)
+Tổng số ảnh: 79086

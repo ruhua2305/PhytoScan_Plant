@@ -2,14 +2,14 @@
 
 | Trường | Giá trị |
 |---|---|
-| Phiên bản | Final v1.0 — hợp nhất FullPlan (V1.1) + SOTA Revised (V2) |
-| Ngày | 2026-07-04 |
+| Phiên bản | Final v1.1 — đồng bộ với code đã triển khai (đối chiếu 2026-07-12) |
+| Ngày | 2026-07-12 (bản gốc 2026-07-04) |
 | Thư mục gốc | `D:\DAT301m_Project\Final_Pipeline` |
 | Phần cứng | NVIDIA RTX 3050 Ti Laptop GPU, 4GB VRAM — 16GB RAM — Windows |
 | Loại dự án | Computer vision, ML nông nghiệp, triển khai web FastAPI |
-| Trạng thái | Kế hoạch thi công (buildable), có code chạy được đầu-cuối |
+| Trạng thái | Đã có code chạy đầu-cuối + checkpoint 5 loài + leaf-gate + bundle + web demo; một số thành phần nâng cao chưa kích hoạt (xem Mục 1.8) |
 
-> **Tài liệu này thay thế cả hai bản trước.** Nó giữ phần **quản trị khoa học chặt chẽ** của FullPlan V1 (split 70/10/10/10 có manifest + hash, holdout khoá, calibration split riêng, golden set, ONNX parity, bundle bất biến, rollback theo bundle) và ghép với phần **kỹ thuật SOTA + code chạy được** của bản V2 (few-shot prototype cho lớp hiếm, Class-Balanced Focal Loss, domain adaptation lab→field, PEFT, AMP/gradient-accumulation, FastAPI + ONNX Runtime, monitoring/rollback vận hành). Mọi lỗi phát hiện ở hai bản gốc đã được sửa (xem Mục 1.5).
+> **Tài liệu này đã được đồng bộ lại với code thực tế trong repo (rà 2026-07-12).** Nó giữ khung **quản trị khoa học** (split 70/10/10/10 có manifest + hash, holdout khoá, calibration split riêng, golden set, ONNX parity, bundle bất biến) và phần **kỹ thuật + code chạy được** (Class-Balanced Focal Loss, PEFT 3 bước, AMP/gradient-accumulation, FastAPI + ONNX Runtime, leaf-gate + energy-OOD). So với bản 2026-07-04, bản này **cập nhật theo dữ liệu và code thật**: dữ liệu FINETUNE nay có **18,402 ảnh** (lớp `Spider_mites` tăng từ 7 lên **55 ảnh**), nên **không còn lớp nào < 30 ảnh** — nhánh few-shot/prototype (Chế độ 2) trở thành **hướng mở rộng, không phải thành phần đang chạy** (Mục 3.5, 1.8); tầng serving load bundle từ **Hugging Face Hub** (Mục 7.5); và các thành phần chưa hoàn tất được **đánh dấu trạng thái trung thực** thay vì trình bày như đã xong (Mục 1.8). Chi tiết thay đổi ở Mục 1.5.
 
 ---
 
@@ -18,7 +18,7 @@
 | # | Quyết định | Chọn | Lý do |
 |---|---|---|---|
 | D1 | Backbone chính | **EfficientNetV2-S** (~21M), fallback **EfficientNetV2-B0** (~7M) | Ưu tiên accuracy tối đa; khả thi trên 4GB nhờ AMP + gradient accumulation + PEFT (không full-unfreeze) + freeze backbone cho loài nhỏ |
-| D2 | Embedding cho lớp hiếm | **DINOv2-S/14 frozen** (ablation) + backbone đã fine-tune | Feature few-shot mạnh, không tốn optimizer state vì đóng băng |
+| D2 | ~~Embedding cho lớp hiếm~~ | **Không dùng ở bản hiện tại** | Dữ liệu mới không còn lớp < 30 ảnh (Spider_mites nay 55) → few-shot/prototype chuyển sang hướng mở rộng (Mục 1.8, 3.5) |
 | D3 | Ngôn ngữ tài liệu | **Tiếng Việt**, giữ thuật ngữ kỹ thuật + tên bảng bằng tiếng Anh | Theo yêu cầu người dùng |
 | D4 | Mức độ code | **Kế hoạch chi tiết + đầy đủ code chạy được** | Ghép code V2 + governance V1 |
 | D5 | Chia dữ liệu | **70/10/10/10** = train/calib/val/holdout, có manifest + SHA256, holdout khoá | Theo V1 — nghiêm ngặt nhất, chống rò rỉ, tốt cho báo cáo học thuật |
@@ -30,9 +30,9 @@
 
 ### 1.1. Mục tiêu dự án
 
-Dự án xây dựng hệ thống phân loại bệnh cây từ ảnh lá cho **5 loài**: Apple, Corn, Grape, Pepper bell và Tomato. Sản phẩm cuối là một **web demo chạy local** gồm FastAPI backend + frontend đơn giản, nơi người dùng chọn loài cây, upload ảnh lá; hệ thống kiểm tra ảnh hợp lệ bằng **Leaf Gate**, sau đó model theo loài trả về **top-k bệnh** kèm **confidence đã calibration**, và biết **từ chối** (reject) khi ảnh không phải lá / sai loài / ngoài phân phối / độ tin cậy thấp.
+Dự án xây dựng hệ thống phân loại bệnh cây từ ảnh lá cho **5 loài**: Apple, Corn, Grape, Pepper bell và Tomato. Sản phẩm cuối là một **web demo** (frontend PhytoScan + FastAPI backend) nơi người dùng chọn loài cây, upload ảnh lá; hệ thống kiểm tra ảnh hợp lệ bằng **Leaf Gate**, sau đó model theo loài trả về **top-k bệnh** kèm **confidence đã calibration**, và có khung **từ chối** (reject) khi ảnh không phải lá / độ tin cậy thấp / ngoài phân phối. Backend hiện load bundle model (ONNX) từ **Hugging Face Hub** và phục vụ inference bằng ONNX Runtime CPU (Mục 7.5).
 
-Mục tiêu không chỉ là accuracy cao trên validation, mà là một **pipeline có thể audit**: split có manifest bất biến, class mapping cố định, calibration riêng từng thành phần, ONNX parity, golden set smoke test, rollback theo bundle, và policy reject rõ ràng. Tài liệu ưu tiên **bằng chứng field holdout + cross-test** hơn là con số accuracy kiểu PlantVillage.
+Mục tiêu không chỉ là accuracy cao trên validation, mà là một **pipeline có thể audit**: split có manifest bất biến, class mapping cố định, calibration riêng từng thành phần, ONNX parity, golden set smoke test, và policy reject rõ ràng. Tài liệu ưu tiên **bằng chứng field holdout + cross-test** hơn là con số accuracy kiểu PlantVillage.
 
 ### 1.2. Luồng xử lý end-to-end
 
@@ -54,15 +54,15 @@ Chi tiết reject taxonomy và fallback UX ở Mục 3 (Leaf Gate) và Mục 7 (
 | Phase | Dữ liệu | Hành động model | Output | Vì sao quan trọng |
 |---|---|---|---|---|
 | Phase 0 | Thư mục dữ liệu hiện có | Xây taxonomy + manifest khoá | `taxonomy_v1.json`, split manifests | Chặn lỗi class mapping & rò rỉ |
-| Phase 1 | PRETRAIN kiểu PlantVillage, 53,599 ảnh, 38 lớp | Pretrain EfficientNetV2-S (+ field-background recomposition) | Checkpoint backbone chung | Học đặc trưng lá/bệnh rẻ + giảm domain gap sớm |
-| Phase 2 | FINETUNE ảnh field, 18,354 ảnh, 20 lớp | Fine-tune per-species (PEFT) + few-shot cho lớp hiếm | 5 candidate model theo loài | Thu hẹp domain gap lab→field |
-| Phase 3 | calib split + OOD sets | Temperature scaling, thresholds, reject policy, prototype | Bundle đã calibration | Confidence trở nên có ý nghĩa |
-| Phase 4 | golden + holdout + public datasets | ONNX parity, smoke test, cross-test | Bundle sẵn sàng deploy + report | Tái lập & so sánh được |
-| Phase 5 | FastAPI + frontend | Serving theo bundle | Web demo local | Sản phẩm dùng được |
+| Phase 1 | PRETRAIN kiểu PlantVillage, 53,599 ảnh, 38 lớp | Pretrain EfficientNetV2-S | Checkpoint backbone chung | Học đặc trưng lá/bệnh rẻ |
+| Phase 2 | FINETUNE ảnh field, 18,402 ảnh, 20 lớp | Fine-tune per-species (PEFT 3 bước) | 5 model theo loài | Thu hẹp domain gap lab→field |
+| Phase 3 | calib split | Temperature scaling (thresholds là việc còn lại) | Calibration.json mỗi loài | Confidence có ý nghĩa hơn |
+| Phase 4 | golden + holdout | ONNX export + parity, holdout report | Bundle + báo cáo | Tái lập & so sánh được |
+| Phase 5 | FastAPI + PhytoScan frontend | Serving qua HF Hub bundle | Web demo | Sản phẩm dùng được |
 
 ### 1.4. Chiến lược phần cứng (4GB VRAM là ràng buộc hạng nhất)
 
-GPU mục tiêu là RTX 3050 Ti Laptop 4GB VRAM — đây là **ràng buộc thiết kế trung tâm**. Bản Final chọn **EfficientNetV2-S** làm backbone chính để tối đa accuracy (D1), và khả thi trên 4GB nhờ tổ hợp bắt buộc: **AMP FP16 + gradient accumulation + PEFT** (chỉ mở khoá head + BatchNorm + 1–2 block cuối thay vì full-unfreeze) + **freeze backbone** cho loài dữ liệu nhỏ (Grape/Pepper). B0 là fallback khi cần iterate nhanh hoặc nếu S vẫn OOM ở batch nhỏ nhất.
+GPU mục tiêu là RTX 3050 Ti Laptop 4GB VRAM — đây là **ràng buộc thiết kế trung tâm**. Bản Final chọn **EfficientNetV2-S** làm backbone chính để tối đa accuracy (D1), và khả thi trên 4GB nhờ tổ hợp bắt buộc: **AMP FP16 + gradient accumulation + PEFT** (mở khoá dần head → BN → 1–2 block cuối thay vì full-unfreeze). Với loài dữ liệu nhỏ (Grape/Pepper), thay vì đóng băng hoàn toàn, code dùng **backbone LR rất thấp** (`5e-6`) + augment bảo thủ + early stopping để tránh overfit (xem `configs/finetune_grape.yaml`). B0 là fallback khi cần iterate nhanh hoặc nếu S vẫn OOM ở batch nhỏ nhất.
 
 Quy tắc vận hành:
 
@@ -73,17 +73,22 @@ Quy tắc vận hành:
 - Một backbone bị **loại khỏi production** nếu dry-run 20 step vượt `3.6GB` reserved VRAM.
 - **Bắt buộc chạy `probe_vram_usage()` trước mỗi vòng train full** (tích hợp sẵn trong script train, Mục 4).
 
-### 1.5. Các lỗi đã sửa so với hai bản gốc
+### 1.5. Các thay đổi so với bản 2026-07-04
 
-| Nguồn | Lỗi | Cách sửa trong bản Final |
-|---|---|---|
-| V2 — Mục 3.7 CLI | Dùng loài `potato` (khoai tây) — dự án **không có** loài này | Chuẩn hoá đúng **5 loài**: apple, corn, grape, pepper_bell, tomato |
-| V2 — comment code | Đường dẫn lặp lỗi `src//Main_Pipeline_V2/models/...` | Chuẩn hoá về `src/models/...` dưới root `Final_Pipeline` |
-| V2 — Section 4 & 6 | Tự mâu thuẫn: chỗ nói "đã verify online 07/2026", chỗ nói "không truy cập internet" | Gộp một tuyên bố xác minh duy nhất, đánh dấu rõ mục nào đã/chưa verify |
-| V2 | Thiếu calibration split riêng + holdout lock (chỉ có train/val) | Áp dụng split 70/10/10/10 + holdout khoá của V1 (D5) |
-| V1 | Không có code thực thi | Ghép toàn bộ code chạy được của V2, đã chỉnh khớp interface |
-| V1 ↔ V2 | Backbone không thống nhất (S vs B0) | Chốt S chính + B0 fallback (D1) |
-| Cả hai | Root path khác nhau (`Full_Plan` / `Main_Pipeline_V2`) | Thống nhất `D:\DAT301m_Project\Final_Pipeline` |
+Bản này đồng bộ tài liệu với code + dữ liệu thực tế. Các sửa đổi chính:
+
+| Khu vực | Bản 2026-07-04 nói | Thực tế trong repo (2026-07-12) | Xử lý |
+|---|---|---|---|
+| Dữ liệu Spider_mites | 7 ảnh (Chế độ 2 rare) | **55 ảnh** | Cập nhật mọi số; bỏ khỏi diện "lớp hiếm" |
+| Tổng FINETUNE | 18,354 | **18,402** | Cập nhật bảng 2.1–2.4 |
+| Lớp < 30 ảnh | Có (Spider_mites) | **Không còn lớp nào < 30** | `rare_folds` rỗng ở mọi manifest; không có file prototype |
+| Few-shot/prototype (Chế độ 2) | Thành phần chính | Code còn nhưng **không kích hoạt** với dữ liệu hiện tại | Hạ xuống mục "hướng mở rộng" (Mục 3.5, 1.8) |
+| Serving | Registry cục bộ `active_version_*.txt`, load-all lúc startup | Load bundle từ **Hugging Face Hub** (private repos), **lazy load per-species** | Viết lại Mục 7.5 theo HF Hub; registry cục bộ là phương án offline |
+| Thresholds reject | Đã tune trên calib | **Chưa có `thresholds.json`** — API chạy default | Đánh dấu là việc còn lại (Mục 5.4, 1.8) |
+| Bước 3 decoupled | CE có `weight=class_w` | Code dùng **CE thường** (tránh cân bằng gấp đôi với sampler) | Sửa Mục 4.9 theo code |
+| Grape/Pepper | "freeze backbone" | Backbone LR thấp `5e-6` + early stopping | Sửa Mục 1.4, 3.1 |
+
+**Lỗi kế thừa từ bản gốc đã sửa từ trước (giữ lại để tham chiếu):** loài `potato` sai → 5 loài đúng; đường dẫn `src//Main_Pipeline_V2/...` → `src/...`; thống nhất root `D:\DAT301m_Project\Final_Pipeline`; áp split 70/10/10/10 + holdout lock; backbone chốt EffV2-S + B0 fallback.
 
 ### 1.6. Mục tiêu metric & deployment gates
 
@@ -92,8 +97,8 @@ Quy tắc vận hành:
 | Apple/Tomato field holdout | Macro-F1 >= 0.90 | Bắt buộc đạt để tuyên bố demo cuối |
 | Corn field holdout | Macro-F1 >= 0.80 | Phải báo per-class F1 vì imbalance cao |
 | Grape/Pepper field holdout | Macro-F1 >= 0.70 | Phải kèm confidence interval + ghi chú giới hạn |
-| Tomato Spider_mites | Không tuyên bố thổi phồng; báo cáo bất định | Chỉ 7 ảnh — lớp thiếu dữ liệu |
-| Calibration | ECE <= 0.05 mỗi loài nếu có thể | Nếu không đạt, đặt reject threshold chặt hơn |
+| Tomato Spider_mites | 55 ảnh (không còn critical-rare) | Vẫn là lớp ít nhất của Tomato — báo per-class recall, không thổi phồng |
+| Calibration | ECE <= 0.05 mỗi loài nếu có thể | **Mục tiêu chưa đạt** ở hầu hết loài (Mục 5.3) → cần đặt reject threshold chặt hơn khi build thresholds |
 | ONNX parity | 100% top-1 parity trên golden/parity set | Bắt buộc trước khi release bundle |
 | API security | Test oversize/MIME/magic-byte pass | Bắt buộc trước demo |
 | Latency | Local p95 <= 3s | Nếu không, fallback backbone nhỏ hơn / preload session |
@@ -103,7 +108,32 @@ Quy tắc vận hành:
 - Không chẩn đoán mọi bệnh cây, sâu hại, thiếu dinh dưỡng, bệnh quả/thân hay tổn thương cơ học.
 - Không thay thế tư vấn chuyên gia nông nghiệp.
 - Không tuyên bố so sánh trực tiếp với các paper trừ khi dataset/split/mapping đã căn chỉnh.
-- Không deploy một model 20-lớp nguyên khối trừ khi định tuyến per-species thất bại trong ablation.
+- Không deploy một model 20-lớp nguyên khối; luôn định tuyến per-species theo lựa chọn người dùng (D6).
+
+### 1.8. Trạng thái triển khai (Đã làm / Chưa làm / Tùy chọn)
+
+Để tránh trình bày quá mức, bảng sau phân biệt rõ cái gì đã chạy và cái gì còn là thiết kế/việc còn lại:
+
+| Thành phần | Trạng thái | Ghi chú |
+|---|---|---|
+| Split manifest 5 loài + hash SHA256 | ✅ Đã làm | `data/splits/*_split_v1.json`, seed 42 |
+| Pretrain backbone 38 lớp | ✅ Đã làm | `checkpoints/backbone_pretrained.pt` |
+| Fine-tune 5 loài (PEFT 3 bước) | ✅ Đã làm | `checkpoints/model_<species>.pt` |
+| Leaf-gate (MobileNetV3-Small) | ✅ Đã làm | `checkpoints/leaf_gate.pt` |
+| Temperature scaling mỗi loài + leaf-gate | ✅ Đã làm | `*_calibration.json` (nhưng **ECE chưa đạt ≤0.05**, Mục 5.3) |
+| ONNX export + parity test | ✅ Đã làm | parity pass (top-1 100%, max_diff ~6e-6) |
+| Bundle bất biến + checksum | ✅ Đã làm | `model_bundles/<species>_.../` |
+| FastAPI + PhytoScan frontend + /api/consult (LLM) | ✅ Đã làm | Serving qua HF Hub (Mục 7.5, 7.10) |
+| **Thresholds reject** (`T_low_confidence`, `T_margin`, `T_energy`, `binary_leaf`) | ❌ Chưa làm | Chưa có `thresholds.json` → energy-OOD & ambiguous/low-confidence hiện dùng default, thực tế **chưa kích hoạt** |
+| **Calibration đạt ECE ≤ 0.05** | ⚠️ Chưa đạt | Xem số thực tế Mục 5.3; cần siết threshold để bù |
+| **Golden set đầy đủ metadata** | ⚠️ Tối giản | Hiện chỉ là danh sách `{"images": [...]}`, chưa có `expected_top1`/`min_confidence` (Mục 2.7) |
+| Few-shot / prototype (Chế độ 2) | 🔵 Tùy chọn / mở rộng | Code còn nhưng **không kích hoạt** vì không còn lớp < 30 (Mục 3.5) |
+| Domain adaptation (field-bg recompose, MMD) | 🔵 Tùy chọn | `domain_mmd.enabled=false` mặc định; field-bg recompose không bật ở pretrain hiện tại |
+| Cross-test Chiều 2 (public→field) | ✅ Đã chạy | `run_direction2.py`; DeiT-39 + backbone-38 vs model mình (Mục 6.5) |
+| Cross-test Chiều 1 (mình→PlantDoc) | 🔵 Tạm gác | Cần de-dup hash (FINETUNE đã chứa 742 ảnh PlantDoc) |
+| Robustness / OOD eval suite (Mục 5.5–5.6) | 🔵 Khung | Chỉ có định nghĩa corruption/metric, chưa có runner đầu-cuối |
+| Ablation B0 / Swin-T / DINOv2 (E7–E9) | 🔵 Tùy chọn | Chưa chạy |
+| Resume training (`--resume`) | ❌ Chưa làm | `checkpoints.py` có helper nhưng train script chưa dùng |
 
 ---
 
@@ -116,29 +146,29 @@ Dự án dùng **hai lớp dữ liệu** với vai trò khác nhau. Lớp PRETRA
 | Lớp | Đường dẫn local | Ảnh | Lớp | Loài | Miền | Được dùng | Không được dùng |
 |---|---|---:|---:|---:|---|---|---|
 | PRETRAIN | `D:\DAT301m_Project\Final_Pipeline\data\1. PRETRAIN DATASET` | 53,599 | 38 | 14 | Studio/lab, nền kiểm soát | Pretrain đặc trưng, sanity check backbone | Tuyên bố sẵn sàng field |
-| FINETUNE | `D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET` | 18,354 | 20 | 5 | Ảnh field thực tế | Fine-tune per-species, calibration, validation, holdout khoá | Tái dùng holdout để tuning |
+| FINETUNE | `D:\DAT301m_Project\Final_Pipeline\data\2. FINETUNE DATASET` | 18,402 | 20 | 5 | Ảnh field thực tế | Fine-tune per-species, calibration, validation, holdout khoá | Tái dùng holdout để tuning |
 
 > Lưu ý đường dẫn: dữ liệu nguồn đặt tại `D:\DAT301m_Project\Final_Pipeline\data\...`; toàn bộ code, manifest, checkpoint, model và report của bản Final cũng nằm dưới root `D:\DAT301m_Project\Final_Pipeline`. Report cuối phải nêu rõ **target production là hiệu năng FINETUNE-field**; metric PRETRAIN chỉ là chẩn đoán phụ trợ.
 
 ### 2.2. Phân tích phân phối lớp & mất cân bằng
 
-FINETUNE có 18,354 ảnh nhưng phân phối rất không đều: nhẹ với Apple/Grape/Pepper, nặng với Corn, và **cực đoan với Tomato** vì `Spider_mites` chỉ có 7 ảnh field.
+FINETUNE có 18,402 ảnh nhưng phân phối rất không đều: nhẹ với Apple/Grape/Pepper, nặng với Corn, và **mất cân bằng cao với Tomato** vì lớp ít nhất `Spider_mites` chỉ có 55 ảnh field (so với 596 của lớp lớn nhất). Sau khi dữ liệu Spider_mites tăng từ 7 → 55 ảnh, **không còn lớp nào dưới 30 ảnh** — mọi lớp đều đủ để train softmax head chuẩn.
 
-| Loài | Tổng ảnh | #Lớp | Min class | Max class | Mean | Median | Imbalance ratio | Lớp hiếm `<100` |
+| Loài | Tổng ảnh | #Lớp | Min class | Max class | Mean | Median | Imbalance ratio | Lớp hiếm `<30` |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
 | Apple | 12,778 | 3 | 2,008 | 5,555 | 4,259.3 | 5,215 | 2.77 | Không |
-| Corn | 2,461 | 4 | 116 | 1,971 | 615.3 | 187.0 | 16.99 | Không, nhưng `Common_rust` gần rare |
-| Grape | 204 | 2 | 71 | 133 | 102.0 | 102.0 | 1.87 | `healthy` |
-| Pepper bell | 268 | 2 | 97 | 171 | 134.0 | 134.0 | 1.76 | `healthy` |
-| Tomato | 2,643 | 9 | 7 | 596 | 293.7 | 304 | 85.14 | `Spider_mites` |
-| **Tổng** | **18,354** | **20** | **7** | **5,555** | **917.7** | **208.5** | **793.57 global** | 3 lớp |
+| Corn | 2,461 | 4 | 116 | 1,971 | 615.3 | 187.0 | 16.99 | Không |
+| Grape | 204 | 2 | 71 | 133 | 102.0 | 102.0 | 1.87 | Không |
+| Pepper bell | 268 | 2 | 97 | 171 | 134.0 | 134.0 | 1.76 | Không |
+| Tomato | 2,691 | 9 | 55 | 596 | 299.0 | 304 | 10.84 | Không |
+| **Tổng** | **18,402** | **20** | **55** | **5,555** | **920.1** | **211.0** | **101.0 global** | **0 lớp** |
 
 Diễn giải:
 
 - **Apple**: đủ dữ liệu cho model supervised chuẩn, nên là loài production-quality đầu tiên.
 - **Corn**: cần xử lý imbalance vì `Northern_Blight` chiếm 80% loài.
-- **Grape/Pepper**: dữ liệu nhỏ — freeze backbone trước khi thử full fine-tune, nhạy với photographer/source bias.
-- **Tomato**: các lớp bệnh dễ nhầm (`Early_blight`/`Late_blight`/`Septoria`/`Leaf_Mold`) và một lớp critical chỉ 7 ảnh.
+- **Grape/Pepper**: dữ liệu nhỏ — backbone LR thấp + augment bảo thủ, nhạy với photographer/source bias.
+- **Tomato**: các lớp bệnh dễ nhầm (`Early_blight`/`Late_blight`/`Septoria`/`Leaf_Mold`) và lớp ít nhất `Spider_mites` (55 ảnh) — vẫn cần theo dõi per-class recall.
 
 Bảng chi tiết từng lớp:
 
@@ -151,30 +181,32 @@ Bảng chi tiết từng lớp:
 | Corn | Common_rust | 116 | 4.71% | Low | Class weights, focal-loss ablation |
 | Corn | Northern_Blight | 1,971 | 80.09% | Dominant | Tránh majority collapse |
 | Corn | healthy | 152 | 6.18% | Low | Class weights, theo dõi false disease rate |
-| Grape | Black_rot | 133 | 65.20% | Low | Freeze backbone trước |
-| Grape | healthy | 71 | 34.80% | Rare | Prototype support, threshold thận trọng |
-| Pepper bell | Bacterial_spot | 171 | 63.81% | Low | Freeze backbone trước |
-| Pepper bell | healthy | 97 | 36.19% | Rare | Prototype support, threshold thận trọng |
-| Tomato | Bacterial_spot | 141 | 5.33% | Low | Weighted CE / focal ablation |
-| Tomato | Early_blight | 497 | 18.80% | Medium | Lớp bệnh chuẩn |
-| Tomato | Late_blight | 220 | 8.32% | Low | Theo dõi nhầm với Early_blight |
-| Tomato | Leaf_Mold | 596 | 22.55% | Common | Lớp bệnh chuẩn |
-| Tomato | Septoria | 304 | 11.50% | Medium | Theo dõi nhầm với Leaf_Mold |
-| Tomato | Spider_mites | 7 | 0.26% | **Critical rare** | Prototype only / báo cáo là thiếu dữ liệu |
-| Tomato | TYLCV | 363 | 13.73% | Medium | Lớp bệnh chuẩn |
-| Tomato | mosaic_virus | 135 | 5.11% | Low | Weighted CE, theo dõi nhầm với TYLCV |
-| Tomato | healthy | 380 | 14.38% | Medium | Lớp bệnh chuẩn |
+| Grape | Black_rot | 133 | 65.20% | Low | Backbone LR thấp, augment bảo thủ |
+| Grape | healthy | 71 | 34.80% | Low | Theo dõi recall, threshold thận trọng |
+| Pepper bell | Bacterial_spot | 171 | 63.81% | Low | Backbone LR thấp, augment bảo thủ |
+| Pepper bell | healthy | 97 | 36.19% | Low | Theo dõi recall, threshold thận trọng |
+| Tomato | Bacterial_spot | 141 | 5.24% | Low | Weighted CE / focal ablation |
+| Tomato | Early_blight | 497 | 18.47% | Medium | Lớp bệnh chuẩn |
+| Tomato | Late_blight | 220 | 8.18% | Low | Theo dõi nhầm với Early_blight |
+| Tomato | Leaf_Mold | 596 | 22.15% | Common | Lớp bệnh chuẩn |
+| Tomato | Septoria | 304 | 11.30% | Medium | Theo dõi nhầm với Leaf_Mold |
+| Tomato | Spider_mites | 55 | 2.04% | Low | Lớp ít nhất — theo dõi recall riêng |
+| Tomato | TYLCV | 363 | 13.49% | Medium | Lớp bệnh chuẩn |
+| Tomato | mosaic_virus | 135 | 5.02% | Low | Weighted CE, theo dõi nhầm với TYLCV |
+| Tomato | healthy | 380 | 14.12% | Medium | Lớp bệnh chuẩn |
 
-### 2.3. Ranh giới lớp thường / lớp hiếm
+### 2.3. Ranh giới lớp thường / lớp hiếm (hiện không có lớp hiếm)
 
-Đây là quyết định thiết kế cốt lõi kế thừa từ V2, tích hợp vào khung split chặt của V1. Ngưỡng phân tách: **`rare_class_threshold = 30` ảnh** (đếm trên toàn loài, trước khi split).
+Bản gốc thiết kế hai chế độ với ngưỡng `rare_class_threshold = 30`: lớp `>= 30` ảnh train bằng softmax head, lớp `< 30` dùng prototype few-shot. **Với dữ liệu hiện tại, không lớp nào rơi vào Chế độ 2** — lớp ít nhất (`Tomato/Spider_mites`) đã có 55 ảnh (> 30). Vì vậy:
 
-| Chế độ | Điều kiện | Phương pháp | Lớp thuộc chế độ |
+| Chế độ | Điều kiện | Phương pháp | Lớp thuộc chế độ (hiện tại) |
 |---|---|---|---|
-| **Chế độ 1 — lớp thường** | `>= 30` ảnh | Fine-tune softmax head + Class-Balanced Focal Loss (Mục 4) | Toàn bộ Apple; Corn (Cercospora, Common_rust, Northern_Blight, healthy); Grape/Pepper Bacterial_spot & Black_rot; hầu hết Tomato |
-| **Chế độ 2 — lớp hiếm** | `< 30` ảnh | Prototype few-shot (Snell 2017) trên embedding backbone đã fine-tune / DINOv2 frozen — **không** train tham số riêng | `Tomato/Spider_mites` (7). Ứng viên biên: `Grape/healthy` (71), `Pepper/healthy` (97) nếu recall kém |
+| **Chế độ 1 — lớp thường** | `>= rare_threshold` | Fine-tune softmax head + Class-Balanced Focal Loss (Mục 4) | **Toàn bộ 20 lớp / 5 loài** |
+| **Chế độ 2 — lớp hiếm** | `< rare_threshold` | Prototype few-shot (Snell 2017) | **Không có lớp nào** |
 
-Lý do toán học: một lớp 7 ảnh (sau split còn ~4 ảnh train) không thể học biên quyết định robust bằng softmax head — dù augment mạnh tới đâu cũng không tạo thông tin mới. Prototype đo khoảng cách tới embedding trung bình, ổn định hơn nhiều ở chế độ dữ liệu cực ít, và cho phép trả `unknown_or_ood` thay vì đoán bừa. Chi tiết thuật toán ở Mục 3.5 và 4.6.
+Hệ quả cụ thể trong code: mọi manifest có khối `rare_folds` **rỗng**; `train_finetune.py` khi thấy `rare_folds` rỗng sẽ in "không có lớp hiếm — bỏ qua Chế độ 2" và **không sinh file prototype nào**. Nhánh few-shot vẫn còn trong code như **hướng mở rộng** cho tương lai (nếu thêm bệnh mới rất ít ảnh) — chi tiết ở Mục 3.5.
+
+> Ghi chú ngưỡng: config `tomato` đặt `rare_class_threshold: 30` nhưng manifest tomato hiện lưu `20` (chạy trước đó); cả hai đều cho cùng kết quả vì lớp nhỏ nhất là 55 — không lớp nào dưới ngưỡng. `split_builder.py` nhận `--rare-threshold` để điều chỉnh nếu cần.
 
 ### 2.4. Chiến lược split & khoá holdout
 
@@ -187,33 +219,33 @@ Split phải **deterministic, stratified theo lớp, và khoá bằng manifest**
 
 Dữ liệu đã được làm sạch ở nguồn (theo bối cảnh dự án), nên bản Final **không** thêm phase cleaning mới. Nhưng split vẫn cần manifest lock vì dữ liệu sạch vẫn có thể rò rỉ qua việc re-split cẩu thả hoặc chồng lấn nguồn.
 
-Bảng phân bổ split (làm tròn stratified per-class; số lẻ dồn vào split lớn hơn):
+Bảng phân bổ split (số thực tế từ manifest `*_split_v1.json`, seed 42):
 
 | Loài | Lớp | Train 70% | Calib 10% | Val 10% | Holdout 10% | Tổng |
 |---|---|---:|---:|---:|---:|---:|
-| Apple | Apple_scab | 3,888 | 556 | 556 | 555 | 5,555 |
-| Apple | Cedar_apple_rust | 1,406 | 201 | 201 | 200 | 2,008 |
-| Apple | healthy | 3,650 | 522 | 522 | 521 | 5,215 |
-| Corn | Cercospora | 155 | 22 | 22 | 23 | 222 |
-| Corn | Common_rust | 81 | 12 | 12 | 11 | 116 |
+| Apple | Apple_scab | 3,887 | 556 | 556 | 556 | 5,555 |
+| Apple | Cedar_apple_rust | 1,405 | 201 | 201 | 201 | 2,008 |
+| Apple | healthy | 3,649 | 522 | 522 | 522 | 5,215 |
+| Corn | Cercospora | 156 | 22 | 22 | 22 | 222 |
+| Corn | Common_rust | 80 | 12 | 12 | 12 | 116 |
 | Corn | Northern_Blight | 1,380 | 197 | 197 | 197 | 1,971 |
-| Corn | healthy | 106 | 15 | 15 | 16 | 152 |
-| Grape | Black_rot | 93 | 13 | 13 | 14 | 133 |
+| Corn | healthy | 107 | 15 | 15 | 15 | 152 |
+| Grape | Black_rot | 94 | 13 | 13 | 13 | 133 |
 | Grape | healthy | 50 | 7 | 7 | 7 | 71 |
 | Pepper bell | Bacterial_spot | 120 | 17 | 17 | 17 | 171 |
-| Pepper bell | healthy | 68 | 10 | 10 | 9 | 97 |
+| Pepper bell | healthy | 67 | 10 | 10 | 10 | 97 |
 | Tomato | Bacterial_spot | 99 | 14 | 14 | 14 | 141 |
-| Tomato | Early_blight | 348 | 50 | 50 | 49 | 497 |
+| Tomato | Early_blight | 347 | 50 | 50 | 50 | 497 |
 | Tomato | Late_blight | 154 | 22 | 22 | 22 | 220 |
-| Tomato | Leaf_Mold | 417 | 60 | 60 | 59 | 596 |
-| Tomato | Septoria | 213 | 30 | 30 | 31 | 304 |
-| Tomato | Spider_mites | 4 | 1 | 1 | 1 | 7 |
-| Tomato | TYLCV | 254 | 36 | 36 | 37 | 363 |
-| Tomato | mosaic_virus | 94 | 14 | 14 | 13 | 135 |
+| Tomato | Leaf_Mold | 416 | 60 | 60 | 60 | 596 |
+| Tomato | Septoria | 214 | 30 | 30 | 30 | 304 |
+| Tomato | Spider_mites | 37 | 6 | 6 | 6 | 55 |
+| Tomato | TYLCV | 255 | 36 | 36 | 36 | 363 |
+| Tomato | mosaic_virus | 93 | 14 | 14 | 14 | 135 |
 | Tomato | healthy | 266 | 38 | 38 | 38 | 380 |
-| **Tổng** | **All** | **12,846** | **1,837** | **1,837** | **1,834** | **18,354** |
+| **Tổng** | **All** | **12,876** | **1,842** | **1,842** | **1,842** | **18,402** |
 
-> **Xử lý đặc biệt lớp hiếm trong split:** với `Spider_mites` (7 ảnh) và các lớp <30 ảnh thuộc Chế độ 2, việc chia 70/10/10/10 gần như vô nghĩa thống kê. Thay vào đó, các lớp này dùng **stratified K-fold** (mỗi ảnh làm query đúng một lần) để đánh giá nhánh prototype — số liệu ở bảng trên chỉ để tính tổng; đánh giá thật theo K-fold (Mục 4.7). Manifest lưu các lớp này trong khối `rare_folds` riêng.
+> **Không còn khối `rare_folds`:** với dữ liệu hiện tại mọi lớp đều `>= 30` ảnh nên tất cả đi theo split 70/10/10/10 chuẩn; `rare_folds` rỗng ở cả 5 manifest. Nếu về sau thêm lớp bệnh mới rất ít ảnh, `split_builder.py` sẽ tự tách chúng sang `rare_folds` (K-fold) và nhánh few-shot (Mục 3.5) sẽ được kích hoạt lại.
 
 Quy tắc xây split:
 
@@ -241,8 +273,9 @@ Trường bắt buộc của manifest:
 | `dataset_root` | string | `D:/DAT301m_Project/Final_Pipeline/data/2. FINETUNE DATASET` |
 | `species` | string | `apple`, `corn`, `grape`, `pepper_bell`, `tomato` |
 | `split_ratio` | object | `{train:0.70, calib:0.10, val:0.10, holdout:0.10}` |
-| `class_to_idx` | object | Class mapping bất biến cho loài này |
-| `rare_class_threshold` | integer | `30` — ranh giới Chế độ 1/2 (Mục 2.3) |
+| `class_to_idx` | object | Class mapping bất biến cho loài này. **Key là tên thư mục đầy đủ** (vd `Tomato___Bacterial_spot`), sinh bằng `sorted()` để ổn định |
+| `species_dir` | string | Tên thư mục loài thật trên đĩa (vd `Corn_(maize)`, `Pepper,_bell`) |
+| `rare_class_threshold` | integer | `30` mặc định (`--rare-threshold`) — lớp `<` ngưỡng vào `rare_folds` (Mục 2.3). Hiện không lớp nào dưới ngưỡng |
 | `items[]` | array | Mỗi ảnh một dòng: path, hash, label, split, source trace |
 | `rare_folds` | object | K-fold cho lớp hiếm (Chế độ 2), `{class: [[fold_idx, path], ...]}` |
 
@@ -261,6 +294,7 @@ Policy chống rò rỉ holdout:
 Xây split manifest DETERMINISTIC cho FINETUNE DATASET (Phase 0, Mục 2.4-2.5).
 - Lớp thường (>= rare_class_threshold): stratified 70/10/10/10 theo seed cố định.
 - Lớp hiếm (< threshold): stratified K-fold vào khối rare_folds (Chế độ 2, Mục 2.3).
+  (Hiện KHÔNG lớp nào < 30 nên rare_folds rỗng ở mọi manifest.)
 Mọi ảnh được hash SHA256 để khoá holdout & phát hiện rò rỉ (Mục 2.5).
 
 Chạy: python -m src.data.split_builder --species all --seed 42
@@ -278,6 +312,29 @@ DATASET_ROOT = r"D:/DAT301m_Project/Final_Pipeline/data/2. FINETUNE DATASET"
 SPLITS_DIR = r"D:/DAT301m_Project/Final_Pipeline/data/splits"
 RATIO = {"train": 0.70, "calib": 0.10, "val": 0.10, "holdout": 0.10}
 
+# Key chuẩn nội bộ -> tên thư mục THẬT trên đĩa (có dấu ngoặc/phẩy).
+SPECIES_DIR_NAME = {
+    "apple": "Apple", "corn": "Corn_(maize)", "grape": "Grape",
+    "pepper_bell": "Pepper,_bell", "tomato": "Tomato",
+}
+
+
+def resolve_species_dir(species: str) -> str:
+    """Trả đường dẫn thư mục loài; nếu tên map sẵn không có thì dò không phân biệt hoa/thường."""
+    candidate = SPECIES_DIR_NAME.get(species, species)
+    path = os.path.join(DATASET_ROOT, candidate)
+    if os.path.isdir(path):
+        return path
+    def norm(s):
+        return (s.lower().replace("_", "").replace(",", "")
+                .replace("(", "").replace(")", "").replace(" ", ""))
+    target = norm(species)
+    for name in os.listdir(DATASET_ROOT):
+        full = os.path.join(DATASET_ROOT, name)
+        if os.path.isdir(full) and (norm(name) == target or norm(name).startswith(target)):
+            return full
+    raise FileNotFoundError(f"Không tìm thấy thư mục loài '{species}' trong {DATASET_ROOT}.")
+
 
 def sha256_file(path: str, chunk: int = 1 << 20) -> str:
     h = hashlib.sha256()
@@ -288,48 +345,37 @@ def sha256_file(path: str, chunk: int = 1 << 20) -> str:
 
 
 def list_class_images(species_dir: str):
-    """Trả {class_name: [abs_path, ...]} sắp xếp ổn định để tái lập."""
+    """Trả {class_name: [abs_path, ...]} sắp xếp ổn định để tái lập. class_name = tên thư mục đầy đủ."""
     classes = sorted(c for c in os.listdir(species_dir)
                      if os.path.isdir(os.path.join(species_dir, c)))
     out = {}
     for cls in classes:
         cdir = os.path.join(species_dir, cls)
-        paths = sorted(os.path.join(cdir, f) for f in os.listdir(cdir)
-                       if f.lower().endswith(IMG_EXT))
-        out[cls] = paths
+        out[cls] = sorted(os.path.join(cdir, f) for f in os.listdir(cdir)
+                          if f.lower().endswith(IMG_EXT))
     return out
 
 
 def stratified_split(paths, rng):
     """Chia 1 lớp thành train/calib/val/holdout theo RATIO, số lẻ dồn train trước."""
-    paths = paths[:]
-    rng.shuffle(paths)
-    n = len(paths)
-    n_calib = int(round(n * RATIO["calib"]))
-    n_val = int(round(n * RATIO["val"]))
-    n_hold = int(round(n * RATIO["holdout"]))
-    n_train = n - n_calib - n_val - n_hold
-    idx = 0
-    out = {}
+    paths = paths[:]; rng.shuffle(paths); n = len(paths)
+    n_calib = int(round(n * RATIO["calib"])); n_val = int(round(n * RATIO["val"]))
+    n_hold = int(round(n * RATIO["holdout"])); n_train = n - n_calib - n_val - n_hold
+    idx, out = 0, {}
     for name, k in [("train", n_train), ("calib", n_calib), ("val", n_val), ("holdout", n_hold)]:
-        out[name] = paths[idx:idx + k]
-        idx += k
+        out[name] = paths[idx:idx + k]; idx += k
     return out
 
 
 def kfold_split(paths, rng, k=5):
-    """Lớp hiếm: chia đều vào k fold (mỗi ảnh 1 fold) để đánh giá prototype."""
-    paths = paths[:]
-    rng.shuffle(paths)
-    folds = []
-    for i, p in enumerate(paths):
-        folds.append([i % max(1, min(k, len(paths))), p])
-    return folds
+    """Lớp hiếm: chia đều vào k fold (mỗi ảnh 1 fold) để đánh giá prototype (hiện không dùng)."""
+    paths = paths[:]; rng.shuffle(paths)
+    return [[i % max(1, min(k, len(paths))), p] for i, p in enumerate(paths)]
 
 
 def build_species(species: str, seed: int, rare_threshold: int = 30):
     rng = random.Random(seed)
-    species_dir = os.path.join(DATASET_ROOT, species)
+    species_dir = resolve_species_dir(species)
     class_images = list_class_images(species_dir)
     class_to_idx = {c: i for i, c in enumerate(sorted(class_images.keys()))}
 
@@ -338,31 +384,24 @@ def build_species(species: str, seed: int, rare_threshold: int = 30):
         if len(paths) < rare_threshold:
             rare_folds[cls] = kfold_split(paths, rng)
             continue
-        split_map = stratified_split(paths, rng)
-        for split_name, split_paths in split_map.items():
+        for split_name, split_paths in stratified_split(paths, rng).items():
             for p in split_paths:
                 items.append({
                     "image_id": os.path.splitext(os.path.basename(p))[0],
                     "relative_path": os.path.relpath(p, DATASET_ROOT).replace("\\", "/"),
                     "sha256": sha256_file(p),
-                    "class_name": cls,
-                    "class_idx": class_to_idx[cls],
-                    "split": split_name,
-                    "source_dataset": "FINETUNE",
+                    "class_name": cls, "class_idx": class_to_idx[cls],
+                    "split": split_name, "source_dataset": "FINETUNE",
                     "source_group_id": "[Cần verify]",
                 })
 
     manifest = {
         "schema_version": "split_manifest_v1",
         "created_at": datetime.now(timezone(timedelta(hours=7))).isoformat(),
-        "seed": seed,
-        "dataset_root": DATASET_ROOT,
-        "species": species,
-        "split_ratio": RATIO,
-        "class_to_idx": class_to_idx,
-        "rare_class_threshold": rare_threshold,
-        "items": items,
-        "rare_folds": rare_folds,
+        "seed": seed, "dataset_root": DATASET_ROOT, "species": species,
+        "species_dir": os.path.relpath(species_dir, DATASET_ROOT).replace("\\", "/"),
+        "split_ratio": RATIO, "class_to_idx": class_to_idx,
+        "rare_class_threshold": rare_threshold, "items": items, "rare_folds": rare_folds,
     }
     os.makedirs(SPLITS_DIR, exist_ok=True)
     out_path = os.path.join(SPLITS_DIR, f"{species}_split_v1.json")
@@ -376,10 +415,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Xây split manifest deterministic (Phase 0)")
     ap.add_argument("--species", default="all", help="'all' hoặc tên 1 loài")
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--rare-threshold", type=int, default=30,
+                    help="lớp < ngưỡng này -> rare_folds (few-shot). Đặt thấp để gộp vào head thường.")
     args = ap.parse_args()
     targets = SPECIES if args.species == "all" else [args.species]
     for sp in targets:
-        build_species(sp, args.seed)
+        build_species(sp, args.seed, rare_threshold=args.rare_threshold)
 ```
 
 ### 2.6. Phân tích domain gap (lab → field)
@@ -393,17 +434,17 @@ if __name__ == "__main__":
 | Mức độ bệnh | Triệu chứng rõ | Triệu chứng sớm, hỗn hợp, gần giống healthy | Nhầm giữa các lớp tương tự |
 | Prior loài | 14 loài nhưng nhãn lab | 5 loài đích do user chọn | Vẫn có thể upload sai loài |
 
-Loài rủi ro cao: **Corn** (lá dài, texture, chụp trong ruộng dày; `Northern_Blight` áp đảo nên shortcut nền/hình dạng lá dễ che khuyết điểm lớp hiếm); **Grape/Pepper** (tập field rất nhỏ, nhạy source bias); **Tomato** (nhãn bệnh gần nhau về thị giác + một lớp critical chỉ 7 ảnh).
+Loài rủi ro cao: **Corn** (lá dài, texture, chụp trong ruộng dày; `Northern_Blight` áp đảo nên shortcut nền/hình dạng lá dễ che khuyết điểm lớp nhỏ); **Grape/Pepper** (tập field rất nhỏ, nhạy source bias); **Tomato** (nhãn bệnh gần nhau về thị giác).
 
-Biện pháp giảm domain gap (chi tiết code ở Mục 4.5):
+Biện pháp giảm domain gap — **đang dùng** vs **tùy chọn** (code có sẵn, chưa bật):
 
-- Dùng PRETRAIN **chỉ** để khởi tạo backbone.
-- Dùng val/holdout **chỉ từ field** cho mọi production metric.
-- **Field-background recomposition** (Jeon et al., 2025) ngay từ pretrain: cắt lá khỏi nền lab, dán lên nền field ngẫu nhiên — bằng chứng trực tiếp cải thiện 9.9–23.6 điểm % trên đúng 4/5 loài của dự án.
-- Augmentation photometric + background-preserving khi fine-tune.
-- **MMD loss** (Wu et al., 2023) tuỳ chọn để căn chỉnh phân phối đặc trưng lab↔field.
-- Calibration + OOD/reject để lỗi field **hiện ra** thay vì bị giấu sau top-1 accuracy.
-- **Đo domain gap định lượng**: accuracy trên PlantDoc/tập field trước và sau khi bật domain adaptation → đây là "biểu đồ trung tâm" của báo cáo (Mục 6.3).
+- ✅ Dùng PRETRAIN **chỉ** để khởi tạo backbone; dùng val/holdout **chỉ từ field** cho mọi production metric.
+- ✅ Augmentation photometric (RandAugment, ColorJitter, JPEG, noise) khi fine-tune (Mục 4.3).
+- ✅ Calibration + khung OOD/reject để lỗi field **hiện ra** thay vì bị giấu sau top-1 accuracy.
+- 🔵 **Field-background recomposition** (Jeon et al., 2025): code có ở `domain_augmentation.py` nhưng **không bật** ở pretrain hiện tại (`domain_aug` chưa kích hoạt). Hướng cải thiện: bằng chứng gốc +9.9–23.6 điểm % trên 4/5 loài.
+- 🔵 **MMD loss** (Wu et al., 2023): code có, `domain_mmd.enabled=false` mặc định.
+- ✅ **Đo domain gap định lượng (Chiều 2 — ĐÃ CHẠY):** model chỉ-biết-lab (DeiT-39 ngoài, backbone-38 của mình) chạy trên holdout field → macro-F1 0.479 và 0.312 so với **0.595** của model fine-tune field. Xác nhận domain gap (Mục 6.5).
+- 🔵 **Chiều 1 trên PlantDoc (lab→field zero-shot/+adaptation):** là kế hoạch, chưa chạy (cần de-dup hash).
 
 ### 2.7. Định nghĩa Golden Set
 
@@ -416,7 +457,9 @@ Golden set là **tập smoke-test nhỏ, cố định** cho an toàn triển kha
 | Rare `<100` ảnh | 3–7 nếu có | Không tuyên bố ý nghĩa thống kê |
 | Tomato Spider_mites | 1–3 | Chỉ dùng làm canary, không phải bằng chứng metric |
 
-Trường golden item: `id`, `species`, `image_path`, `sha256`, `expected_top1`, `allowed_top3`, `min_confidence`, `must_pass_leaf_gate`, `notes`. Ca canonical yêu cầu **top-1 chính xác**; ca mập mờ chỉ chấp nhận top-3 khi đánh dấu rõ.
+> **Trạng thái hiện tại:** golden set đang ở dạng **tối giản** — mỗi loài một file `data/golden/<species>.json` chỉ chứa `{"images": [đường dẫn, ...]}` (30 ảnh/loài, dùng cho parity test top-1 PyTorch↔ONNX ở Mục 7.4). Schema đầy đủ dưới đây (với `expected_top1`, `min_confidence`, `must_pass_leaf_gate`...) là **mục tiêu hoàn thiện**, chưa được điền.
+
+Trường golden item (mục tiêu): `id`, `species`, `image_path`, `sha256`, `expected_top1`, `allowed_top3`, `min_confidence`, `must_pass_leaf_gate`, `notes`. Ca canonical yêu cầu **top-1 chính xác**; ca mập mờ chỉ chấp nhận top-3 khi đánh dấu rõ.
 
 Quy tắc pass golden:
 
@@ -455,13 +498,13 @@ GPU chỉ 4GB VRAM, nên batch size là tài nguyên được kiểm soát chặ
 4. Đường đi sạch từ minimal baseline → production candidate mà không đổi serving stack.
 5. So sánh được với literature PlantVillage và public CNN baselines.
 
-**Khả thi trên 4GB nhờ:** EffV2-S (~21M params ≈ 86MB FP32 weights, ~172MB AdamW state) — params **không** phải bottleneck; **activation** mới là biến lớn. Kiểm soát activation bằng: batch physical 16 + AMP FP16 (giảm ~½ activation) + gradient accumulation (effective 32–64) + **PEFT** (chỉ mở head+BN+block cuối → optimizer state giảm ~20×) + freeze backbone cho Grape/Pepper. Nếu probe VRAM vẫn OOM ở BS8, hạ về **B0 fallback** (D1).
+**Khả thi trên 4GB nhờ:** EffV2-S (~21M params ≈ 86MB FP32 weights, ~172MB AdamW state) — params **không** phải bottleneck; **activation** mới là biến lớn. Kiểm soát activation bằng: batch physical 16 + AMP FP16 (giảm ~½ activation) + gradient accumulation (effective 32–64) + **PEFT** (chỉ mở head+BN+block cuối → optimizer state giảm ~20×). Với Grape/Pepper (data nhỏ) dùng **backbone LR thấp `5e-6`** + augment bảo thủ + early stopping thay vì đóng băng cứng. Nếu probe VRAM vẫn OOM ở BS8, hạ về **B0 fallback** (D1).
 
 Operational VRAM target:
 - Training peak phải `< 3.6GB` để chừa cho Windows display + driver.
 - Mặc định: `batch_size=16`, AMP FP16, `accumulation_steps=2–4`, effective batch `32–64`.
 - OOM → hạ `batch_size=8`, `accumulation=4–8`, freeze thêm block sớm.
-- Grape/Pepper bắt đầu với **frozen backbone** vì field data nhỏ.
+- Grape/Pepper: backbone LR thấp + early stopping (xem `configs/finetune_grape.yaml`, `finetune_pepper_bell.yaml`).
 
 Bảng backbone tóm tắt:
 
@@ -470,8 +513,8 @@ Bảng backbone tóm tắt:
 | EfficientNetV2-S | ~21M | **Primary** cho pretrain + fine-tune 5 loài |
 | EfficientNetV2-B0 | ~7M | Fallback khi OOM / cần iterate nhanh |
 | MobileNetV3-Small | ~2.5M | Leaf Gate (Mục 3.2) |
-| DINOv2-S/14 (frozen) | 22M | Embedding cho prototype lớp hiếm (Mục 3.5) — ablation |
-| MobileViT-XS / Swin-T | 2–28M | Ablation tuỳ chọn, không delay pipeline chính |
+| ~~DINOv2-S/14 (frozen)~~ | 22M | ❌ Không dùng — dữ liệu không còn lớp hiếm (few-shot chỉ là hướng mở rộng, Mục 3.5) |
+| ~~MobileViT-XS / Swin-T~~ | 2–28M | 🔵 Ablation tùy chọn, chưa chạy |
 | ~~EffV2-M / Swin-S / DINOv2-B full FT~~ | 49–86M | ❌ Tránh trên 4GB |
 
 Factory tạo backbone (dùng chung pretrain + fine-tune):
@@ -571,42 +614,36 @@ Thiết kế production dùng **một model bệnh mỗi loài** thay vì một 
 
 Thiết kế head: EfficientNetV2-S backbone → global pooled feature → dropout `p=0.2` → linear classifier → temperature scaling lúc inference.
 
-Per-species thresholds lưu trong bundle:
+Per-species thresholds (thiết kế — **hiện chưa build `thresholds.json`**, Mục 1.8/5.4):
 
 | Threshold | Ý nghĩa | Tune trên |
 |---|---|---|
 | `T_low_confidence` | Xác suất top-1 (đã calibration) tối thiểu | `calib` split |
 | `T_margin` | Chênh top-1 trừ top-2 tối thiểu | `calib` split |
-| `T_energy` | Ngưỡng energy OOD (tuỳ chọn) | OOD validation suite |
-| `T_proto` | Prototype similarity tối thiểu (tuỳ chọn) | Train embeddings + calib |
+| `T_energy` | Ngưỡng energy OOD | `calib` + OOD suite |
+| `binary_leaf` | Ngưỡng leaf-gate | PR curve leaf-gate |
 
-> **Lưu ý routing:** định tuyến loài **chỉ** do lựa chọn của người dùng + bundle registry quyết định. Prototype/OOD check chạy **sau** khi model loài đã chọn chạy — không tự động chuyển ảnh sang model loài khác.
+> **Lưu ý mapping:** class index bất biến do `split_builder.py` sinh; `class_mapping.json` trong bundle lưu `idx_to_class` với **tên thư mục đầy đủ** (vd `Tomato___Bacterial_spot`). Bảng trên dùng tên rút gọn cho dễ đọc; frontend dịch sang nhãn hiển thị song ngữ qua `api_compat.py` (Mục 7.10).
 
-### 3.4. Head chi tiết + note về Spider_mites trong head Tomato
+> **Lưu ý routing:** định tuyến loài **chỉ** do lựa chọn của người dùng + repo registry (HF Hub) quyết định. Không tự động chuyển ảnh sang model loài khác.
 
-Tomato head khai báo đủ **9 lớp** (kể cả `Spider_mites`) để giữ class mapping bất biến và tương thích ONNX/API. Nhưng vì `Spider_mites` chỉ 7 ảnh (Chế độ 2), nhánh softmax **không** được kỳ vọng học tốt lớp này — quyết định cuối cho ảnh nghi `Spider_mites` do **nhánh prototype** (Mục 3.5) đảm nhận, và report phải ghi rõ giới hạn dữ liệu. Điều này tránh mâu thuẫn giữa "head có 9 lớp" và "lớp thứ 6 thiếu dữ liệu": head vẫn xuất 9 logit, nhưng inference hợp nhất prototype để không tuyên bố quá tự tin.
+### 3.4. Head Tomato & lớp Spider_mites
 
-### 3.5. Prototype Classifier cho lớp hiếm (few-shot)
+Tomato head khai báo đủ **9 lớp** (kể cả `Spider_mites`) để giữ class mapping bất biến và tương thích ONNX/API. Với dữ liệu hiện tại `Spider_mites` có **55 ảnh** (train 37) — đủ để nhánh softmax học lớp này như một lớp thường (Chế độ 1), tuy vẫn là lớp ít mẫu nhất của Tomato. Report nên **báo per-class recall/precision riêng cho `Spider_mites`** và các lớp bệnh dễ nhầm, không cần nhánh prototype riêng nữa.
 
-Prototype classifier là **cơ chế hỗ trợ**, không thay thế softmax head. Nó chạy song song trên embedding, giúp nhận diện lớp thiếu dữ liệu hoặc reject ảnh xa mọi cluster đã biết.
+### 3.5. Few-shot / Prototype — hướng mở rộng (hiện KHÔNG kích hoạt)
 
-Vì sao cần:
-- `Tomato/Spider_mites` chỉ 7 ảnh → softmax head không học được biên robust.
-- `Grape/healthy`, `Pepper/healthy` đủ hiếm để dễ dự đoán sai thành bệnh.
-- Prototype distance hữu ích để nói "ảnh này khác mọi mẫu đã biết" ngay cả khi softmax overconfident.
+> **Trạng thái:** với dữ liệu hiện tại **không lớp nào < 30 ảnh**, nên nhánh few-shot/prototype (Chế độ 2) **không chạy** — `train_finetune.py` thấy `rare_folds` rỗng sẽ bỏ qua và không sinh file prototype. Phần này giữ lại làm **hướng mở rộng**: nếu về sau thêm bệnh mới rất ít ảnh (`< rare_class_threshold`), pipeline sẽ tự tách chúng sang `rare_folds` và kích hoạt lại nhánh này.
 
-Thuật toán build (Snell et al., 2017):
+Ý tưởng (Snell et al., 2017): thay vì train softmax head cho lớp cực ít ảnh (dễ overfit), tính **prototype** = embedding trung bình (đã L2-normalize) của mỗi lớp trên backbone đã fine-tune, rồi phân loại query bằng cosine similarity tới prototype gần nhất. Ưu điểm ở chế độ dữ liệu cực ít: ổn định hơn softmax head và cho phép trả `unknown_or_ood` khi query xa mọi prototype.
 
-1. Chạy backbone đã fine-tune (hoặc DINOv2-S frozen) trên mỗi ảnh train của loài.
-2. Trích embedding penultimate (trước classifier head).
-3. L2-normalize mỗi embedding.
-4. Mỗi lớp: tính normalized mean embedding = `prototype_center`.
-5. Tính phân phối khoảng cách từ embedding lớp tới center.
-6. Lưu `radius_p50`, `radius_p90`, `radius_p95`, `num_support_images` vào bundle.
+Code liên quan vẫn còn trong repo để tái kích hoạt khi cần:
+- `src/train/few_shot.py`: `compute_prototypes()`, `classify_by_prototype()`.
+- `src/train/train_finetune.py`: `run_few_shot_evaluation()` (K-fold, chỉ chạy khi `rare_folds` không rỗng).
 
 ```python
-# Final_Pipeline/src/train/few_shot.py
-"""Prototypical classification cho lớp <30 ảnh (Snell, Swersky, Zemel, 2017
+# Final_Pipeline/src/train/few_shot.py  (giữ nguyên — chỉ chạy khi có lớp < ngưỡng)
+"""Prototypical classification cho lớp < rare_threshold (Snell, Swersky, Zemel, 2017
    — https://arxiv.org/abs/1703.05175). Không train tham số riêng cho lớp hiếm."""
 import torch
 import torch.nn.functional as F
@@ -631,30 +668,7 @@ def classify_by_prototype(query_features: torch.Tensor, prototypes: torch.Tensor
     return sim.softmax(dim=-1)
 ```
 
-Thuật toán inference (hợp nhất regular-head + prototype-head):
-
-1. Lấy calibrated softmax top-3 từ disease head.
-2. Trích normalized embedding cùng ảnh.
-3. Tính cosine similarity tới mọi class prototype.
-4. Nếu softmax top-1 và prototype top-1 **bất đồng** và softmax confidence `< 0.70` → trả `ambiguous`.
-5. Nếu prototype distance ngoài `1.25 * radius_p95` → trả `unknown_or_ood`.
-6. Ngược lại → trả calibrated disease prediction.
-
-**Cơ chế hợp nhất (theo V2, tránh vòng lặp phụ thuộc).** Không dùng logic "đoán lớp hiếm trước rồi mới gọi prototype". Thay vào đó luôn tính **song song** `regular_logits` và `prototype_scores`, calibration **riêng** từng nhánh (regular: temperature scaling per head; prototype: temperature/scale riêng trên cosine), rồi hợp nhất trong không gian điểm chung:
-
-```python
-def merge_regular_and_prototype(regular_logits, proto_sim, T_regular, T_proto, class_map):
-    """Hợp nhất 2 nhánh SAU khi mỗi nhánh đã calibration riêng.
-    class_map: ánh xạ index nhánh -> index global của loài (không suy từ folder name)."""
-    regular_probs = torch.softmax(regular_logits / T_regular, dim=-1)
-    proto_probs = torch.softmax(proto_sim / T_proto, dim=-1)
-    scores = project_to_global_classes(regular_probs, proto_probs, class_map)
-    return scores
-```
-
-Report **bắt buộc** có metric riêng: `rare_class_recall`, `rare_class_precision`, và confusion giữa lớp hiếm với lớp thường — không chỉ macro-F1 chung.
-
-Guardrail: prototype **không** route ảnh sang model loài khác. Species routing chỉ do user selection + bundle registry (nhắc lại từ 3.3).
+Guardrail (nếu tái kích hoạt): prototype **không** route ảnh sang model loài khác; species routing chỉ do user selection + registry.
 
 ---
 
@@ -664,14 +678,14 @@ Section này ghép mọi kỹ thuật rời rạc thành pipeline chạy đượ
 
 Bảng truy vết kỹ thuật → nguồn:
 
-| Bước pipeline | Kỹ thuật SOTA | Tham chiếu |
+| Bước pipeline | Kỹ thuật | Tham chiếu |
 |---|---|---|
 | Backbone | EfficientNetV2-S, PEFT-lite | Mục 3.1, 4.8 |
-| Pretrain 38 lớp | Field-Background Recomposition, AMP + grad accumulation, CutMix/Mixup | Mục 4.5, 4.6, 4.2 |
-| Fine-tune lớp thường | Class-Balanced Focal Loss, CutMix/Mixup, PEFT 2 bước, decoupled re-training | Mục 4.2, 4.3, 4.7 |
-| Fine-tune lớp hiếm | Prototypical Networks trên feature đã fine-tune (hoặc DINOv2 frozen) | Mục 3.5, 4.7 |
-| Domain adaptation | MMD loss phụ trợ | Mục 4.5 |
+| Pretrain 38 lớp | AMP + grad accumulation, CutMix/Mixup | Mục 4.5, 4.6, 4.2 |
+| Fine-tune lớp thường | Class-Balanced Focal Loss, CutMix/Mixup, PEFT 3 bước, decoupled re-training | Mục 4.2, 4.3, 4.7, 4.9 |
 | Calibration | Temperature scaling, ECE | Mục 5 |
+| 🔵 Field-BG recompose / MMD (tùy chọn) | Domain adaptation | Mục 4.6 (chưa bật) |
+| 🔵 Few-shot prototype (mở rộng) | Prototypical Networks | Mục 3.5 (không kích hoạt) |
 
 ### 4.1. Cấu trúc thư mục
 
@@ -722,7 +736,10 @@ D:\DAT301m_Project\Final_Pipeline\
 │   │   ├── ood_eval.py              # Mục 5.5
 │   │   └── robustness.py            # Mục 5.6
 │   ├── cross_test/
-│   │   └── run_cross_test.py        # Mục 6.5
+│   │   ├── run_direction2.py       # Mục 6.5 — Chiều 2 (public model -> holdout field) ĐÃ CHẠY
+│   │   ├── public_models.py        # adapter BackbonePVModel + DeiTPVModel
+│   │   ├── label_maps.py           # map 20 lớp mình <-> PlantVillage-38/39
+│   │   └── run_cross_test.py       # Mục 6.5b — helper Chiều 1 (PlantDoc, chưa chạy)
 │   ├── export/
 │   │   ├── export_onnx.py           # Mục 7.3
 │   │   ├── parity_test.py           # Mục 7.4
@@ -797,7 +814,8 @@ train:
   accumulation_steps: 4
   epochs_warmup: 5            # Bước 1 — head_only
   epochs_full: 25             # Bước 2 — head_bn_lastblock
-  epochs_decoupled: 4         # Bước 3 — decoupled re-training (Kang et al., 2019)
+  epochs_decoupled: 10        # Bước 3 — decoupled re-training (Kang et al., 2019)
+  early_stop_patience: 7      # dừng sớm trong pha nếu val F1 không cải thiện
   lr_head: 1.0e-3
   lr_backbone: 1.0e-5
   weight_decay: 1.0e-4
@@ -948,11 +966,11 @@ class CutMixMixupCollate:
 | Weighted CE | Corn, Tomato, loài nhỏ | Weight quá lớn | Clamp weight tránh gradient bất ổn |
 | Class-Balanced Focal | Imbalance + recall lớp hiếm kém | Calibration xấu đi nhiều | So sánh ECE, không chỉ F1 |
 | WeightedRandomSampler | Minority bị bỏ qua | Lớp cực nhỏ overfit ngay | Dùng với augment bảo thủ |
-| Prototype distance | Lớp hiếm/nhỏ (Chế độ 2) | Thay thế cho mọi lớp | Chỉ hỗ trợ song song |
+| Prototype distance | Lớp <ngưỡng (Chế độ 2) — hiện không có | Thay thế cho mọi lớp | Chỉ hỗ trợ song song; hướng mở rộng (Mục 3.5) |
 
 Bản Final dùng **Class-Balanced Loss** (Cui et al., 2019) thay inverse-frequency thuần: trọng số theo "effective number of samples" `(1−βⁿ)/(1−β)`, phản ánh đúng việc thêm 1 ảnh vào lớp 500 ảnh mang ít thông tin hơn thêm 1 ảnh vào lớp 5 ảnh. Kết hợp Focal (Lin et al., 2017) + label smoothing (Müller et al., 2019).
 
-Quy tắc class weight (dùng chung cho cả sampler): `weight_c = sqrt(total / (num_classes * count_c))`, clamp `[0.25, 4.0]` — tránh weight cực lớn cho `Spider_mites`. (Effective-number dùng trong loss; sqrt-clamp dùng khi cần công thức đơn giản đối chiếu.)
+Quy tắc class weight (dùng chung cho cả sampler): `weight_c = sqrt(total / (num_classes * count_c))`, clamp `[0.25, 4.0]` — tránh weight cực lớn cho lớp nhỏ nhất. (Effective-number dùng trong loss; sqrt-clamp dùng khi cần công thức đơn giản đối chiếu.)
 
 ```python
 # Final_Pipeline/src/train/losses.py
@@ -1379,17 +1397,17 @@ Script trung tâm Phase 2, phân nhánh theo `rare_class_threshold=30`:
 
 ```text
 Ảnh loài X (đọc từ manifest split_v1.json)
-  ├── Lớp THƯỜNG (Chế độ 1)
+  ├── Lớp THƯỜNG (Chế độ 1) — TẤT CẢ lớp hiện nay
   │     Bước 1: PEFT head_only (warm-up)
   │     Bước 2: PEFT head_bn_lastblock + Class-Balanced Focal + CutMix/Mixup (+MMD tuỳ chọn)
-  │     Bước 3: decoupled re-training head + WeightedRandomSampler (backbone đóng băng)
+  │              + early stopping (early_stop_patience)
+  │     Bước 3: decoupled re-training head + WeightedRandomSampler + CE THƯỜNG (backbone đóng băng)
   │     -> checkpoints/model_<species>.pt
-  └── Lớp HIẾM (Chế độ 2)
-        Trích embedding từ backbone vừa fine-tune -> prototype -> đánh giá K-fold
-        -> checkpoints/model_<species>_prototypes.pt
+  └── Lớp HIẾM (Chế độ 2) — HIỆN KHÔNG CÓ (rare_folds rỗng -> bỏ qua)
+        (nếu tương lai có lớp < ngưỡng: trích embedding -> prototype -> K-fold, Mục 3.5)
 ```
 
-Vì sao tách: Bước 1–2 học representation trên lớp đủ ảnh; Bước 3 áp dụng Kang et al. (2019) — rebalancing bằng sampler nên **tách pha** khỏi học representation, nên Bước 3 tắt CutMix/Mixup, chỉ CE thường trên dữ liệu đã cân bằng. Lớp hiếm **không** qua Bước 1–3 vì 4–29 ảnh chắc chắn overfit softmax head; thay vào đó tận dụng embedding các lớp đủ ảnh cùng loài (giả định: bệnh trong cùng loài chia sẻ đặc trưng cấp thấp/trung).
+Vì sao tách 3 bước: Bước 1–2 học representation; Bước 3 áp dụng Kang et al. (2019) — rebalancing bằng sampler nên **tách pha** khỏi học representation. Điểm quan trọng trong code: **Bước 3 dùng `CrossEntropyLoss` thường (KHÔNG class weight)** đi cùng `WeightedRandomSampler` — nếu dùng cả hai thì "cân bằng gấp đôi", head lệch mạnh về lớp thiểu số và macro-F1 tụt. Bước 3 cũng tắt CutMix/Mixup. Với dữ liệu hiện tại **mọi lớp đều qua đủ 3 bước** (không lớp nào rẽ sang Chế độ 2).
 
 **Phần 1/2 — helpers** (load backbone, optimizer discriminative-LR, một pha train, MMD-aware loop):
 
@@ -1500,8 +1518,12 @@ def train_one_epoch_finetune(model, loader, opt, crit, device, accumulation_step
 
 
 def _train_phase(model, tl, vl, opt, crit, device, *, epochs, accumulation_steps, use_amp,
-                 best_f1, ckpt_meta, ckpt_path, phase, mmd_loader=None, lambda_max=0.0, mmd_warmup=0):
-    """Chạy 1 pha, lưu checkpoint tốt nhất XUYÊN SUỐT 3 bước (best_f1 chuyền tiếp)."""
+                 best_f1, ckpt_meta, ckpt_path, phase, mmd_loader=None, lambda_max=0.0, mmd_warmup=0,
+                 patience=0):
+    """Chạy 1 pha, lưu checkpoint tốt nhất XUYÊN SUỐT 3 bước (best_f1 chuyền tiếp).
+    patience>0: dừng sớm nếu val F1 không cải thiện sau `patience` epoch liên tiếp (xét trong pha)."""
+    best_in_phase = -1.0
+    stall = 0
     for ep in range(epochs):
         lam = lambda_max * min(1.0, (ep + 1) / max(1, mmd_warmup)) if (mmd_loader and lambda_max > 0) else 0.0
         loss = train_one_epoch_finetune(model, tl, opt, crit, device, accumulation_steps,
@@ -1515,6 +1537,14 @@ def _train_phase(model, tl, vl, opt, crit, device, *, epochs, accumulation_steps
             best_f1 = f1
             torch.save({**ckpt_meta, "model_state": model.state_dict(), "val_macro_f1": best_f1}, ckpt_path)
             print(f"    -> saved ({phase}) {ckpt_path} (macro-F1={best_f1:.4f})")
+        # early stopping xét theo cải thiện TRONG pha (epsilon bỏ qua nhiễu nhỏ)
+        if f1 > best_in_phase + 1e-4:
+            best_in_phase = f1; stall = 0
+        else:
+            stall += 1
+            if patience and stall >= patience:
+                print(f"    -> early stop ({phase}): {patience} epoch không cải thiện")
+                break
     return best_f1
 ```
 
@@ -1640,7 +1670,8 @@ def train_finetune(config_path):
     best = _train_phase(model, tl, vl, opt, crit_cb, device, epochs=t["epochs_full"],
                         accumulation_steps=t["accumulation_steps"], use_amp=t["use_amp"],
                         best_f1=best, ckpt_meta=meta, ckpt_path=ckpt_path, phase="full",
-                        mmd_loader=mmd_loader, lambda_max=lam_max, mmd_warmup=warm)
+                        mmd_loader=mmd_loader, lambda_max=lam_max, mmd_warmup=warm,
+                        patience=t.get("early_stop_patience", 0))
 
     # Bước 3 — decoupled re-training (backbone đóng băng, sampler cân bằng, KHÔNG CutMix)
     print(f"\n===== [{species}] BƯỚC 3: decoupled re-training =====")
@@ -1650,14 +1681,15 @@ def train_finetune(config_path):
     sampler = build_balanced_sampler(bal_ds.samples, counts, beta=cb["beta"])
     bal_loader = DataLoader(bal_ds, t["batch_size"], sampler=sampler,
                             num_workers=cfg["data"]["num_workers"], pin_memory=True)
-    class_w = effective_num_weights(counts, beta=cb["beta"]).to(device)
-    crit_ce = nn.CrossEntropyLoss(weight=class_w)
+    # Decoupled (Kang et al., 2019): balanced sampler ĐI VỚI CE THƯỜNG (KHÔNG class weight).
+    # Dùng cả hai = cân bằng gấp đôi -> head lệch mạnh về lớp thiểu số, F1 tụt.
+    crit_ce = nn.CrossEntropyLoss()
     best = _train_phase(model, bal_loader, vl, opt, crit_ce, device, epochs=t["epochs_decoupled"],
                         accumulation_steps=t["accumulation_steps"], use_amp=t["use_amp"],
                         best_f1=best, ckpt_meta=meta, ckpt_path=ckpt_path, phase="decoupled")
     print(f"\n[{species}] Chế độ 1 DONE — best macro-F1: {best:.4f}")
 
-    # ===== CHẾ ĐỘ 2 =====
+    # ===== CHẾ ĐỘ 2 (hiện KHÔNG chạy — rare_folds rỗng) =====
     rare_folds = manifest.get("rare_folds", {})
     if rare_folds:
         run_few_shot_evaluation(cfg, model, rare_folds, device, ckpt_path)
@@ -1672,11 +1704,12 @@ if __name__ == "__main__":
     train_finetune(ap.parse_args().config)
 ```
 
-**Bốn điểm thiết kế:**
+**Ba điểm thiết kế còn hiệu lực:**
 1. `load_pretrained_backbone` lọc theo **shape** → tự loại head lệch số lớp, không hard-code tên.
-2. `best_f1` chuyền qua cả 3 bước → luôn giữ một `model_<species>.pt` là trạng thái macro-F1 cao nhất toàn cục.
-3. Chế độ 2 nạp lại checkpoint **tốt nhất** (không dùng trạng thái cuối Bước 3, vốn tối ưu cho lớp thường) trước khi trích embedding.
-4. Prototype đánh giá (K-fold, loại query khỏi support) **tách khỏi** prototype suy luận (dùng toàn bộ ảnh) → metric không bị lạc quan giả.
+2. `best_f1` chuyền qua cả 3 bước → luôn giữ một `model_<species>.pt` là trạng thái macro-F1 cao nhất toàn cục; early stopping xét cải thiện trong từng pha.
+3. Bước 3 dùng `WeightedRandomSampler` + `CrossEntropyLoss` **thường** (không class weight) để tránh cân bằng gấp đôi (Kang et al., 2019).
+
+> Điểm về Chế độ 2 (nạp checkpoint tốt nhất trước khi trích embedding, K-fold tách khỏi prototype suy luận) chỉ áp dụng khi `rare_folds` không rỗng — hiện không kích hoạt (Mục 3.5).
 
 ### 4.10. Checkpoint & Resume
 
@@ -1729,9 +1762,9 @@ Bộ tối thiểu phải hoàn thành trước khi báo cáo cuối (E0–E6 b�
 | E1 | Finetune | EffV2-S | Apple | CE baseline | Minimal baseline | Yes |
 | E2 | Finetune | EffV2-S | Apple | domain aug + CB-Focal | Strong Apple candidate | Yes |
 | E3 | Finetune | EffV2-S | Corn | CB-Focal + sampler | Imbalance handling | Yes |
-| E4 | Finetune | EffV2-S | Grape | frozen backbone + prototype | Small-data | Yes |
-| E5 | Finetune | EffV2-S | Pepper | frozen backbone + prototype | Small-data | Yes |
-| E6 | Finetune | EffV2-S | Tomato | CB-Focal + prototype | Rare class | Yes |
+| E4 | Finetune | EffV2-S | Grape | backbone LR thấp + augment bảo thủ | Small-data | Yes |
+| E5 | Finetune | EffV2-S | Pepper | backbone LR thấp + augment bảo thủ | Small-data | Yes |
+| E6 | Finetune | EffV2-S | Tomato | CB-Focal + decoupled | 9 lớp, imbalance | Yes |
 | E7 | Ablation | EffV2-B0 | All/subset | fallback | So tốc độ/VRAM | Optional |
 | E8 | Ablation | Swin-T | Apple/Tomato | transformer | So kiến trúc | Optional |
 | E9 | Ablation | DINOv2-S frozen | Tomato | few-shot embedding | So foundation model | Optional |
@@ -1905,7 +1938,7 @@ Mỗi báo cáo loài phải có metric tổng hợp **và** per-class. Accuracy
 | ECE | Expected Calibration Error | Đo độ tin cậy probability |
 | Brier score | MSE của probability | Chất lượng confidence |
 | NLL | Negative log-likelihood | Mục tiêu temperature scaling |
-| `rare_class_recall/precision` | Riêng lớp Chế độ 2 | Bắt buộc (Mục 3.5) |
+| `rare_class_recall/precision` | Chỉ khi có lớp Chế độ 2 | Hiện không áp dụng (không lớp <30); thay bằng per-class recall cho lớp ít mẫu như `Spider_mites` |
 
 Vì sao **macro-F1** chứ không accuracy: data imbalance, accuracy bị lớp đa số chi phối; macro-F1 lấy trung bình không trọng số nên phạt nặng việc bỏ rơi minority. Mọi vòng chọn checkpoint trong dự án dùng macro-F1.
 
@@ -2004,7 +2037,20 @@ if __name__ == "__main__":
 
 Mạng hiện đại thường **overconfident** (Guo et al., 2017): softmax cao hơn accuracy thực. Với hệ có reject, hệ quả trực tiếp là ngưỡng chọn cảm tính (0.7) không tương ứng mức tin cậy thật. Temperature scaling học **một** scalar `T>0`, chia logits cho `T` trước softmax, tối ưu NLL trên `calib` — **không** đổi argmax (nên không đổi accuracy), chỉ hiệu chỉnh confidence.
 
-**Calibration V2 cho hệ nhiều tầng:** một `T` chung chỉ đủ demo. Bản Final calibration **riêng** cho: `leaf_gate`, từng `species_head`, từng `prototype_branch`, và **chạy lại sau ONNX export/quantization**. Mỗi bundle lưu `calibration.json` gồm `temperature`, `thresholds`, `ECE`, `Brier`, `coverage_accuracy_curve`, thời điểm calibration.
+**Calibration V2 cho hệ nhiều tầng:** một `T` chung chỉ đủ demo. Bản Final calibration **riêng** cho: `leaf_gate` và từng `species_head`. Mỗi checkpoint sinh `<ckpt>_calibration.json` gồm `temperature`, `ece_before/after`, `brier_before/after`.
+
+> **Kết quả thực tế (calib split, cần cải thiện):** temperature scaling **chưa đạt gate ECE ≤ 0.05** ở hầu hết thành phần. Số đo hiện tại:
+>
+> | Thành phần | T | ECE trước → sau |
+> |---|---:|---|
+> | Apple | 0.68 | 0.183 → **0.094** |
+> | Corn | 1.10 | 0.112 → 0.133 (xấu đi) |
+> | Grape | 1.51 | 0.199 → 0.119 |
+> | Pepper bell | 2.06 | 0.272 → 0.213 |
+> | Tomato | 1.17 | 0.071 → 0.084 (xấu đi) |
+> | Leaf-gate | 2.24 | 0.882 → 0.741 |
+>
+> Nguyên nhân khả dĩ: calib split nhỏ ở loài ít dữ liệu; leaf-gate cần xem lại nhãn/negatives. **Hệ quả cho reject policy:** vì confidence chưa đáng tin, khi build `thresholds.json` (Mục 5.4) phải đặt ngưỡng **bảo thủ hơn** và không dựa hoàn toàn vào xác suất tuyệt đối. Đây là việc còn lại được đánh dấu ở Mục 1.8.
 
 ```python
 # Final_Pipeline/src/eval/calibration.py
@@ -2146,9 +2192,11 @@ if __name__ == "__main__":
     _run_calibration(a.config, a.target)
 ```
 
-> Prototype branch (Chế độ 2) calibration bằng scale riêng trên cosine similarity: fit một scalar tương tự trên các fold `rare_folds` rồi lưu `T_proto` vào `thresholds.json` của bundle (Mục 3.5). Vì lớp hiếm quá ít mẫu, ưu tiên đặt `T_proto` bảo thủ + ngưỡng `radius_p95` thay vì tối ưu NLL.
+> Prototype branch (Chế độ 2) hiện **không có** vì không còn lớp hiếm (Mục 3.5); khi nào tái kích hoạt thì mới cần `T_proto`/`radius_p95`. CLI hiện hỗ trợ hai `--target`: `species` và `leaf_gate`.
 
 ### 5.4. Thresholds & reject policy tuning
+
+> **Trạng thái: CHƯA build `thresholds.json`.** Hiện API chạy với default (`binary_leaf=0.5`, `T_energy=1e9` → energy-OOD gần như không kích hoạt, `T_low_confidence=0.0`, `T_margin=0.0`). Nghĩa là các nhánh reject `unknown_or_ood` / `low_confidence` / `ambiguous` **về mặt hiệu lực chưa hoạt động** — đây là việc còn lại quan trọng nhất của tầng serving (Mục 1.8).
 
 Sau khi có `T`, tune threshold trên `calib` (không phải val, không phải holdout):
 
@@ -2159,9 +2207,11 @@ Sau khi có `T`, tune threshold trên `calib` (không phải val, không phải 
 | `T_energy` | Phân phối energy in-dist vs OOD | Chặn OOD với false-reject thấp |
 | `binary_leaf` | PR curve leaf-gate | Precision >= 0.95 để hạn chế nhận nhầm |
 
-Reject taxonomy trả về (khớp API Mục 7): `not_a_leaf`, `unknown_or_ood`, `low_confidence`, `ambiguous`, `ok`. Ngưỡng leaf-gate `0.7` cảm tính của bản gốc được thay bằng điểm có căn cứ từ PR curve.
+Reject taxonomy trả về (khớp API Mục 7): `not_a_leaf`, `unknown_or_ood`, `low_confidence`, `ambiguous`, `ok`. Vì calibration chưa đạt ECE tốt (Mục 5.3), ngưỡng nên đặt bảo thủ và ưu tiên leaf-gate + margin hơn là xác suất tuyệt đối.
 
 ### 5.5. Đánh giá OOD & reject
+
+> **Trạng thái: khung.** `src/eval/ood_eval.py` chỉ cung cấp helper `fpr_at_tpr()` + `ood_auroc()`; chưa có runner đầu-cuối gắn tập OOD thật, và `T_energy` chưa được tune (Mục 5.4). Phần dưới là thiết kế mục tiêu.
 
 Ba nhóm input cần từ chối đúng:
 
@@ -2196,18 +2246,18 @@ def ood_auroc(scores_in, scores_out):
 
 ### 5.6. Robustness suite
 
+> **Trạng thái: khung.** `src/eval/robustness.py` định nghĩa `CORRUPTIONS` (5 loại: blur, brightness, noise, jpeg, rotate) + `build_corruption_transform()`; chưa có runner đầu-cuối tự động quét toàn bộ. Các loại occlusion/motion-blur/downscale trong bảng dưới là mục tiêu mở rộng.
+
 Vì input thật là ảnh điện thoại ngoài đồng, robustness là **bằng chứng chính** chứ không phải phụ. Áp corruption lên bản sao `val` (không đụng holdout), báo cáo macro-F1 drop từng mức.
 
-| Corruption | Mức | Mô phỏng |
-|---|---|---|
-| Gaussian blur | sigma 1/2/3 | Lấy nét kém |
-| Motion blur | kernel 5/9/15 | Rung tay |
-| Brightness | ±20% / ±40% | Nắng/bóng |
-| Gaussian noise | std 10/25/50 | ISO cao |
-| JPEG | quality 50/30/15 | Nén web |
-| Rotation | 15/30/45° | Cầm nghiêng |
-| Occlusion | che 10/25/40% | Lá che nhau |
-| Downscale | 0.75/0.5/0.25× | Ảnh xa/độ phân giải thấp |
+| Corruption | Mức | Mô phỏng | Có trong code |
+|---|---|---|---|
+| Gaussian blur | 3/7/13 | Lấy nét kém | ✅ |
+| Brightness | +20% / +40% | Nắng/bóng | ✅ |
+| Gaussian noise | std 0.04/0.1/0.2 | ISO cao | ✅ |
+| JPEG | quality 50/30/15 | Nén web | ✅ |
+| Rotation | 15/30/45° | Cầm nghiêng | ✅ |
+| Motion blur / Occlusion / Downscale | — | Rung tay / lá che / ảnh xa | 🔵 mở rộng |
 
 ```python
 # Final_Pipeline/src/eval/robustness.py
@@ -2216,15 +2266,27 @@ import albumentations as A
 
 
 CORRUPTIONS = {
-    "gauss_blur": [A.GaussianBlur((3, 3), p=1), A.GaussianBlur((7, 7), p=1), A.GaussianBlur((13, 13), p=1)],
-    "brightness": [A.RandomBrightnessContrast((0.2, 0.2), p=1), A.RandomBrightnessContrast((0.4, 0.4), p=1)],
-    "noise": [A.GaussNoise((10, 10), p=1), A.GaussNoise((25, 25), p=1), A.GaussNoise((50, 50), p=1)],
-    "jpeg": [A.ImageCompression(50, 50, p=1), A.ImageCompression(30, 30, p=1), A.ImageCompression(15, 15, p=1)],
-    "rotate": [A.Rotate((15, 15), p=1), A.Rotate((30, 30), p=1), A.Rotate((45, 45), p=1)],
+    "gauss_blur": [A.GaussianBlur(blur_limit=(3, 3), p=1), A.GaussianBlur(blur_limit=(7, 7), p=1),
+                   A.GaussianBlur(blur_limit=(13, 13), p=1)],
+    "brightness": [A.RandomBrightnessContrast(brightness_limit=(0.2, 0.2), contrast_limit=0, p=1),
+                   A.RandomBrightnessContrast(brightness_limit=(0.4, 0.4), contrast_limit=0, p=1)],
+    "noise": [A.GaussNoise(std_range=(0.04, 0.04), p=1), A.GaussNoise(std_range=(0.1, 0.1), p=1),
+              A.GaussNoise(std_range=(0.2, 0.2), p=1)],
+    "jpeg": [A.ImageCompression(quality_range=(50, 50), p=1),
+             A.ImageCompression(quality_range=(30, 30), p=1),
+             A.ImageCompression(quality_range=(15, 15), p=1)],
+    "rotate": [A.Rotate(limit=(15, 15), p=1), A.Rotate(limit=(30, 30), p=1),
+               A.Rotate(limit=(45, 45), p=1)],
 }
+
+
+def build_corruption_transform(corruption_op, img_size=224):
+    """Ghép 1 corruption trước resize + normalize để tái dùng cùng pipeline eval."""
+    from albumentations.pytorch import ToTensorV2
+    from src.data.augmentation import IMAGENET_MEAN, IMAGENET_STD
+    return A.Compose([corruption_op, A.Resize(height=img_size, width=img_size),
+                      A.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD), ToTensorV2()])
 # Với mỗi (loại, mức): build val loader kèm corruption -> evaluate() -> ghi macro-F1 drop.
-# Fairness note (Mục 8.13): nếu có metadata nguồn/thiết bị, báo cáo drop theo nhóm;
-# nếu thiếu metadata, nêu giới hạn thay vì suy diễn.
 ```
 
 Fairness theo điều kiện chụp: hiệu năng không nên lệch mạnh theo loài, lớp, nguồn ảnh, thiết bị, ánh sáng, nền, nhóm rare-vs-regular. Thiếu metadata thì ghi rõ giới hạn (chi tiết Mục 8.13).
@@ -2233,11 +2295,13 @@ Fairness theo điều kiện chụp: hiệu năng không nên lệch mạnh theo
 
 ## 6. Cross-Test Plan (so sánh với nghiên cứu công bố)
 
+> **Trạng thái:** **Chiều 2 (public model → holdout field của mình) ĐÃ CHẠY** (2026-07-12) — code ở `src/cross_test/run_direction2.py` + `public_models.py` + `label_maps.py`, kết quả ở Mục 6.5. **Chiều 1 (model mình → PlantDoc) tạm gác** vì FINETUNE đã chứa 742 ảnh `PLANTDOC_` (cần de-dup hash trước khi so, chưa làm). `evaluate_with_label_map()`/`summarize()` trong `run_cross_test.py` là helper cho chiều 1 khi triển khai sau.
+
 Mục tiêu: đặt pipeline cạnh công trình đã công bố trên **cùng dataset công khai** để (1) có mốc tham chiếu định lượng macro-F1/accuracy, và (2) chứng minh điểm mạnh riêng — khả năng thu hẹp domain gap lab→field, nơi hầu hết paper đạt >99% trên PlantVillage đều sụp đổ trên ảnh field.
 
 ### 6.1. Papers & benchmark tham chiếu
 
-> **Trạng thái xác minh nguồn:** phần này đã được đối chiếu online (07/2026) với arXiv, DOI.org và trang nhà xuất bản gốc. P1–P7 đã kiểm; các thay đổi so với bản nháp đầu được ghi ngay dưới bảng. Các citation kỹ thuật khác (Section 12) vẫn cần rà lần cuối trước khi nộp.
+> **Trạng thái xác minh nguồn:** đã đối chiếu online (2026-07-12) với arXiv, DOI.org và trang nhà xuất bản. P1–P7 xác nhận đúng; tiêu đề P6/P7 đã cập nhật theo bản published (trước đó là mô tả rút gọn). Chi tiết ở Mục 12.
 
 | # | Bài báo | Năm | Dataset (công khai?) | Model chính | Metric chính | Link |
 |---|---|---|---|---|---|---|
@@ -2246,8 +2310,8 @@ Mục tiêu: đặt pipeline cạnh công trình đã công bố trên **cùng d
 | P3 | Singh, Misra, Okafor et al. — *PlantDoc: A Dataset for Visual Plant Disease Detection* | 2020 | **PlantDoc** — 2,598 ảnh field, 13 loài, 17 lớp ✅ | dataset field + CNN baseline | +31% accuracy khi thêm PlantDoc vào training | [arXiv:1911.10317](https://arxiv.org/abs/1911.10317) |
 | P4 | Borhani, Khoramdel, Najafi — *A deep learning based approach ... using vision transformer* | 2022 | PlantVillage (+biến thể) ✅ | ViT + bản lai CNN+ViT | Acc ~**99%** trên PlantVillage | [DOI:10.1038/s41598-022-15163-0](https://doi.org/10.1038/s41598-022-15163-0) |
 | P5 | Li et al. — *PMVT: a lightweight vision transformer for plant disease identification* | 2023 | Nhiều bộ field ✅ | PMVT (MobileViT-based, ~2–3M) | Acc cạnh tranh, tham số rất thấp | [DOI:10.3389/fpls.2023.1256773](https://doi.org/10.3389/fpls.2023.1256773) |
-| P6 | Wu et al. — *(domain-alignment cho plant disease, MMD)* | 2023 | Lab + field ✅ | CNN + MMD domain adaptation | Cải thiện accuracy miền đích (field) | [DOI:10.34133/plantphenomics.0038](https://doi.org/10.34133/plantphenomics.0038) |
-| P7 | Jeon et al. — *(field-background recomposition cho plant disease)* | 2025 | Lab + nền field ✅ | CNN + tái tổ hợp nền field | +9.9–23.6 điểm % trên ảnh field | [SSRN:10.2139/ssrn.5217081](https://dx.doi.org/10.2139/ssrn.5217081) |
+| P6 | Wu et al. — *From Laboratory to Field: Unsupervised Domain Adaptation for Plant Disease Recognition in the Wild* | 2023 | Lab + field ✅ | CNN + UDA (domain alignment) | Cải thiện accuracy miền đích (field) | [DOI:10.34133/plantphenomics.0038](https://doi.org/10.34133/plantphenomics.0038) |
+| P7 | Jeon et al. — *Bridging the Lab-to-Field Gap in Plant Disease Diagnosis Through Unsupervised Domain Adaptation Enhanced by Background Recomposition* | 2025 | Lab + nền field ✅ | CNN + tái tổ hợp nền field | +9.9–23.6 điểm % trên ảnh field | [SSRN:10.2139/ssrn.5217081](https://dx.doi.org/10.2139/ssrn.5217081) |
 
 Ghi chú thay đổi so với nháp: sửa 1 lỗi tên tác giả (P3); nâng cấp trạng thái xuất bản 1 mục (P7). Hai con số 99.35% và ~31% ở P2 giữ nguyên (đã đúng nguyên văn). P1–P4 là mốc benchmark kinh điển; P5–P7 (2023–2025) trực tiếp giải bài toán khó của dự án (lab→field, model nhẹ) và đã được dùng làm căn cứ kỹ thuật ở Mục 3–4 — nhất quán nội tại.
 
@@ -2285,27 +2349,52 @@ PlantDoc và PlantVillage **không** dùng cùng bộ tên lớp. Trước khi t
 
 Bỏ qua mapping/de-dup là lỗi âm thầm hay gặp nhất khi so cross-dataset — làm macro-F1 lệch hẳn.
 
-### 6.5. Bảng kết quả mẫu (điền sau khi chạy)
+### 6.5. Kết quả Chiều 2 (public model → holdout FIELD của mình) — ĐÃ CHẠY 2026-07-12
 
-| Kịch bản | Dataset test | macro-F1 | Accuracy | Tham chiếu gần nhất |
-|---|---|---|---|---|
-| 1. In-domain (lab→lab) | PlantVillage val | *(điền)* | *(điền)* | P2 (~99%), P4 (~99%) |
-| 2. Zero-shot (lab→field) | PlantDoc (giao lớp) | *(điền)* | *(điền)* | P2 (sụt ~31% OOD) |
-| 3. + Domain adaptation | PlantDoc (giao lớp) | *(điền)* | *(điền)* | P6, P7 (cải thiện field) |
-| 4. Lớp hiếm (few-shot) | FINETUNE rare-folds | *(điền, Mục 4.9)* | — | Snell et al. 2017 |
-| 5. Public model → ta | FINETUNE holdout | *(điền)* | *(điền)* | checkpoint PlantVillage công khai |
+Chạy 2 model chỉ-biết-lab trên đúng holdout field 5 loài của mình, đặt cạnh model đã fine-tune.
+Đánh giá **closed-set per-species** (mỗi loài chỉ xét K lớp thuộc loài, công bằng với head per-species).
 
-Cách đọc: ô quan trọng nhất **không** phải kịch bản 1 (ai cũng ~99%), mà là **hiệu số (3) − (2)** — lượng hoá đúng đóng góp kỹ thuật của dự án.
+| Model | Train trên | apple | corn | grape | pepper | tomato | **macro-F1 TB** | Accuracy |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| **Của mình (fine-tune FIELD)** | field | 0.841 | 0.591 | 0.487 | 0.667 | 0.391 | **0.595** | 0.780 |
+| DeiT-39 ngoài | PlantVillage lab | 0.592 | 0.259 | 0.649 | 0.703 | 0.193 | **0.479** | 0.559 |
+| Backbone-38 của mình | PRETRAIN lab | 0.244 | 0.157 | 0.487 | 0.540 | 0.133 | **0.312** | 0.236 |
+
+Nguồn model: DeiT — [rescu/deit-base-patch16-224-finetuned-plantvillage](https://huggingface.co/rescu/deit-base-patch16-224-finetuned-plantvillage) ([config 39 lớp](https://huggingface.co/rescu/deit-base-patch16-224-finetuned-plantvillage/raw/main/config.json)); Backbone-38 = `checkpoints/backbone_pretrained.pt` (PlantVillage-38, dataset [Hughes & Salathé 2015](https://arxiv.org/abs/1511.08060)).
+
+**Cách đọc:**
+- Cả hai model **chỉ-biết-lab** đều thua rõ model fine-tune field (0.312 và 0.479 vs **0.595**) → **lượng hoá domain gap lab→field**, đúng phát hiện Mohanty et al. 2016 ([DOI](https://doi.org/10.3389/fpls.2016.01419)).
+- **Kiểm chứng không phải model hỏng:** backbone-38 đạt **99.77% macro-F1 trên PRETRAIN lab val** và đoán đúng 100% Apple_scab ảnh lab — nhưng chỉ 26% trên Apple field. Sụt hoàn toàn do đổi miền.
+- DeiT ngoài > backbone của mình vì DeiT lớn hơn (ViT-base 86M) và train đa dạng hơn; nhưng vẫn dưới model field-adapted.
+- Cột `open_offspecies_rate` trong `reports/cross_test/direction2_*_summary.json` cho biết tỉ lệ model công khai đoán "lạc sang loài khác" khi cho chọn toàn 38/39 lớp (open-set) — cao ở apple/grape, phản ánh nhầm lẫn xuyên loài trên ảnh field.
+
+Cách chạy lại:
+```bash
+python -m src.cross_test.run_direction2 --model mine       # baseline fine-tune (offline)
+python -m src.cross_test.run_direction2 --model backbone   # B: lab-38 của mình (offline)
+python -m src.cross_test.run_direction2 --model deit       # A: DeiT ngoài (cần transformers + tải HF ~330MB)
+```
+
+### 6.5b. Chiều 1 (model mình → dataset công bố) — CHƯA CHẠY
+
+| Kịch bản | Dataset test | Trạng thái | Ghi chú |
+|---|---|---|---|
+| Zero-shot lab→field | PlantDoc (giao lớp) | 🔵 tạm gác | FINETUNE đã chứa 742 ảnh `PLANTDOC_` → cần de-dup SHA256 trước khi so |
+| + Domain adaptation | PlantDoc (giao lớp) | 🔵 tạm gác | Bật field-bg/MMD rồi test lại (Mục 4.6) |
+
+Khi làm chiều 1: `git clone https://github.com/pratikkayal/PlantDoc-Dataset` (CC-BY-4.0), xây bảng ánh xạ 28 lớp PlantDoc ↔ 20 lớp mình, **de-dup bằng file hash** với train/calib/val, rồi dùng `evaluate_with_label_map()`/`summarize()` trong `run_cross_test.py`.
 
 ```python
-# Final_Pipeline/src/cross_test/run_cross_test.py  (khung — điền dataset thật khi có)
-"""Chạy cross-test theo mapping nhãn giao + log prediction để audit.
+# Final_Pipeline/src/cross_test/run_cross_test.py  (helper cho CHIỀU 1 — điền dataset khi làm)
+"""Chạy cross-test theo mapping nhãn giao + log prediction để audit (Mục 6).
 Mỗi prediction ghi: image_id, source_dataset, mapped_label, pred_label, confidence, correct."""
 import json
+import os
+from sklearn.metrics import f1_score, accuracy_score
 
 
 def evaluate_with_label_map(preds, label_map, intersection_classes):
-    """preds: list dict {image_id, true_raw, pred_idx, confidence}.
+    """preds: list dict {image_id, true_raw, pred_label, confidence}.
     label_map: raw_label -> internal_label. Chỉ tính trên intersection_classes."""
     rows, y_true, y_pred = [], [], []
     for p in preds:
@@ -2316,14 +2405,26 @@ def evaluate_with_label_map(preds, label_map, intersection_classes):
         y_pred.append(p["pred_label"])
         rows.append({**p, "mapped_label": mapped, "correct": mapped == p["pred_label"]})
     return rows, y_true, y_pred
-# Lưu rows -> reports/cross_test/<scenario>.jsonl để kiểm tra thủ công.
+
+
+def summarize(rows, y_true, y_pred, scenario, out_dir="reports/cross_test"):
+    """Ghi rows -> jsonl + trả macro-F1/accuracy để điền bảng 6.5."""
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, f"{scenario}.jsonl"), "w", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    if not y_true:
+        return {"scenario": scenario, "n": 0, "macro_f1": None, "accuracy": None}
+    return {"scenario": scenario, "n": len(y_true),
+            "macro_f1": f1_score(y_true, y_pred, average="macro", zero_division=0),
+            "accuracy": accuracy_score(y_true, y_pred)}
 ```
 
 ---
 
 ## 7. Deployment (Web tối ưu)
 
-Mục tiêu tầng phục vụ: chạy được **trên máy không GPU** (VPS rẻ hoặc chính laptop khi demo), phản hồi thấp, image Docker nhẹ. Chìa khoá: **tách huấn luyện (PyTorch + CUDA) khỏi phục vụ (ONNX Runtime CPU)** — inference không cần PyTorch, không cần CUDA.
+Mục tiêu tầng phục vụ: chạy được **trên máy không GPU** (VPS rẻ hoặc chính laptop khi demo), phản hồi thấp, image Docker nhẹ. Chìa khoá: **tách huấn luyện (PyTorch + CUDA) khỏi phục vụ (ONNX Runtime CPU)** — inference không cần PyTorch, không cần CUDA. Bundle model được phân phối qua **Hugging Face Hub** và tải về khi cần (Mục 7.2).
 
 Kiến trúc suy luận một ảnh:
 
@@ -2382,9 +2483,22 @@ Mỗi model deploy là một **bundle bất biến** trong `model_bundles/<model
 }
 ```
 
-### 7.2. Registry & active version
+### 7.2. Registry & phân phối bundle (Hugging Face Hub)
 
-Registry chọn version đang phục vụ qua biến môi trường `ACTIVE_MODEL_VERSION` hoặc file `model_bundles/active_version.txt` mỗi loài. Version mới **không** thay thế version cũ ngay — phải qua shadow + smoke test (Mục 8.3). Giữ tối thiểu **2 bundle gần nhất** mỗi loài để rollback.
+**Thực tế triển khai:** tầng serving **không** đọc registry cục bộ `active_version_*.txt` lúc chạy, mà **tải bundle từ Hugging Face Hub** (private repos) qua `huggingface_hub.snapshot_download`, xác thực bằng biến môi trường `HF_TOKEN`. Ánh xạ loài → repo được khai báo trong `app.py` (`REPO_MAP`):
+
+| Loài | HF repo |
+|---|---|
+| apple | `ruhua2305/apple_effv2s_onnx` |
+| corn | `ruhua2305/corn_effv2s_onnx` |
+| grape | `ruhua2305/grape_effv2s_onnx` |
+| pepper_bell | `ruhua2305/pepper_bell_effv2s_onnx` |
+| tomato | `ruhua2305/tomato_effv2s_onnx` |
+| leaf-gate | `ruhua2305/leaf_gate_MobileNetV3Small` |
+
+**Lazy load per-species:** startup chỉ tải leaf-gate (~6MB); model từng loài chỉ được tải khi có request đầu tiên cho loài đó (tiết kiệm RAM cho VPS nhỏ). Bundle được cache trong thư mục tạm (`hf_cache`).
+
+Registry cục bộ `model_bundles/active_version_<species>.txt` + `build_bundle.py` vẫn được dùng để **đóng gói và version hoá offline** trước khi push lên HF Hub; đây là phương án thay thế khi chạy hoàn toàn local không mạng.
 
 ### 7.3. ONNX export + quantization
 
@@ -2592,26 +2706,39 @@ if __name__ == "__main__":
 
 > `test_bundle_checksum.py` (Mục 8.10) đọc `checksums.sha256` và re-hash từng file để phát hiện bundle bị sửa. Con trỏ `active_version_<species>.txt` chỉ được trỏ tới bundle đã build xong + parity pass (Mục 8.13).
 
-### 7.5. API phục vụ (FastAPI + ONNX Runtime)
+### 7.5. API phục vụ (FastAPI + ONNX Runtime + HF Hub)
 
-`app.py` nạp ONNX session **một lần** lúc khởi động (không nạp lại mỗi request), tiền xử lý khớp `preprocessing.json` của bundle, và ra quyết định leaf-gate trước khi chẩn đoán loài. Reject taxonomy khớp Mục 5.4.
+`app.py` tải leaf-gate lúc startup và **lazy load** model từng loài từ Hugging Face Hub khi có request đầu tiên, tiền xử lý khớp `preprocessing.json`, và ra quyết định leaf-gate trước khi chẩn đoán loài. Reject taxonomy khớp Mục 5.4 (nhưng threshold hiện dùng default vì chưa build `thresholds.json`).
 
 ```python
 # Final_Pipeline/src/deploy/app.py
 """API chẩn đoán bệnh lá — FastAPI + ONNX Runtime (CPU-only, không CUDA).
-Nạp bundle 1 lần lúc startup. Luồng: validate -> leaf-gate -> loài -> [prototype].
+Tải bundle từ Hugging Face Hub (private repos) khi startup/lazy-load.
+Luồng: validate -> leaf-gate -> loài -> [prototype].
 Chạy dev: uvicorn src.deploy.app:app --host 0.0.0.0 --port 8000"""
 import io
 import json
 import os
+import tempfile
+import glob
 import numpy as np
 import onnxruntime as ort
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from PIL import Image, ImageOps
+from huggingface_hub import snapshot_download
 
 app = FastAPI(title="Plant Disease Diagnosis API", version="1.0")
 
-BUNDLES_DIR = "model_bundles"
+# Ánh xạ loài -> repo_id trên Hugging Face (Mục 7.2)
+REPO_MAP = {
+    "apple": "ruhua2305/apple_effv2s_onnx",
+    "corn": "ruhua2305/corn_effv2s_onnx",
+    "grape": "ruhua2305/grape_effv2s_onnx",
+    "pepper_bell": "ruhua2305/pepper_bell_effv2s_onnx",
+    "tomato": "ruhua2305/tomato_effv2s_onnx",
+}
+LEAF_GATE_REPO = "ruhua2305/leaf_gate_MobileNetV3Small"
+
 MAX_BYTES = 8 * 1024 * 1024
 MAX_PIXELS = 12_000_000
 ALLOWED_MAGIC = {b"\xff\xd8\xff": "jpg", b"\x89PNG\r\n\x1a\n": "png"}
@@ -2621,43 +2748,63 @@ _leaf_sess, _leaf_T = None, 1.0
 
 
 def _load_session(path):
-    return ort.InferenceSession(path, providers=["CPUExecutionProvider"])
+    options = ort.SessionOptions()
+    options.enable_cpu_mem_arena = False            # tiết kiệm RAM
+    options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+    options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    return ort.InferenceSession(path, sess_options=options, providers=["CPUExecutionProvider"])
 
 
-def _read_active_bundle(species):
-    """Đọc active_version.txt -> trả đường dẫn bundle đang phục vụ cho loài."""
-    ptr = os.path.join(BUNDLES_DIR, f"active_version_{species}.txt")
-    if not os.path.exists(ptr):
-        return None
-    with open(ptr, encoding="utf-8") as f:
-        return os.path.join(BUNDLES_DIR, f.read().strip())
+def _load_model_from_hf(repo_id, token=None):
+    """Tải toàn bộ file của repo về thư mục tạm (có cache) và trả đường dẫn."""
+    return snapshot_download(repo_id=repo_id, token=token, local_dir_use_symlinks=False,
+                             cache_dir=os.path.join(tempfile.gettempdir(), "hf_cache"))
+
+
+def _load_species_model(species):
+    """Lazy load model 1 loài từ HF Hub, tìm .onnx + class_mapping/preprocessing/calibration/thresholds."""
+    token = os.environ.get("HF_TOKEN")
+    if not token:
+        raise RuntimeError("HF_TOKEN not set")
+    bundle_dir = _load_model_from_hf(REPO_MAP[species], token=token)
+    onnx_files = glob.glob(os.path.join(bundle_dir, "**", "*.onnx"), recursive=True)
+    if not onnx_files:
+        raise FileNotFoundError(f"Không tìm thấy .onnx trong {bundle_dir}")
+    _sessions[species] = _load_session(onnx_files[0])
+    # class_mapping.json (idx_to_class) — LẤY TỪ bundle, không suy từ folder (Mục 7.1)
+    cm_files = glob.glob(os.path.join(bundle_dir, "**", "class_mapping.json"), recursive=True)
+    if cm_files:
+        cm = json.load(open(cm_files[0], encoding="utf-8"))
+        idx_map = cm["idx_to_class"]
+        _classes[species] = [idx_map[str(i)] for i in range(len(idx_map))]
+    else:
+        _classes[species] = ["unknown"]
+    # preprocessing / calibration / thresholds (default nếu thiếu)
+    pp = glob.glob(os.path.join(bundle_dir, "**", "preprocessing.json"), recursive=True)
+    _preproc[species] = json.load(open(pp[0], encoding="utf-8")) if pp else \
+        {"img_size": 224, "mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]}
+    cal = glob.glob(os.path.join(bundle_dir, "**", "calibration.json"), recursive=True)
+    _cal[species] = json.load(open(cal[0], encoding="utf-8")) if cal else {"temperature": 1.0}
+    thr = glob.glob(os.path.join(bundle_dir, "**", "thresholds.json"), recursive=True)
+    _thr[species] = json.load(open(thr[0], encoding="utf-8")) if thr else {}
 
 
 @app.on_event("startup")
 def _startup():
-    """Nạp mọi bundle active + leaf-gate. class_mapping LẤY TỪ bundle (Mục 7.1)."""
+    """Chỉ tải leaf_gate lúc startup (nhẹ ~6MB); model loài lazy load khi có request."""
     global _leaf_sess, _leaf_T
-    for species in ["apple", "corn", "grape", "pepper_bell", "tomato"]:
-        bundle = _read_active_bundle(species)
-        if not bundle or not os.path.isdir(bundle):
-            continue
-        _sessions[species] = _load_session(os.path.join(bundle, "model.onnx"))
-        with open(os.path.join(bundle, "class_mapping.json"), encoding="utf-8") as f:
-            cm = json.load(f)
-            _classes[species] = [cm["idx_to_class"][str(i)] for i in range(len(cm["idx_to_class"]))]
-        with open(os.path.join(bundle, "preprocessing.json"), encoding="utf-8") as f:
-            _preproc[species] = json.load(f)
-        cal_p = os.path.join(bundle, "calibration.json")
-        thr_p = os.path.join(bundle, "thresholds.json")
-        _cal[species] = json.load(open(cal_p, encoding="utf-8")) if os.path.exists(cal_p) else {"temperature": 1.0}
-        _thr[species] = json.load(open(thr_p, encoding="utf-8")) if os.path.exists(thr_p) else {}
-    lg = os.path.join(BUNDLES_DIR, "leaf_gate", "model.onnx")
-    if os.path.exists(lg):
-        _leaf_sess = _load_session(lg)
-        lg_t = os.path.join(BUNDLES_DIR, "leaf_gate", "calibration.json")
-        if os.path.exists(lg_t):
-            _leaf_T = json.load(open(lg_t, encoding="utf-8")).get("temperature", 1.0)
-    print(f"[startup] loài: {list(_sessions.keys())}; leaf_gate={'on' if _leaf_sess else 'off'}")
+    token = os.environ.get("HF_TOKEN")
+    try:
+        lg_dir = _load_model_from_hf(LEAF_GATE_REPO, token=token)
+        lg_onnx = glob.glob(os.path.join(lg_dir, "**", "*.onnx"), recursive=True)
+        if lg_onnx:
+            _leaf_sess = _load_session(lg_onnx[0])
+            lg_cal = glob.glob(os.path.join(lg_dir, "**", "calibration.json"), recursive=True)
+            if lg_cal:
+                _leaf_T = json.load(open(lg_cal[0], encoding="utf-8")).get("temperature", 1.0)
+    except Exception as e:
+        print(f"[ERROR] Không thể tải leaf_gate: {e}")
+    print(f"[startup] leaf_gate={'on' if _leaf_sess else 'off'}")
 
 
 def validate_image_upload(raw: bytes) -> Image.Image:
@@ -2672,37 +2819,36 @@ def validate_image_upload(raw: bytes) -> Image.Image:
     return ImageOps.exif_transpose(img).convert("RGB")
 
 
-def _preprocess(img: Image.Image, pp: dict) -> np.ndarray:
-    mean = np.array(pp["mean"], dtype=np.float32)
-    std = np.array(pp["std"], dtype=np.float32)
+def _preprocess(img, pp):
+    mean = np.array(pp["mean"], dtype=np.float32); std = np.array(pp["std"], dtype=np.float32)
     img = img.resize((pp["img_size"], pp["img_size"]))
     arr = (np.asarray(img, dtype=np.float32) / 255.0 - mean) / std
     return np.transpose(arr, (2, 0, 1))[None, ...].astype(np.float32)
 
 
 def _softmax(x):
-    e = np.exp(x - x.max(axis=1, keepdims=True))
-    return e / e.sum(axis=1, keepdims=True)
+    e = np.exp(x - x.max(axis=1, keepdims=True)); return e / e.sum(axis=1, keepdims=True)
 
 
 def _energy(logits, T=1.0):
-    z = logits / T
-    return float(-T * (z.max() + np.log(np.exp(z - z.max()).sum())))
+    z = logits / T; return float(-T * (z.max() + np.log(np.exp(z - z.max()).sum())))
 
 
 @app.post("/predict")
 async def predict(species: str, file: UploadFile = File(...)):
-    """Chẩn đoán 1 ảnh cho 1 loài. Threshold LẤY TỪ bundle (đã calibration, Mục 5.4)."""
+    """Chẩn đoán 1 ảnh. Lazy load model loài nếu chưa có. Threshold LẤY TỪ bundle (hiện default)."""
     if species not in _sessions:
-        raise HTTPException(404, detail={"code": "species_unavailable",
-                                         "message": f"Có: {list(_sessions.keys())}"})
+        try:
+            _load_species_model(species)
+        except Exception as e:
+            raise HTTPException(500, detail=f"Lỗi tải model {species}: {e}")
     img = validate_image_upload(await file.read())
     x = _preprocess(img, _preproc[species])
     T = _cal[species].get("temperature", 1.0)
     thr = _thr[species]
     species_logits = _sessions[species].run(["logits"], {"input": x})[0]
 
-    # (1) Leaf-gate + energy OOD
+    # (1) Leaf-gate + energy OOD (hiện dùng default vì chưa build thresholds.json — Mục 5.4)
     if _leaf_sess is not None:
         lg = _leaf_sess.run(None, {"input": x})[0]
         p_leaf = float(_softmax(lg / _leaf_T)[0, 1])
@@ -2720,8 +2866,7 @@ async def predict(species: str, file: UploadFile = File(...)):
     if top1 < thr.get("T_low_confidence", 0.0):
         return {"status": "low_confidence", "confidence": round(float(top1), 4)}
     if (top1 - top2) < thr.get("T_margin", 0.0):
-        return {"status": "ambiguous",
-                "candidates": [classes[order[0]], classes[order[1]]],
+        return {"status": "ambiguous", "candidates": [classes[order[0]], classes[order[1]]],
                 "confidence": round(float(top1), 4)}
     return {"status": "ok", "species": species, "prediction": classes[order[0]],
             "confidence": round(float(top1), 4),
@@ -2730,16 +2875,25 @@ async def predict(species: str, file: UploadFile = File(...)):
 
 @app.get("/health")
 def health():
-    """Liveness cho load balancer / Docker healthcheck."""
-    return {"status": "healthy", "species": list(_sessions.keys())}
+    return {"status": "healthy", "species_loaded": list(_sessions.keys())}
 
 
 @app.get("/ready")
 def ready():
-    """Readiness: xác nhận bundle đã load đủ + leaf-gate sẵn sàng."""
     ok = len(_sessions) > 0
     return {"status": "ready" if ok else "not_ready", "species_loaded": list(_sessions.keys())}
+
+
+# /api/* cho frontend PhytoScan + phục vụ tĩnh (Mục 7.10)
+from fastapi.staticfiles import StaticFiles
+from src.deploy.api_compat import router as api_router
+app.include_router(api_router)
+_STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(_STATIC_DIR):
+    app.mount("/", StaticFiles(directory=_STATIC_DIR, html=True), name="static")
 ```
+
+> Lưu ý `/ready` trả `ready` chỉ khi đã có ít nhất 1 model loài được lazy-load; ngay sau startup (chỉ có leaf-gate) nó báo `not_ready` cho tới request loài đầu tiên.
 
 ### 7.6. Bảo mật API & xử lý lỗi
 
@@ -2766,7 +2920,7 @@ Checklist bảo mật upload (đã hiện thực một phần trong `validate_im
 Chìa khoá image nhỏ: base `python:3.11-slim`, chỉ `onnxruntime` (CPU, **không** `onnxruntime-gpu`), **không** cài `torch`.
 
 ```dockerfile
-# Final_Pipeline/Dockerfile — tầng phục vụ CPU-only
+# Final_Pipeline/Dockerfile — tầng phục vụ CPU-only (Mục 7.7)
 FROM python:3.11-slim
 WORKDIR /app
 
@@ -2774,9 +2928,10 @@ WORKDIR /app
 COPY requirements-serve.txt .
 RUN pip install --no-cache-dir -r requirements-serve.txt
 
+# Cần src/ là package: giữ __init__.py các cấp
+COPY src/__init__.py ./src/__init__.py
+COPY src/models/__init__.py src/models/energy_ood.py ./src/models/
 COPY src/deploy/ ./src/deploy/
-COPY src/models/energy_ood.py ./src/models/energy_ood.py
-COPY model_bundles/ ./model_bundles/
 
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s \
@@ -2784,6 +2939,8 @@ HEALTHCHECK --interval=30s --timeout=3s \
 
 CMD ["uvicorn", "src.deploy.app:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
+
+> ⚠️ **Cần sửa trong Dockerfile hiện tại:** `EXPOSE`/healthcheck dùng cổng `8000` nhưng `CMD` đang chạy `--port 8080` → không khớp, healthcheck sẽ fail. Thống nhất về một cổng (8000). Ngoài ra bundle **không** còn được `COPY` vào image (model tải từ HF Hub lúc chạy), nên cần truyền `HF_TOKEN` qua env khi `docker run`.
 
 ```text
 # Final_Pipeline/requirements-serve.txt — TÁCH RIÊNG khỏi requirements train (không torch/CUDA)
@@ -2794,19 +2951,22 @@ pillow>=10.0
 numpy>=1.24
 python-multipart>=0.0.9    # cần cho UploadFile
 httpx>=0.27               # gọi LLM API ngoài cho /api/consult (Mục 7.10)
+huggingface-hub           # tải bundle từ HF Hub (Mục 7.2)
+python-dotenv             # đọc .env (LLM_API_KEY, HF_TOKEN)
 ```
 
 **So sánh dung lượng (ước lượng — tự đo lại):** image training kèm `torch`+CUDA thường **vài GB**; image serving chỉ ONNX Runtime CPU thường **vài trăm MB**. Chênh lệch chủ yếu từ việc bỏ `torch` + thư viện CUDA — đúng lý do xuất ONNX ở Mục 7.3.
 
 ```bash
 # Build & chạy
-docker build -t plant-disease-api:2026-07-04-ab12cd .
-# Truyền khoá LLM qua env (KHÔNG bake vào image); dùng model rẻ để tiết kiệm
+docker build -t plant-disease-api:2026-07-12-ab12cd .
+# Truyền HF_TOKEN (tải bundle private) + khoá LLM qua env (KHÔNG bake vào image)
 docker run -p 8000:8000 \
-  -e LLM_API_KEY="sk-..." \
-  -e LLM_BASE_URL="https://api.openai.com/v1" \
-  -e LLM_MODEL="gpt-4o-mini" \
-  plant-disease-api:2026-07-04-ab12cd
+  -e HF_TOKEN="hf_..." \
+  -e LLM_API_KEY="..." \
+  -e LLM_BASE_URL="https://api.groq.com/openai/v1" \
+  -e LLM_MODEL="llama-3.3-70b-versatile" \
+  plant-disease-api:2026-07-12-ab12cd
 # Gọi thử
 curl -X POST "http://localhost:8000/predict?species=tomato" -F "file=@test_leaf.jpg"
 ```
@@ -2839,101 +2999,80 @@ Cấu trúc section (khớp file theme): `hero` (#home) → `demo` (upload + k�
 
 ### 7.10. API compatibility layer cho frontend
 
-Frontend PhytoScan gọi `/api/predict`, `/api/species`, `/api/diseases`, `/api/consult` với response shape riêng, **khác** `/predict` ở Mục 7.5. Thay vì sửa frontend, ta thêm một router `/api/*` mỏng bọc quanh logic inference đã có — giữ `/predict` làm API "thô" và `/api/*` làm lớp tương thích UI.
+Frontend PhytoScan gọi `/api/predict`, `/api/species`, `/api/diseases`, `/api/consult` với response shape riêng, **khác** `/predict` ở Mục 7.5. Router `/api/*` (`api_compat.py`) bọc quanh logic inference đã có, và bổ sung **i18n song ngữ (en/vi)** cho tên loài + tên bệnh, cùng logic **định tuyến chủ đề tư vấn theo từ khoá** (thuốc/phòng ngừa/triệu chứng/lây lan).
 
 ```python
-# Final_Pipeline/src/deploy/api_compat.py
-"""Router /api/* khớp hợp đồng frontend PhytoScan. Bọc quanh inference ở app.py.
-Gắn vào app: from src.deploy.api_compat import router; app.include_router(router)"""
-import time
+# Final_Pipeline/src/deploy/api_compat.py  (trích — cấu trúc thực tế)
+"""Router /api/* khớp hợp đồng frontend PhytoScan."""
+import os, re, time, httpx
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
 
-from src.deploy import app as core   # dùng lại _sessions, _classes, _preprocess, predict...
-
+load_dotenv()
 router = APIRouter(prefix="/api")
 
-# Nhãn hiển thị confidence cho UI (frontend đọc data.confidence_level)
-def _confidence_level(p):
-    return "High" if p >= 0.85 else ("Medium" if p >= 0.6 else "Low")
+# Cấu hình LLM qua ENV (mặc định Groq — rẻ/nhanh; đổi LLM_BASE_URL để dùng provider khác)
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
+LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "15"))
+LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "2048"))
 
+# SPECIES_I18N / DISEASE_I18N: từ điển en/vi cho dropdown + nhãn hiển thị (đầy đủ 5 loài / 20 lớp)
+# translate_species() / translate_disease(): map class_name -> nhãn song ngữ (có fallback keyword)
 
 @router.get("/species")
-def species_list():
-    """Trả danh sách loài đang phục vụ (frontend đổ vào dropdown)."""
-    return {"species": list(core._sessions.keys())}
-
+def species_list(language: str = "en"):
+    from src.deploy.app import REPO_MAP
+    keys = list(REPO_MAP.keys())
+    return {"species": keys,
+            "items": [{"value": k, "label": translate_species(k, language)} for k in keys]}
 
 @router.get("/diseases")
 def diseases(species: str, language: str = "en"):
-    """Trả danh mục lớp bệnh của 1 loài (cho dropdown tư vấn). Lấy từ class_mapping bundle."""
-    return {"species": species, "diseases": core._classes.get(species, [])}
-
+    """Trả danh mục bệnh — luôn dùng DISEASE_I18N để dropdown hiển thị ngay (không chờ model load)."""
+    keys = list(DISEASE_I18N.get(species, {}).keys()) or ["healthy"]
+    return {"species": species, "diseases": keys,
+            "items": [{"value": k, "label": translate_disease(species, k, language)} for k in keys]}
 
 @router.post("/predict")
-async def api_predict(species: str = Form(...), file: UploadFile = File(...),
-                      language: str = Form("en")):
-    """Bọc core.predict -> shape frontend: {status, predictions:{disease:conf}, confidence_level}."""
+async def api_predict(species: str = Form(...), file: UploadFile = File(...), language: str = Form("en")):
+    from src.deploy.app import predict
     t0 = time.time()
     try:
-        result = await core.predict(species=species, file=file)
+        result = await predict(species=species, file=file)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=400)
-
     if result.get("status") == "ok":
-        preds = {d["label"]: d["prob"] for d in result["top3"]}
         return {"status": result["prediction"],
-                "predictions": preds,
+                "predictions": {d["label"]: d["prob"] for d in result["top3"]},
                 "confidence_level": _confidence_level(result["confidence"]),
                 "latency_ms": round((time.time() - t0) * 1000, 1)}
-    # reject / low_confidence / ambiguous -> vẫn trả có cấu trúc để UI hiển thị lý do
-    return {"status": result.get("status"),
-            "reason": result.get("reason"),
+    return {"status": result.get("status"), "reason": result.get("reason"),
             "predictions": {}, "confidence_level": "Low"}
-
 
 @router.post("/consult")
 async def consult(payload: dict):
-    """Tư vấn chatbot bằng LLM ngoài (Mục 8.7). Chi phí thấp — chỉ gửi TEXT (loài/bệnh/câu hỏi),
-    TUYỆT ĐỐI không gửi ảnh, không gửi PII, không gửi đường dẫn file người dùng.
-    API key qua biến môi trường (không hard-code). Fallback tĩnh nếu key trống / lỗi mạng."""
-    species = payload.get("species", "")
-    disease = payload.get("disease", "")
+    """Tư vấn LLM ngoài. CHỈ gửi TEXT (loài/bệnh/câu hỏi) — không ảnh, không PII.
+    Định tuyến chủ đề theo từ khoá (thuốc/phòng ngừa/triệu chứng/lây lan) để trả lời đúng trọng tâm.
+    Fallback tĩnh nếu thiếu key / lỗi mạng."""
+    species, disease = payload.get("species", ""), payload.get("disease", "")
     message = (payload.get("message", "") or "").strip()
     language = payload.get("language", "vi")
     if not species or not disease:
-        return {"reply": "Vui lòng chọn loài và bệnh trước khi hỏi."}
-
-    system = ("Bạn là trợ lý nông học. Chỉ tư vấn tham khảo về bệnh cây trồng, "
-              "luôn nhắc người dùng xác nhận với chuyên gia và đọc kỹ nhãn thuốc BVTV. "
-              "Không chẩn đoán y tế, không khẳng định chắc chắn. Trả lời ngắn gọn.")
-    user = f"[Ngôn ngữ: {language}] Loài: {species}. Bệnh nghi ngờ: {disease}. Câu hỏi: {message}"
-
-    reply = _call_llm(system, user)          # xem helper bên dưới
-    if reply is None:                        # key trống hoặc lỗi -> fallback an toàn
-        reply = (f"[{species}/{disease}] Đây là thông tin tham khảo, không thay thế chuyên gia. "
-                 f"Hãy xác nhận triệu chứng trên nhiều lá và điều kiện canh tác trước khi xử lý.")
-    return {"reply": reply, "disclaimer": "Chỉ tham khảo, không thay thế chuyên gia nông nghiệp."}
+        return {"reply": _select_species_disease_msg(language)}
+    # ... phân loại câu hỏi -> chọn 'focus' cho system prompt ...
+    reply = _call_llm(system, user) or _fallback_reply(species, disease, language)
+    return {"reply": reply, "disclaimer": _disclaimer_text(language)}
 ```
 
-Helper gọi LLM (đặt trong `api_compat.py`) — dùng REST HTTP nên **không** thêm SDK nặng vào image serving; đổi provider chỉ cần đổi env var:
+Helper gọi LLM (trong `api_compat.py`) — dùng REST HTTP nên **không** thêm SDK nặng vào image serving; đổi provider chỉ cần đổi env var:
 
 ```python
 # Final_Pipeline/src/deploy/api_compat.py  (helper gọi LLM — nối tiếp)
-import os
-import httpx
-
-# Cấu hình qua ENV (không hard-code khoá). Mặc định theo chuẩn OpenAI-compatible;
-# đổi LLM_BASE_URL để trỏ sang provider rẻ hơn (Groq, DeepSeek, OpenRouter, local vLLM...).
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
-LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")     # chọn model rẻ để tiết kiệm
-LLM_TIMEOUT = float(os.getenv("LLM_TIMEOUT", "12"))
-LLM_MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "400"))
-
-
 def _call_llm(system_prompt: str, user_prompt: str):
-    """Gọi LLM ngoài (chat completions). Trả text hoặc None nếu key trống / lỗi.
+    """Gọi LLM ngoài (chat completions, OpenAI-compatible). Trả text hoặc None nếu key trống / lỗi.
     An toàn: chỉ text đi ra ngoài; timeout ngắn; nuốt lỗi để không sập API chính."""
     if not LLM_API_KEY:
         return None
@@ -2953,17 +3092,9 @@ def _call_llm(system_prompt: str, user_prompt: str):
         return None
 ```
 
-Gắn router vào `app.py` + phục vụ file tĩnh:
+> Mặc định trong code trỏ tới model `llama-3.3-70b-versatile` (hợp với Groq — nhanh/rẻ); đặt `LLM_BASE_URL=https://api.groq.com/openai/v1` + `LLM_API_KEY` tương ứng. Đổi `LLM_BASE_URL`/`LLM_MODEL` để dùng OpenAI/DeepSeek/OpenRouter/vLLM local. `LLM_MAX_TOKENS` mặc định 2048 — hạ xuống để tiết kiệm chi phí nếu cần.
 
-```python
-# Thêm vào cuối Final_Pipeline/src/deploy/app.py
-from fastapi.staticfiles import StaticFiles
-from src.deploy.api_compat import router as api_router
-
-app.include_router(api_router)                       # /api/* cho frontend PhytoScan
-app.mount("/", StaticFiles(directory="src/deploy/static", html=True), name="static")
-# static/index.html = theme PhytoScan (Mục 7.9). Mount SAU khi khai báo mọi route API.
-```
+Router `/api/*` và static mount đã được gắn ở cuối `app.py` (xem Mục 7.5): `app.include_router(api_router)` rồi `app.mount("/", StaticFiles(..., html=True))`. Static mount đặt **sau** mọi route API để không che các endpoint.
 
 > Giữ **hai lớp**: `/predict` (thô, để test/parity/script) và `/api/predict` (cho UI). Cả hai dùng chung một hàm inference nên không lệch logic. Cảnh báo bảo mật Mục 7.6 áp dụng cho **cả hai** — thêm auth/rate-limit trước khi public. `/api/consult` gọi **LLM API ngoài** (chi phí thấp) qua REST, cấu hình bằng env var `LLM_API_KEY` / `LLM_BASE_URL` / `LLM_MODEL`; nguyên tắc an toàn: **chỉ gửi text** (loài/bệnh/câu hỏi), không bao giờ gửi ảnh hay PII, và fallback về câu trả lời tĩnh khi thiếu key hoặc lỗi mạng.
 
@@ -2990,7 +3121,7 @@ classes:
     species: tomato
     display_name: "Tomato — Spider mites (Two-spotted)"
     aliases: ["Spider_mites Two-spotted_spider_mite"]
-    note: "Rare (7 ảnh) — Chế độ 2 prototype, báo cáo là thiếu dữ liệu"
+    note: "Lớp ít nhất của Tomato (55 ảnh) — train như lớp thường, theo dõi recall riêng"
 ```
 
 Quy tắc thêm lớp:
@@ -3007,17 +3138,19 @@ Quy tắc thêm lớp:
 | **Canary** | Chỉ khi phục vụ thật | Định tuyến % nhỏ request sang version mới, theo dõi metric |
 | **Active swap** | Sau khi shadow + smoke pass | Đổi `active_version_<species>.txt`, restart |
 
-Với demo laptop: chỉ cần **shadow offline + smoke test** trước khi đổi active version.
+Với demo hiện tại: bundle được version hoá offline (`build_bundle.py`) rồi **push lên HF Hub**; đổi version = push bundle mới / cập nhật `REPO_MAP` và restart. Shadow offline + smoke test nên chạy trước khi cập nhật repo phục vụ.
 
 ```bash
-# deploy version mới sau khi parity + smoke + shadow đạt
-echo tomato_2026_07_04_effv2s_ab12cd > model_bundles/active_version_tomato.txt
-cd D:/DAT301m_Project/Final_Pipeline && uvicorn src.deploy.app:app --host 0.0.0.0 --port 8000
+# Đóng gói + version offline, sau đó push lên HF Hub (repo trong REPO_MAP)
+python -m src.export.build_bundle --species tomato \
+       --version tomato_2026_07_12_effv2s_ab12cd \
+       --onnx model_bundles/tmp/tomato/model.onnx --git-commit ab12cd34
+# huggingface-cli upload ruhua2305/tomato_effv2s_onnx model_bundles/tomato_2026_07_12_effv2s_ab12cd
 
-# rollback nhanh về version trước (đổi con trỏ + restart)
-echo tomato_2026_06_28_effv2s_91fe20 > model_bundles/active_version_tomato.txt
-# restart service (supervisor/systemd/docker restart tuỳ môi trường)
+# Rollback: trỏ REPO_MAP về commit/revision bundle cũ đã biết tốt rồi restart service.
 ```
+
+> Registry cục bộ `active_version_<species>.txt` vẫn tồn tại trong repo cho phương án chạy hoàn toàn local; khi đó `app.py` cần chuyển sang đọc bundle cục bộ thay vì HF Hub.
 
 ### 8.3. Điều kiện rollback cụ thể
 
@@ -3149,7 +3282,7 @@ python -m src.train.train_leaf_gate --config configs/leaf_gate.yaml
 # ==========================================
 # PHASE 2 — Fine-tune 5 loài (tuần tự — an toàn VRAM)
 # ==========================================
-# Mỗi loài sinh model_<species>.pt (Chế độ 1) + model_<species>_prototypes.pt (Chế độ 2 nếu có lớp hiếm).
+# Mỗi loài sinh model_<species>.pt (Chế độ 1). Chế độ 2/prototype KHÔNG chạy (không lớp <30).
 python -m src.train.train_finetune --config configs/finetune_apple.yaml
 python -m src.train.train_finetune --config configs/finetune_corn.yaml
 python -m src.train.train_finetune --config configs/finetune_grape.yaml
@@ -3197,10 +3330,11 @@ python -m src.eval.evaluate --config configs/finetune_apple.yaml --split holdout
 # ==========================================
 # PHASE 5 — Serving (API + frontend PhytoScan)
 # ==========================================
-echo tomato_2026_07_04_effv2s_ab12cd > model_bundles/active_version_tomato.txt
+# Bundle tải từ HF Hub (Mục 7.2) — cần HF_TOKEN cho private repo; LLM key cho /api/consult.
+export HF_TOKEN=hf_...          # (Windows: set HF_TOKEN=... hoặc dùng .env)
 uvicorn src.deploy.app:app --host 0.0.0.0 --port 8000
 # Frontend PhytoScan phục vụ tĩnh tại "/" (Mục 7.9); API UI tại /api/* (Mục 7.10).
-# Hoặc Docker: docker build -t plant-disease-api:2026-07-04-ab12cd . && docker run -p 8000:8000 ...
+# Hoặc Docker: docker build -t plant-disease-api:2026-07-12-ab12cd . && docker run -p 8000:8000 -e HF_TOKEN=... ...
 
 # ==========================================
 # Test tự động (chạy trước deploy — Mục 8.10)
@@ -3228,7 +3362,7 @@ pytest src/tests/
 | 2 | Fine-tune Corn | ~40–60 phút | |
 | 2 | Fine-tune Grape | ~15–25 phút | data nhỏ, freeze backbone |
 | 2 | Fine-tune Pepper | ~15–25 phút | data nhỏ |
-| 2 | Fine-tune Tomato (+few-shot) | ~1–1.5 giờ | 9 lớp + prototype |
+| 2 | Fine-tune Tomato (9 lớp) | ~1–1.5 giờ | 9 lớp, 3 bước decoupled |
 | 3 | Đánh giá + calibration 5 loài | ~30–45 phút | |
 | 4 | Export ONNX + parity + bundle | ~30–45 phút | |
 | 5 | Dựng API + Docker + smoke test | ~1–2 giờ | Một lần |
@@ -3242,24 +3376,25 @@ Thứ tự khuyến nghị: Phase 0 → 1 → 2 (tuần tự 5 loài) → 3 → 
 
 Những điểm cần quyết định/bổ sung khi triển khai thật:
 
-- **Xác minh citations (ưu tiên cao):** P1–P7 (Mục 6.1) đã đối chiếu online. Các citation kỹ thuật khác (Section 12) nên mở lại từng DOI/arXiv-ID xác nhận tác giả/năm/tiêu đề trước khi nộp — sai citation là lỗi nặng học thuật. Mục có dấu ngoặc tác giả (P6, P7, MMD/FMDA) cần rà kỹ nhất.
-- **Tập val cho leaf-gate:** temperature scaling (Mục 5.3) cần tập có **cả** ảnh lá lẫn không-phải-lá. Tập này chưa có trong dữ liệu gốc — cần thu thập/gán nhãn một lượng nhỏ ảnh "không phải lá" (bàn tay, nền, vật ngẫu nhiên) trước khi hiệu chỉnh ngưỡng. Đánh dấu `[Cần verify license]` cho nguồn negative.
-- **`source_group_id` = `[Cần verify]`:** split hiện chưa group theo nguồn/photographer vì thiếu metadata (Mục 2.4). Nếu FINETUNE có ảnh cùng nguồn/cùng cây, cần group-split để tránh rò rỉ nhẹ — hiện ghi rõ giới hạn thay vì tuyên bố độc lập nguồn nghiêm ngặt.
-- **Ánh xạ nhãn cross-dataset:** khi test chéo PlantDoc (Section 6), phải xây bảng ánh xạ thủ công + chỉ đánh giá trên giao hai tập lớp + de-dup hash. Bước dễ bị bỏ sót, gây sai lệch macro-F1.
-- **Đo lại sau quantization:** INT8 (Mục 7.3) có thể giảm nhẹ accuracy — bắt buộc chạy lại `evaluate` + `parity_test` trên model ONNX đã lượng tử hoá trước khi chốt bundle.
-- **`Spider_mites` 7 ảnh:** không tuyên bố hiệu năng đáng tin cho lớp này; báo cáo là thiếu dữ liệu, dựa vào nhánh prototype + reject (Mục 3.4–3.5).
-- **Bảo mật API `/predict`:** hiện **không** có authentication/rate-limit (Mục 7.6). Trước khi mở Internet công khai cần bổ sung API key + rate-limiting + HTTPS.
-- **Số liệu split ở Mục 2.4 là ước lượng stratified:** số thực tế sau khi `split_builder.py` chạy có thể lệch ±1–2 ảnh/ô do làm tròn; manifest sinh ra là nguồn sự thật.
-- **Latency chưa đo thực:** mục tiêu p95 <= 3s là giả định; phải benchmark trên máy đích, nếu không đạt thì fallback B0 hoặc preload session.
-- **Frontend PhytoScan cần bổ sung Corn:** theme gốc chỉ có 4 loài ở phần crops (Mục 7.9); danh sách loài lấy động từ `/api/species` nên không sai chức năng, nhưng phần tĩnh nên thêm card Corn cho đủ 5 loài.
-- **`/api/consult` gọi LLM ngoài (chi phí thấp):** cấu hình qua env var (`LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`) — Mục 7.10. **Chỉ gửi text**, không gửi ảnh/PII. Cần lưu ý: (a) đặt `LLM_MAX_TOKENS` thấp + model rẻ để kiểm soát chi phí; (b) thêm rate-limit riêng cho endpoint này tránh bị lạm dụng đốt quota; (c) không log nội dung nhạy cảm; (d) đọc điều khoản dữ liệu của provider. Fallback tĩnh khi thiếu key/lỗi mạng.
-- **Prototype calibration (`T_proto`):** với lớp cực hiếm, `T_proto` đặt bảo thủ dựa `radius_p95` thay vì tối ưu NLL (Mục 5.3) — chấp nhận đánh đổi vì quá ít mẫu để fit đáng tin.
+- **Thresholds reject chưa build (ưu tiên cao nhất):** chưa có `thresholds.json` nên energy-OOD + ambiguous/low-confidence chưa thực sự hoạt động (Mục 5.4). Cần quét `calib` để chọn `binary_leaf`, `T_energy`, `T_low_confidence`, `T_margin` rồi đóng vào bundle/HF repo.
+- **Calibration chưa đạt ECE ≤ 0.05:** hầu hết loài và đặc biệt leaf-gate (ECE 0.74) còn cao (Mục 5.3). Cần xem lại calib split / nhãn leaf-gate; trong lúc đó đặt threshold bảo thủ.
+- **Xác minh citations:** đã đối chiếu online — sửa 1 lỗi ID (FMDA, Mục 12 #17: `arXiv:2203.12119` → `arXiv:2412.18859`) và cập nhật tiêu đề thật cho P6/P7. Các mục còn lại đã xác nhận đúng.
+- **Golden set tối giản:** hiện chỉ là danh sách ảnh cho parity; cần bổ sung `expected_top1`/`min_confidence` để làm smoke test class-mapping đầy đủ (Mục 2.7).
+- **`source_group_id` = `[Cần verify]`:** split chưa group theo nguồn/photographer vì thiếu metadata (Mục 2.4) — ghi rõ giới hạn thay vì tuyên bố độc lập nguồn nghiêm ngặt.
+- **Cross-test Chiều 2 đã chạy** (Mục 6.5); **Chiều 1 (PlantDoc) chưa chạy:** cần gắn dataset thật + bảng ánh xạ nhãn giao + de-dup hash (FINETUNE đã chứa 742 ảnh PlantDoc) trước khi báo cáo con số.
+- **Domain adaptation (field-bg recompose, MMD) chưa bật:** code có nhưng mặc định tắt; nếu bật cần QC Grad-CAM (Mục 4.6).
+- **Few-shot/prototype không kích hoạt:** dữ liệu không còn lớp < 30 (Spider_mites nay 55). Giữ làm hướng mở rộng (Mục 3.5).
+- **Đo lại sau quantization:** nếu dùng INT8 (Mục 7.3) phải chạy lại `evaluate` + `parity_test` trên model đã lượng tử hoá.
+- **Bảo mật API:** `/predict` + `/api/*` chưa có auth/rate-limit (Mục 7.6). `HF_TOKEN` và LLM key phải qua env/`.env`, không commit.
+- **Dockerfile lệch cổng:** `CMD --port 8080` vs `EXPOSE 8000`/healthcheck 8000 — cần thống nhất (Mục 7.7).
+- **Latency chưa đo thực:** mục tiêu p95 <= 3s là giả định; lazy-load lần đầu mỗi loài có độ trễ tải bundle từ HF Hub — cần benchmark thực.
+- **Resume training chưa dùng:** `checkpoints.py` có helper nhưng train script chưa gọi `--resume` (Mục 8.8).
 
 ---
 
 ## 12. Tài liệu tham khảo
 
-> **Trạng thái xác minh:** P1–P7 (dataset & benchmark, Mục 6.1) đã đối chiếu online 07/2026. Các mục kiến trúc/kỹ thuật dưới đây lấy ID từ thân tài liệu; **mở lại từng liên kết trước khi nộp** để xác nhận tác giả/năm/tiêu đề.
+> **Trạng thái xác minh:** toàn bộ 27 citation đã được đối chiếu online (2026-07-12). 26/27 chính xác; đã sửa lỗi ID duy nhất ở #17 (FMDA: `2203.12119` → `2412.18859`) và cập nhật tiêu đề thật cho #15 (Jeon), #16 (Wu). Một số mục dùng tiêu đề rút gọn (bỏ subtitle) — chấp nhận được.
 
 **Kiến trúc & backbone:**
 1. Tan, M., & Le, Q. (2021). *EfficientNetV2: Smaller Models and Faster Training.* [arXiv:2104.00298](https://arxiv.org/abs/2104.00298) — Mục 3.1 (backbone chính)
@@ -3284,9 +3419,9 @@ Những điểm cần quyết định/bổ sung khi triển khai thật:
 14. Hu, E. J., et al. (2021). *LoRA.* [arXiv:2106.09685](https://arxiv.org/abs/2106.09685) — Mục 4.7
 
 **Domain adaptation (lab → field):**
-15. Jeon, et al. (2025). *Field-background recomposition.* [SSRN:10.2139/ssrn.5217081](https://dx.doi.org/10.2139/ssrn.5217081) — Mục 4.6; P7
-16. Wu, et al. (2023). *Domain alignment / MMD.* [DOI:10.34133/plantphenomics.0038](https://doi.org/10.34133/plantphenomics.0038) — Mục 4.6; P6
-17. Kudo, Kagiwada, & Iyatomi (2024). *Few-shot Metric Domain Adaptation (FMDA).* [arXiv:2203.12119](https://arxiv.org/abs/2203.12119) — Mục 4.6 Cách 3
+15. Jeon, W., Kim, T., Choi, S., & Yang, K. (2025). *Bridging the Lab-to-Field Gap in Plant Disease Diagnosis Through Unsupervised Domain Adaptation Enhanced by Background Recomposition.* [SSRN:10.2139/ssrn.5217081](https://dx.doi.org/10.2139/ssrn.5217081) — Mục 4.6; P7
+16. Wu, X., et al. (2023). *From Laboratory to Field: Unsupervised Domain Adaptation for Plant Disease Recognition in the Wild.* Plant Phenomics. [DOI:10.34133/plantphenomics.0038](https://doi.org/10.34133/plantphenomics.0038) — Mục 4.6; P6
+17. Kudo, S., Kagiwada, S., & Iyatomi, H. (2024). *Few-shot Metric Domain Adaptation: Practical Learning Strategies for an Automated Plant Disease Diagnosis.* [arXiv:2412.18859](https://arxiv.org/abs/2412.18859) — Mục 4.6 Cách 3
 
 **OOD & calibration:**
 18. Liu, W., et al. (2020). *Energy-based OOD Detection.* [arXiv:2010.03759](https://arxiv.org/abs/2010.03759) — Mục 3.2
@@ -3322,15 +3457,15 @@ Những điểm cần quyết định/bổ sung khi triển khai thật:
 | corn | 2 | Northern_Blight | corn_northern_blight | 1 |
 | corn | 3 | healthy | corn_healthy | 1 |
 | grape | 0 | Black_rot | grape_black_rot | 1 |
-| grape | 1 | healthy | grape_healthy | 1 (biên) |
+| grape | 1 | healthy | grape_healthy | 1 |
 | pepper_bell | 0 | Bacterial_spot | pepper_bacterial_spot | 1 |
-| pepper_bell | 1 | healthy | pepper_healthy | 1 (biên) |
+| pepper_bell | 1 | healthy | pepper_healthy | 1 |
 | tomato | 0 | Bacterial_spot | tomato_bacterial_spot | 1 |
 | tomato | 1 | Early_blight | tomato_early_blight | 1 |
 | tomato | 2 | Late_blight | tomato_late_blight | 1 |
 | tomato | 3 | Leaf_Mold | tomato_leaf_mold | 1 |
 | tomato | 4 | Septoria | tomato_septoria | 1 |
-| tomato | 5 | Spider_mites | tomato_spider_mites | **2 (rare, 7 ảnh)** |
+| tomato | 5 | Spider_mites | tomato_spider_mites | 1 (55 ảnh — lớp ít nhất) |
 | tomato | 6 | TYLCV | tomato_tylcv | 1 |
 | tomato | 7 | mosaic_virus | tomato_mosaic_virus | 1 |
 | tomato | 8 | healthy | tomato_healthy | 1 |
@@ -3398,20 +3533,20 @@ pytest>=8.0
 
 ## 14. Trạng thái tài liệu
 
-Toàn bộ 14 section đã hoàn tất và khớp interface đầu-cuối:
+Tài liệu đã đồng bộ với code thực tế (rà 2026-07-12). Trạng thái từng section (xem thêm bảng chi tiết Mục 1.8):
 
 | Section | Nội dung | Trạng thái |
 |---|---|---|
-| 1 | Executive Summary + quyết định đã chốt + lỗi đã sửa | ✅ |
-| 2 | Dataset Analysis + split 70/10/10/10 + manifest lock | ✅ có code |
-| 3 | Model Architecture (EffV2-S, leaf-gate, prototype) | ✅ có code |
-| 4 | Training Pipeline (pretrain + fine-tune 5 loài + leaf-gate) | ✅ code chạy được |
-| 5 | Evaluation & Calibration (+ CLI calibration) | ✅ có code |
-| 6 | Cross-Test Plan (7 benchmark) | ✅ |
-| 7 | Deployment (ONNX + parity + build_bundle + FastAPI + frontend PhytoScan + Docker) | ✅ code chạy được |
+| 1 | Executive Summary + quyết định + thay đổi + bảng trạng thái 1.8 | ✅ |
+| 2 | Dataset Analysis + split 70/10/10/10 + manifest lock (18,402 ảnh) | ✅ có code |
+| 3 | Model Architecture (EffV2-S, leaf-gate; few-shot là mở rộng) | ✅ có code |
+| 4 | Training Pipeline (pretrain + fine-tune 5 loài 3 bước + leaf-gate) | ✅ code chạy được |
+| 5 | Evaluation & Calibration | ✅ code; ⚠️ ECE chưa đạt, thresholds chưa build |
+| 6 | Cross-Test Plan | ✅ Chiều 2 đã chạy (Mục 6.5); Chiều 1 tạm gác |
+| 7 | Deployment (ONNX + parity + FastAPI + HF Hub + PhytoScan) | ✅ code chạy được |
 | 8 | Versioning, Monitoring & Rollback | ✅ có code |
 | 9–14 | CLI, Timeline, Giới hạn, References, Phụ lục | ✅ |
 
-Bổ sung sau rà soát hoàn thiện: **(1)** `train_leaf_gate.py` + config leaf-gate (Mục 4.12) — lấp mắt xích leaf-gate thiếu script train; **(2)** `build_bundle.py` đóng gói bundle bất biến + checksums, và CLI calibration cho species/leaf-gate (Mục 7.4b, 5.3); **(3)** frontend web theme **PhytoScan** (palette xanh/nền tối, Inter — Mục 7.9) + lớp tương thích `/api/*` khớp hợp đồng frontend (Mục 7.10). CLI Section 9 và cây thư mục Mục 4.1 đã cập nhật để pipeline chạy được thật sự đầu-cuối.
+Đã triển khai thực tế: split manifest 5 loài + hash, pretrain backbone, fine-tune 5 loài (PEFT 3 bước + CB-Focal + decoupled), leaf-gate, temperature scaling, ONNX export + parity, bundle bất biến, FastAPI + PhytoScan frontend + /api/consult (LLM), serving qua Hugging Face Hub.
 
-Bản Final hợp nhất quản trị khoa học chặt của FullPlan V1 (split khoá, holdout, calibration split, golden set, bundle, rollback) với kỹ thuật SOTA + code chạy được của V2 (few-shot lớp hiếm, CB-Focal, domain adaptation, AMP/grad-accum, FastAPI + ONNX). Mọi lỗi phát hiện ở hai bản gốc đã sửa (Mục 1.5): đúng **5 loài** (không potato), đường dẫn nhất quán dưới `D:\DAT301m_Project\Final_Pipeline`, backbone chốt EfficientNetV2-S (fallback B0), và tuyên bố xác minh nguồn nhất quán. Tối ưu cho RTX 3050 Ti 4GB / RAM 16GB như ràng buộc đề ra.
+Việc còn lại (Mục 1.8, 11): build `thresholds.json` để kích hoạt reject policy; cải thiện calibration đạt ECE ≤ 0.05 (nhất là leaf-gate); hoàn thiện golden set + cross-test **Chiều 1** (PlantDoc, cần de-dup hash); sửa cổng Dockerfile (8080↔8000); tùy chọn bật domain adaptation. Cross-test **Chiều 2 đã chạy** (Mục 6.5) — xác nhận domain gap lab→field. Few-shot/prototype giữ làm hướng mở rộng vì dữ liệu hiện không còn lớp < 30. Backbone chốt EfficientNetV2-S (fallback B0), tối ưu cho RTX 3050 Ti 4GB / RAM 16GB.

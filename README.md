@@ -1,10 +1,10 @@
 # PhytoScan — DAT301m Plant Disease Classification
 
 Hệ thống phân loại **bệnh cây trồng qua ảnh lá** cho **5 loài**: `apple`, `corn`, `grape`,
-`pepper_bell`, `tomato` (tổng **20 lớp bệnh/khỏe**). Sản phẩm cuối là **web demo chạy local**
+`pepper_bell`, `tomato` (tổng **20 lớp bệnh/khỏe**). Sản phẩm cuối là **web demo**
 (FastAPI + frontend PhytoScan): người dùng chọn loài, upload ảnh lá, hệ thống kiểm tra ảnh hợp lệ
-bằng **Leaf Gate**, chẩn đoán bệnh kèm **độ tin cậy đã hiệu chỉnh**, và biết **từ chối** khi ảnh
-không phải lá / sai loài / ngoài phân phối / độ tin cậy thấp.
+bằng **Leaf Gate**, chẩn đoán bệnh kèm **độ tin cậy đã hiệu chỉnh**, và có khung **từ chối** khi ảnh
+không phải lá / độ tin cậy thấp / ngoài phân phối.
 
 Toàn bộ thiết kế chi tiết nằm trong [`DAT301m_Plan_Final.md`](DAT301m_Plan_Final.md). README này
 tập trung vào **cách tổ chức dữ liệu và cách chạy**.
@@ -17,9 +17,9 @@ tập trung vào **cách tổ chức dữ liệu và cách chạy**.
 | Backbone | EfficientNetV2-S (primary), B0 (fallback) |
 | Định tuyến | Per-species: 5 model riêng, người dùng chọn loài |
 | Chia dữ liệu | 70/10/10/10 = train/calib/val/holdout, manifest khoá + SHA256 |
-| Lớp hiếm | `Tomato/Spider_mites` (7 ảnh) → few-shot prototype, không train head riêng |
+| Lớp ít mẫu nhất | `Tomato/Spider_mites` (**55 ảnh**) — vẫn train head thường; không còn lớp <30 |
 | Chống 4GB OOM | AMP + gradient accumulation + PEFT + `probe_vram_usage()` |
-| Phục vụ | ONNX Runtime (CPU-only), bundle bất biến + rollback |
+| Phục vụ | ONNX Runtime (CPU-only); bundle tải từ **Hugging Face Hub** (lazy load per-species) |
 | Tư vấn | `/api/consult` gọi LLM ngoài (chỉ gửi text, cấu hình qua ENV) |
 
 ## Mục lục
@@ -29,7 +29,8 @@ tập trung vào **cách tổ chức dữ liệu và cách chạy**.
 3. [Dataset Leaf Gate](#3-dataset-leaf-gate)
 4. [Quy trình chạy đầu-cuối](#4-quy-trình-chạy-đầu-cuối)
 5. [Serving, LLM & frontend](#5-serving-llm--frontend)
-6. [Test & xử lý sự cố](#6-test--xử-lý-sự-cố)
+6. [Cross-Test (so với nghiên cứu công bố)](#6-cross-test-so-với-nghiên-cứu-công-bố)
+7. [Test & xử lý sự cố](#7-test--xử-lý-sự-cố)
 
 ---
 
@@ -80,28 +81,32 @@ D:\DAT301m_Project\Final_Pipeline\data\
 │   └── val\
 │       └── ... (cùng 38 lớp)
 │
-├── 2. FINETUNE DATASET\          # ~18.354 ảnh, 20 lớp, 5 loài — ảnh FIELD (miền đích thật)
-│   ├── apple\
-│   │   ├── Apple_scab\        *.jpg
-│   │   ├── Cedar_apple_rust\  *.jpg
-│   │   └── healthy\           *.jpg
-│   ├── corn\
-│   │   ├── Cercospora\  Common_rust\  Northern_Blight\  healthy\
-│   ├── grape\
-│   │   ├── Black_rot\  healthy\
-│   ├── pepper_bell\
-│   │   ├── Bacterial_spot\  healthy\
-    └── tomato\
-        ├── Bacterial_spot\ Early_blight\ Late_blight\ Leaf_Mold\ Septoria\
-        ├── Spider_mites\  TYLCV\  mosaic_virus\  healthy\
+├── 2. FINETUNE DATASET\          # ~18.402 ảnh, 20 lớp, 5 loài — ảnh FIELD (miền đích thật)
+│   ├── Apple\
+│   │   ├── Apple___Apple_scab\        *.jpg
+│   │   ├── Apple___Cedar_apple_rust\  *.jpg
+│   │   └── Apple___healthy\           *.jpg
+│   ├── Corn_(maize)\
+│   │   ├── Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot\  Corn_(maize)___Common_rust_\
+│   │   ├── Corn_(maize)___Northern_Leaf_Blight\  Corn_(maize)___healthy\
+│   ├── Grape\
+│   │   ├── Grape___Black_rot\  Grape___healthy\
+│   ├── Pepper,_bell\
+│   │   ├── Pepper,_bell___Bacterial_spot\  Pepper,_bell___healthy\
+    └── Tomato\
+        ├── Tomato___Bacterial_spot\ Tomato___Early_blight\ Tomato___Late_blight\
+        ├── Tomato___Leaf_Mold\ Tomato___Septoria_leaf_spot\
+        ├── Tomato___Spider_mites Two-spotted_spider_mite\
+        ├── Tomato___Tomato_Yellow_Leaf_Curl_Virus\ Tomato___Tomato_mosaic_virus\ Tomato___healthy\
 ```
 
-> Tên thư mục loài thật trên đĩa có thể khác key nội bộ (`Corn_(maize)`↔`corn`,
-> `Pepper,_bell`↔`pepper_bell`); `split_builder.py` đã tự ánh xạ qua `SPECIES_DIR_NAME`.
+> Tên thư mục loài thật trên đĩa (`Corn_(maize)`, `Pepper,_bell`) khác key nội bộ (`corn`,
+> `pepper_bell`); `split_builder.py` tự ánh xạ qua `SPECIES_DIR_NAME` + dò không phân biệt hoa/thường.
 
-> **Tên lớp** phải khớp `configs/taxonomy_v1.yaml` (cột `class_name`). `class_index` do
-> `split_builder.py` sinh tự động bằng cách **sort tên lớp** — bất biến, dùng chung cho ONNX/API.
-> Nếu tên thư mục lớp khác taxonomy, sửa taxonomy hoặc đổi tên thư mục cho trùng.
+> **Tên lớp** = **tên thư mục đầy đủ** (vd `Tomato___Bacterial_spot`). `class_index` do
+> `split_builder.py` sinh tự động bằng cách **sort tên thư mục lớp** — bất biến, lưu vào
+> `class_mapping.json` của bundle và dùng chung cho ONNX/API. Frontend dịch sang nhãn hiển thị
+> song ngữ (en/vi) trong `api_compat.py`.
 
 ### 2.2. Dữ liệu SINH RA (code tạo — nằm TRONG `Final_Pipeline`)
 
@@ -120,13 +125,17 @@ D:\DAT301m_Project\Final_Pipeline\
 │       ├── calib\{leaf, not_leaf}\ *.jpg
 │       └── val\  {leaf, not_leaf}\ *.jpg
 ├── checkpoints\                  # *.pt: backbone_pretrained, model_<species>, leaf_gate
-│   └── model_<species>_prototypes.pt   # prototype lớp hiếm (nếu có)
-├── model_bundles\                # bundle bất biến để phục vụ + con trỏ active
+│   └── model_<species>_calibration.json   # T + ECE trước/sau (sinh ở Phase 3)
+├── model_bundles\                # bundle đóng gói offline (trước khi push lên HF Hub)
 │   ├── <version>\                # model.onnx, manifest.json, class_mapping.json, ...
-│   └── active_version_<species>.txt    # trỏ tới bundle đang chạy (đổi = rollback)
-├── experiments\                  # log mỗi lần train (config, metric, confusion, Grad-CAM)
-└── reports\                      # báo cáo cross-test, robustness
+│   └── active_version_<species>.txt    # con trỏ cho phương án chạy local (serving thật dùng HF Hub)
+├── experiments\                  # (dành cho) log mỗi lần train — hiện trống
+└── reports\                      # cross_test\ (kết quả Chiều 2) + (dành cho) robustness
+    └── cross_test\               # direction2_*.json/jsonl + CROSS_TEST_RESULTS.md
 ```
+
+> Với dữ liệu hiện tại **không lớp nào < 30 ảnh** nên `train_finetune.py` **không** sinh file
+> `model_<species>_prototypes.pt` (nhánh few-shot chỉ kích hoạt khi có lớp hiếm — xem plan Mục 3.5).
 
 ### 2.3. Golden set (cho Phase 4 parity)
 
@@ -135,8 +144,8 @@ Tạo tay file JSON liệt kê vài ảnh đại diện mỗi loài (lấy từ 
 ```json
 // data/golden/tomato.json
 { "images": [
-  "D:/DAT301m_Project/Final_Pipeline/data/2. FINETUNE DATASET/tomato/Early_blight/xxx.jpg",
-  "D:/DAT301m_Project/Final_Pipeline/data/2. FINETUNE DATASET/tomato/healthy/yyy.jpg"
+  "D:/DAT301m_Project/Final_Pipeline/data/2. FINETUNE DATASET/Tomato/Tomato___Early_blight/xxx.jpg",
+  "D:/DAT301m_Project/Final_Pipeline/data/2. FINETUNE DATASET/Tomato/Tomato___healthy/yyy.jpg"
 ] }
 ```
 
@@ -248,9 +257,9 @@ python -m src.train.train_finetune --config configs/finetune_grape.yaml
 python -m src.train.train_finetune --config configs/finetune_pepper_bell.yaml
 python -m src.train.train_finetune --config configs/finetune_tomato.yaml
 ```
-→ Mỗi loài sinh `model_<species>.pt`. Loài có lớp hiếm (tomato) sinh thêm
-`model_<species>_prototypes.pt`. Train gồm 3 bước: warmup head → mở BN + block cuối → decoupled
-re-training với sampler cân bằng.
+→ Mỗi loài sinh `model_<species>.pt`. Train gồm 3 bước: warmup head → mở BN + block cuối
+(CB-Focal + CutMix + early stopping) → decoupled re-training với sampler cân bằng (CE thường).
+Nhánh few-shot/prototype (Chế độ 2) **không chạy** vì không còn lớp <30 ảnh.
 
 ### Phase 3 — Đánh giá + calibration
 ```bash
@@ -259,8 +268,9 @@ python -m src.eval.calibration --config configs/finetune_tomato.yaml --target sp
 # (lặp cho 5 loài + leaf_gate)
 ```
 → `evaluate` in classification report + confusion matrix. `calibration` sinh
-`model_<species>_calibration.json` (nhiệt độ T + ECE trước/sau). Threshold reject chọn trên xác
-suất ĐÃ hiệu chỉnh, dùng split `calib` (không đụng val/holdout).
+`model_<species>_calibration.json` (nhiệt độ T + ECE trước/sau). **Lưu ý:** ECE hiện chưa đạt mục
+tiêu ≤0.05 ở hầu hết loài (và leaf-gate còn cao) — cần siết ngưỡng reject bù lại. Ngưỡng reject
+(`thresholds.json`) **chưa được build**, nên API hiện chạy với default (xem mục 5).
 
 ### Phase 4 — Export ONNX + parity + đóng gói bundle
 ```bash
@@ -285,7 +295,8 @@ là rò rỉ, mất giá trị báo cáo).
 
 ### Phase 5 — Serving
 ```bash
-echo tomato_2026_07_07_effv2s_ab12cd > model_bundles/active_version_tomato.txt
+# Bundle được phục vụ từ Hugging Face Hub (Mục 5). Cần HF_TOKEN cho private repo:
+export HF_TOKEN=hf_...        # Windows: set HF_TOKEN=... hoặc dùng .env
 uvicorn src.deploy.app:app --host 0.0.0.0 --port 8000
 ```
 → Chi tiết ở mục 5.
@@ -294,45 +305,54 @@ uvicorn src.deploy.app:app --host 0.0.0.0 --port 8000
 
 ## 5. Serving, LLM & frontend
 
-### 5.1. Kích hoạt bundle & chạy API
-API chỉ phục vụ bundle được trỏ bởi `active_version_<species>.txt`. Đổi con trỏ = đổi model
-(hoặc **rollback** về bản cũ):
+### 5.1. Tải bundle & chạy API
+API tải bundle model từ **Hugging Face Hub** (private repos khai báo trong `app.py` → `REPO_MAP`),
+xác thực bằng biến môi trường `HF_TOKEN`. Startup chỉ nạp leaf-gate (~6MB); mỗi model loài được
+**lazy load** khi có request đầu tiên cho loài đó.
 
 ```bash
-# trỏ tới bundle muốn phục vụ (lặp cho từng loài đã có bundle)
-echo tomato_2026_07_04_effv2s_ab12cd > model_bundles/active_version_tomato.txt
-# leaf-gate đặt bundle tại model_bundles/leaf_gate/ (API tự nạp nếu có)
-
+export HF_TOKEN=hf_...        # bắt buộc để tải private repo (Windows: set HF_TOKEN=... / .env)
 uvicorn src.deploy.app:app --host 0.0.0.0 --port 8000
 ```
+
+Ánh xạ loài → repo (trong `app.py`): `apple → ruhua2305/apple_effv2s_onnx`, `corn`, `grape`,
+`pepper_bell`, `tomato → ruhua2305/tomato_effv2s_onnx`, leaf-gate → `ruhua2305/leaf_gate_MobileNetV3Small`.
+
+> Muốn chạy **hoàn toàn local** (không mạng): đóng gói bundle bằng `build_bundle.py`, trỏ
+> `active_version_<species>.txt` và sửa `app.py` để đọc bundle cục bộ thay vì HF Hub.
 
 Mở trình duyệt: **http://localhost:8000** → frontend PhytoScan. Các endpoint:
 
 | Endpoint | Ý nghĩa |
 |---|---|
-| `GET /health`, `GET /ready` | Liveness / readiness |
+| `GET /health`, `GET /ready` | Liveness / readiness (`ready` chỉ true sau khi lazy-load ≥1 loài) |
 | `POST /predict?species=<sp>` (form `file`) | API thô (test/script) |
 | `POST /api/predict` (form `species,file,language`) | Cho frontend |
-| `GET /api/species`, `GET /api/diseases?species=` | Danh mục cho dropdown |
+| `GET /api/species`, `GET /api/diseases?species=` | Danh mục song ngữ cho dropdown |
 | `POST /api/consult` | Tư vấn LLM (mục 5.3) |
 
 ### 5.2. Chạy bằng Docker (serving CPU-only)
 ```bash
 docker build -t phytoscan-api:latest .
 docker run -p 8000:8000 \
-  -e LLM_API_KEY="sk-..." -e LLM_BASE_URL="https://api.openai.com/v1" -e LLM_MODEL="gpt-4o-mini" \
+  -e HF_TOKEN="hf_..." \
+  -e LLM_API_KEY="..." -e LLM_BASE_URL="https://api.groq.com/openai/v1" \
+  -e LLM_MODEL="llama-3.3-70b-versatile" \
   phytoscan-api:latest
 ```
+
+> ⚠️ Dockerfile hiện `EXPOSE 8000` + healthcheck cổng 8000 nhưng `CMD` chạy `--port 8080` → không
+> khớp (healthcheck sẽ fail). Cần thống nhất về một cổng trước khi dùng thật.
 
 ### 5.3. Tư vấn LLM ngoài (`/api/consult`)
 Cấu hình qua biến môi trường — **chỉ gửi text** (loài/bệnh/câu hỏi), không gửi ảnh/PII. Thiếu key
 hoặc lỗi mạng thì tự trả câu tĩnh an toàn.
 
 ```bash
-export LLM_API_KEY="sk-..."
-export LLM_BASE_URL="https://api.openai.com/v1"   # đổi sang Groq/DeepSeek/OpenRouter cho rẻ
-export LLM_MODEL="gpt-4o-mini"                     # model rẻ để tiết kiệm
-export LLM_MAX_TOKENS="400"
+export LLM_API_KEY="..."
+export LLM_BASE_URL="https://api.groq.com/openai/v1"   # mặc định code hợp Groq; đổi sang OpenAI/DeepSeek/OpenRouter tùy ý
+export LLM_MODEL="llama-3.3-70b-versatile"             # mặc định trong code
+export LLM_MAX_TOKENS="2048"                            # hạ xuống để tiết kiệm chi phí
 ```
 
 > ⚠️ Bảo mật: `/predict` và `/api/*` hiện **chưa** có auth/rate-limit. Trước khi mở Internet công
@@ -340,15 +360,52 @@ export LLM_MAX_TOKENS="400"
 > đây là endpoint tốn tiền theo lượt gọi.
 
 ### 5.4. Frontend PhytoScan
-`src/deploy/static/index.html` — landing page (theme xanh lá nền tối, font Inter) được `app.py`
-phục vụ tĩnh tại `/`. Danh sách loài lấy động từ `/api/species`, nên chỉ hiện loài đã có bundle
-active. Không cần build gì thêm.
+`src/deploy/static/index.html` — landing page (theme xanh lá nền tối, font Inter, song ngữ vi/en)
+được `app.py` phục vụ tĩnh tại `/`. Danh sách loài lấy từ `/api/species` (5 loài trong `REPO_MAP`),
+danh mục bệnh từ `/api/diseases` (dịch song ngữ trong `api_compat.py`). Không cần build gì thêm.
 
 ---
 
-## 6. Test & xử lý sự cố
+## 6. Cross-Test (so với nghiên cứu công bố)
 
-### 6.1. Chạy test
+Đặt pipeline cạnh công trình công bố để định lượng **domain gap lab→field** — model train trên ảnh
+lab (PlantVillage) chạy kém trên ảnh field thật, đúng phát hiện Mohanty et al. 2016
+([DOI:10.3389/fpls.2016.01419](https://doi.org/10.3389/fpls.2016.01419)).
+
+### 6.1. Chiều 2 — model công khai → holdout FIELD của mình (ĐÃ CHẠY)
+Chạy model chỉ-biết-lab trên holdout field, so với model per-species đã fine-tune:
+
+```bash
+python -m src.cross_test.run_direction2 --model mine       # baseline fine-tune field (offline)
+python -m src.cross_test.run_direction2 --model backbone   # backbone-38 của mình, chỉ biết lab (offline)
+python -m src.cross_test.run_direction2 --model deit       # DeiT-39 ngoài (cần transformers + tải HF ~330MB)
+```
+
+Kết quả (holdout field, macro-F1 trung bình 5 loài):
+
+| Model | Train trên | macro-F1 | Accuracy |
+|---|---|---:|---:|
+| **Của mình (fine-tune field)** | field | **0.595** | 0.780 |
+| DeiT-39 ngoài | PlantVillage lab | 0.479 | 0.559 |
+| Backbone-38 của mình | PRETRAIN lab | 0.312 | 0.236 |
+
+→ Model lab thua rõ model field-adapted. Chi tiết + bảng per-species + kiểm chứng "backbone không
+hỏng" (99.77% trên lab val): [`reports/cross_test/CROSS_TEST_RESULTS.md`](reports/cross_test/CROSS_TEST_RESULTS.md).
+
+Nguồn model công khai: [rescu/deit-base-patch16-224-finetuned-plantvillage](https://huggingface.co/rescu/deit-base-patch16-224-finetuned-plantvillage) (39 lớp, có id2label) ·
+backbone-38 = `checkpoints/backbone_pretrained.pt` (PlantVillage-38, [Hughes & Salathé 2015](https://arxiv.org/abs/1511.08060)).
+
+### 6.2. Chiều 1 — model mình → dataset công bố (CHƯA CHẠY)
+Test model mình trên PlantDoc. **Tạm gác** vì FINETUNE đã chứa 742 ảnh `PLANTDOC_` → cần **de-dup
+SHA256** trước khi so (nếu không sẽ rò rỉ, số liệu lạc quan giả). Khi làm:
+`git clone https://github.com/pratikkayal/PlantDoc-Dataset` (CC-BY-4.0), map 28 lớp PlantDoc ↔ 20
+lớp mình, de-dup hash, rồi dùng helper trong `src/cross_test/run_cross_test.py`.
+
+---
+
+## 7. Test & xử lý sự cố
+
+### 7.1. Chạy test
 ```bash
 pytest src/tests/
 ```
@@ -356,20 +413,20 @@ Bộ test tách hai loại: test **logic thuần** (checksum, class-mapping, rea
 parity-metrics, preprocessing, upload-security) chạy mọi nơi; test cần **torch/onnx/PIL** tự
 `skip` nếu thiếu dependency, và sẽ chạy đầy đủ trên máy đã cài `requirements.txt`.
 
-### 6.2. Lỗi thường gặp
+### 7.2. Lỗi thường gặp
 
 | Triệu chứng | Nguyên nhân & cách xử lý |
 |---|---|
 | `probe_vram ... OOM` khi train | 4GB không đủ ở batch hiện tại → giảm `batch_size` (16→8) và/hoặc tăng `accumulation_steps` để giữ effective batch. Cân nhắc backbone B0. |
 | `RuntimeError: OOM` giữa chừng | Đóng app ngốn VRAM khác; đặt `img_size: 224`; đảm bảo `use_amp: true`. |
 | `FileNotFoundError` split manifest | Chưa chạy Phase 0 (`split_builder`). |
-| `KeyError` khi load class_mapping | class_index không liên tục → kiểm tên lớp khớp `taxonomy_v1.yaml`. |
+| `KeyError` khi load class_mapping | class_index không liên tục → chạy lại `split_builder` và kiểm `class_mapping.json` của bundle (index sinh từ sort tên thư mục lớp). |
 | Parity FAIL | ONNX lệch PyTorch → kiểm opset, tránh op động; nếu do INT8 thì đo lại macro-F1, cân nhắc FP16. |
-| API `species_unavailable` | Chưa đặt `active_version_<species>.txt` hoặc bundle lỗi. |
+| API `500 Lỗi tải model` | `HF_TOKEN` chưa set / sai, hoặc repo HF không truy cập được → kiểm token + `REPO_MAP`. |
 | Import lỗi khi chạy `api_compat` trực tiếp | Chỉ chạy qua `uvicorn src.deploy.app:app`, không chạy `api_compat.py` riêng. |
 | DataLoader treo/chậm trên Windows | Giảm `num_workers` (2 → 0) nếu gặp lỗi spawn. |
 
-### 6.3. Lưu ý phần cứng (4GB VRAM là ràng buộc hạng nhất)
+### 7.3. Lưu ý phần cứng (4GB VRAM là ràng buộc hạng nhất)
 - **AMP + gradient accumulation + PEFT** bắt buộc để vừa 4GB. Không dùng batch thật 32/64.
 - `probe_vram_usage()` chạy đầu mỗi script train — OOM thì dừng có thông báo, không crash giữa chừng.
 - `num_workers=2` (16GB RAM); **không** dùng 8.
