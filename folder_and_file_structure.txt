@@ -2,7 +2,7 @@
 D:\DAT301m_Project\Final_Pipeline
   .env
   .gitignore
-  ... và 12 file khác
+  ... và 14 file khác
 
 D:\DAT301m_Project\Final_Pipeline\checkpoints
   backbone_pretrained.pt
@@ -626,16 +626,31 @@ D:\DAT301m_Project\Final_Pipeline\model_bundles\tomato_2026_07_07_effv2s_ab12cd
   checksums.sha256
   ... và 6 file khác
 
+D:\DAT301m_Project\Final_Pipeline\raw_data_processing
+  classification_log.csv
+  classify_lab_field_clip.py
+  ... và 7 file khác
+
+D:\DAT301m_Project\Final_Pipeline\reports
+
+D:\DAT301m_Project\Final_Pipeline\reports\cross_test
+  CROSS_TEST_RESULTS.md
+  direction2_backbone_pv38.jsonl
+  ... và 5 file khác
+
 D:\DAT301m_Project\Final_Pipeline\src
   config.py
   __init__.py
 
 D:\DAT301m_Project\Final_Pipeline\src\cross_test
-  run_cross_test.py
-  __init__.py
+  label_maps.py
+  public_models.py
+  ... và 3 file khác
 
 D:\DAT301m_Project\Final_Pipeline\src\cross_test\__pycache__
-  run_cross_test.cpython-310.pyc
+  label_maps.cpython-311.pyc
+  public_models.cpython-311.pyc
+  ... và 3 file khác
 
 D:\DAT301m_Project\Final_Pipeline\src\data
   augmentation.py
