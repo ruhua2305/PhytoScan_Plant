@@ -1,8 +1,7 @@
 # DAT301m — Tài liệu Giải thích Toàn diện Dự án (bản chi tiết)
 ## Phân loại Bệnh Cây Trồng qua Ảnh Lá — PhytoScan
 
-> **Tài liệu này dành cho ai:** cho chính bạn — để hiểu **tường minh từng thứ** trong dự án, đủ để trả lời giảng viên bất kỳ câu hỏi nào về lý thuyết hoặc "dòng code này làm gì, chạy ra sao".
->
+
 > **Cách tổ chức:** đọc theo **đúng thứ tự quy trình huấn luyện** (data → chia → pretrain → fine-tune → đánh giá → đóng gói → phục vụ). Mỗi **file code** được mổ xẻ theo **từng thành phần bên trong** (hàm/class/biến), giải thích *nó nhận gì, làm gì từng bước, trả gì, ai gọi nó*. Mọi **thuật ngữ** được giải thích cụ thể ngay lần đầu xuất hiện, kèm ví dụ.
 >
 > **Ký hiệu trong tài liệu:**
@@ -246,6 +245,48 @@ Toàn bộ việc "điều chỉnh cách nhìn" là tự động, dựa trên vi
 ## Phần C — Quy trình huấn luyện tổng thể
 
 > Đây là "bản đồ" nối các file với nhau. Đọc phần này trước, rồi vào Phần D xem chi tiết từng file.
+
+### C.0. Trước Giai đoạn 0 — dựng dữ liệu thô thành 2 tập (upstream)
+
+> ⚠️ **Sơ bộ.** Đây là phần **chưa** nằm trong `src/` mà ở thư mục `raw_data_processing/` — nó tạo ra hai tập `1. PRETRAIN DATASET` và `2. FINETUNE DATASET` mà toàn bộ pipeline `src/` giả định là đã có sẵn. Hiểu phần này để trả lời câu "dữ liệu field ở đâu ra?".
+
+🧠 **Vấn đề:** ta có **11 dataset thô** tải từ nhiều nguồn (tổng ~280k ảnh), lẫn lộn ảnh **lab** (nền sạch), ảnh **field** (nền thật), và cả ảnh **quả** (không phải lá). Ta cần: (a) giữ PlantVillage làm tập **pretrain** (ảnh lab), (b) lọc ra ảnh **field-leaf sạch** từ các dataset còn lại làm tập **fine-tune**.
+
+📁 **4 bước** (theo `raw_data_processing/`):
+
+```text
+BƯỚC 1 — datasets_grouping(for_classify_images).py
+  Chọn "candidate species" = loài trong PlantVillage có ĐỦ CẢ nhãn healthy LẪN nhãn bệnh
+  (loài chỉ có healthy hoặc chỉ có bệnh thì bỏ, vì không phân loại được).
+  Chia 11 dataset thành 3 nhóm rồi lọc khác nhau:
+    • ONFIELD (field chắc chắn)   → copy thẳng          → ONFIELD_LEAF_DETECTED
+        PlantDoc, FieldPlant, Plant Pathology 2020, Plant Pathology 2021
+    • LAB_SUSPEN (nghi lẫn lab)   → CLIP lab/field:
+        field → ONFIELD_LEAF_DETECTED, lab → LAB_LEAF_DETECTED
+        Master Plant Disease Dataset, Plant Disease Classification Merged,
+        Tomato-Village-main, TomatoDataset, NGLD
+    • FRUIT_SUSPEN (nghi lẫn quả) → CLIP fruit/leaf trước;
+        nếu là leaf thì CLIP tiếp lab/field; nếu là quả thì bỏ
+        plantseg
+
+BƯỚC 2 — del_unrelevant_label.py  (finalize_candidates)
+  • Xóa mọi nhãn bệnh trong LAB nếu nhãn đó KHÔNG có trong ONFIELD.
+  • Xóa cả loài nếu (ONFIELD+LAB) không còn đủ cả healthy lẫn bệnh.
+
+BƯỚC 3 — đổi tên (thủ công)
+  ONFIELD_LEAF_DETECTED  →  2. FINETUNE DATASET   (ảnh field, miền đích)
+  PlantVillage           →  1. PRETRAIN DATASET   (ảnh lab, học đặc trưng)
+
+BƯỚC 4 — dedup (đã chạy)
+  • Trùng lặp tuyệt đối (exact-dup): cả 2 tập.
+  • Gần trùng (near-duplicate): chỉ tập FINETUNE.
+```
+
+🧠 **CLIP là gì ở đây:** CLIP (mô hình vision-language) chấm điểm ảnh khớp với câu mô tả nào hơn (VD "a leaf photo in a laboratory" vs "a leaf photo in the field") → dùng làm bộ phân loại **zero-shot** để tách lab/field và fruit/leaf mà không cần train riêng.
+
+⚠️ **Code cũ (V1) đã bị thay:** `combined_all_into_a_dataset(except_PV).py` + `classify_lab_field_clip.py` + `classification_log.csv` là thế hệ đầu — gộp tất cả vào một `Field_Raw` rồi mới CLIP lab/field, **không** lọc quả. V2 (Bước 1 ở trên) lọc thông minh theo từng dataset. File `lab_field_fruit_leaf_split.py` gần như trùng `datasets_grouping(...)`.
+
+📊 **Kết quả:** `1. PRETRAIN DATASET` = 53,599 ảnh / 38 lớp; `2. FINETUNE DATASET` = 18,354 ảnh / 20 lớp field trên 5 loài. (Sau đó lớp `Tomato/Spider_mites` được bổ sung 7 → 55 ảnh, nâng tổng FINETUNE lên **18,402** — con số dùng xuyên suốt tài liệu training.)
 
 ### C.1. Sơ đồ 7 giai đoạn
 

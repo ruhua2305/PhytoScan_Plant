@@ -139,6 +139,48 @@ Bản này đồng bộ tài liệu với code + dữ liệu thực tế. Các s
 
 ## 2. Dataset Analysis
 
+### 2.0. Pipeline tiền xử lý dữ liệu thô (upstream — trước Phase 0)
+
+> **Sơ bộ (đối chiếu code trong `raw_data_processing/`, 2026-07-12).** Đây là bước **trước** khi có `1. PRETRAIN DATASET` và `2. FINETUNE DATASET`. Mục tiêu: từ **11 dataset thô** gộp lại, tách ảnh field-leaf sạch để fine-tune, giữ PlantVillage làm pretrain. Có **hai thế hệ code** trong thư mục; V2 (grouping theo dataset) thay thế V1 (dump-all rồi CLIP).
+
+**11 dataset nguồn** (`raw_datasets_structure.txt`):
+
+| Dataset | Ảnh thô | Nhóm xử lý |
+|---|---:|---|
+| PlantVillage | 54,305 | **PRETRAIN** (không qua pipeline field) |
+| Master Plant Disease Dataset | 66,953 | LAB_SUSPEN |
+| Plant Disease Classification Merged Dataset | 79,086 | LAB_SUSPEN |
+| Tomato-Village-main | 24,546 | LAB_SUSPEN |
+| TomatoDataset | 1,609 | LAB_SUSPEN |
+| Niphad Grape Leaf Disease Dataset (NGLD) | 2,726 | LAB_SUSPEN |
+| plantseg | 22,916 | FRUIT_SUSPEN |
+| PlantDoc | 2,922 | ONFIELD |
+| FieldPlant | 5,156 | ONFIELD |
+| Plant Pathology 2020 | 3,642 | ONFIELD |
+| Plant Pathology 2021 | 18,635 | ONFIELD |
+
+**Ý tưởng pipeline (đúng thứ tự):**
+
+| # | Bước | File (V2) | Vào → Ra |
+|---|---|---|---|
+| **1** | Map label + chọn candidate species (loài PV có **≥1 nhãn healthy + ≥1 nhãn disease**) + phân 3 nhóm + CLIP theo nhóm | `datasets_grouping(for_classify_images).py` | 11 dataset thô → `ONFIELD_LEAF_DETECTED` + `LAB_LEAF_DETECTED` |
+| **2** | Prune: xóa nhãn LAB không có trong ONFIELD; xóa loài thiếu healthy/disease | `del_unrelevant_label.py` (`finalize_candidates`) | prune tại chỗ 2 thư mục |
+| **3** | Đổi tên | *(thủ công)* | `ONFIELD_LEAF_DETECTED` → **`2. FINETUNE DATASET`**; `PlantVillage` → **`1. PRETRAIN DATASET`** |
+| **4** | Dedup exact (cả 2 tập) + near-duplicate (chỉ FINETUNE) — **đã chạy** | *(script ngoài `raw_data_processing/`)* | tập sạch cuối |
+
+**Logic phân nhóm ở Bước 1** (quyết định cách lọc từng dataset):
+
+- **ONFIELD** (field chắc chắn → copy thẳng, **không** CLIP): PlantDoc, FieldPlant, Plant Pathology 2020, Plant Pathology 2021.
+- **LAB_SUSPEN** (nghi lẫn ảnh lab → CLIP nhị phân lab/field: field → ONFIELD, lab → LAB): Master Plant Disease Dataset, Plant Disease Classification Merged Dataset, Tomato-Village-main, TomatoDataset, NGLD.
+- **FRUIT_SUSPEN** (nghi lẫn ảnh quả → CLIP fruit/leaf trước; nếu leaf mới CLIP lab/field; nếu fruit thì bỏ): plantseg.
+- **PRETRAIN**: PlantVillage giữ nguyên (chỉ đổi tên, dùng cho Phase 1).
+
+> **Code V1 đã bị thay thế (giữ để tham chiếu):** `combined_all_into_a_dataset(except_PV).py` (dump toàn bộ trừ PV vào `Field_Raw`, không tách theo dataset), `classify_lab_field_clip.py` (CLIP lab/field mù trên `Field_Raw` → `Field_Clean`/`Lab_Detected`), `classification_log.csv` (log chạy V1). V1 **không** có bước lọc quả và CLIP chạy trên tập đã gộp; V2 lọc theo từng dataset nên chính xác hơn. File `lab_field_fruit_leaf_split.py` gần trùng 1:1 với `datasets_grouping(...)` → nên archive một bản.
+
+**Kết quả cuối** (`processed_datasets_structure.txt`): `1. PRETRAIN DATASET` = **53,599 ảnh / 38 lớp** (train+val kiểu PlantVillage); `2. FINETUNE DATASET` = **18,354 ảnh / 20 lớp field-leaf** trên 5 loài (Apple, Corn, Grape, Pepper bell, Tomato).
+
+> **Lưu ý số liệu:** `processed_datasets_structure.txt` là **ảnh chụp trước khi bổ sung Spider_mites** (khi đó `Tomato/Spider_mites` = 7 ảnh, tổng FINETUNE = 18,354). Bản dữ liệu hiện dùng cho training đã tăng Spider_mites → **55 ảnh**, tổng **18,402** (Mục 2.2). Số 18,402 là con số chuẩn cho mọi bảng split/metric bên dưới.
+
 ### 2.1. Phạm vi dataset & ranh giới nguồn
 
 Dự án dùng **hai lớp dữ liệu** với vai trò khác nhau. Lớp PRETRAIN hữu ích để học đặc trưng texture lá/bệnh chung; lớp FINETUNE mới là **miền đích thật** cho triển khai field. Hai lớp không được trộn tuỳ tiện: ảnh kiểu PlantVillage có thể thổi phồng validation accuracy nếu lọt vào protocol test cuối.
