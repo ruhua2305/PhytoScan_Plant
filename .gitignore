@@ -23,7 +23,7 @@ logs/
 checkpoints/
 experiments/
 reports/
-data/
+/data/
 *.tmp
 
 # Secrets
