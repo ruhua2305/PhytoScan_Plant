@@ -508,7 +508,7 @@ Hằng số: `IMAGENET_MEAN=(0.485,0.456,0.406)`, `IMAGENET_STD=(0.229,0.224,0.2
 ---
 
 ### D4. `domain_augmentation.py`
-📁 [`src/data/domain_augmentation.py`](src/data/domain_augmentation.py) — **Ghép lá lab lên nền field (giảm domain gap).** ⚠️ *Mặc định TẮT — hướng mở rộng.*
+📁 [`src/data/domain_augmentation.py`](src/data/domain_augmentation.py) — **Ghép lá lab lên nền field (giảm domain gap).** ✅ *Đã bật ở pretrain (`domain_aug.enabled=true`, `p=0.4`).*
 
 🧠 **Ý tưởng (Jeon 2025):** ảnh lab có nền sạch, model dễ "gian lận" bằng cách nhìn nền thay vì lá. Nếu cắt lá ra và dán lên nền field ngẫu nhiên, model buộc phải nhìn **lá** → quen với nền lộn xộn của ảnh thật.
 
@@ -524,7 +524,7 @@ Hằng số: `IMAGENET_MEAN=(0.485,0.456,0.406)`, `IMAGENET_STD=(0.229,0.224,0.2
 🔧 **class `FieldBackgroundAugment`** — dùng trong `PretrainDataset.__getitem__`.
 - `__call__(ảnh)`: với xác suất `p` (≈0.4) và có nền → ghép nền field ngẫu nhiên; ngược lại trả ảnh gốc.
 
-**Ai gọi:** `train_pretrain.py` (nếu bật `domain_aug` trong config; hiện tắt).
+**Ai gọi:** `train_pretrain.py` (đọc `domain_aug` trong config; hiện đã bật, `p=0.4`).
 
 ---
 

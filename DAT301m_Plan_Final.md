@@ -483,7 +483,7 @@ Biện pháp giảm domain gap — **đang dùng** vs **tùy chọn** (code có 
 - ✅ Dùng PRETRAIN **chỉ** để khởi tạo backbone; dùng val/holdout **chỉ từ field** cho mọi production metric.
 - ✅ Augmentation photometric (RandAugment, ColorJitter, JPEG, noise) khi fine-tune (Mục 4.3).
 - ✅ Calibration + khung OOD/reject để lỗi field **hiện ra** thay vì bị giấu sau top-1 accuracy.
-- 🔵 **Field-background recomposition** (Jeon et al., 2025): code có ở `domain_augmentation.py` nhưng **không bật** ở pretrain hiện tại (`domain_aug` chưa kích hoạt). Hướng cải thiện: bằng chứng gốc +9.9–23.6 điểm % trên 4/5 loài.
+- ✅ **Field-background recomposition** (Jeon et al., 2025): code ở `domain_augmentation.py`, **đã bật** ở pretrain (`domain_aug.enabled=true`, `p=0.4`, 18354 nền field). Bằng chứng gốc +9.9–23.6 điểm % trên 4/5 loài.
 - 🔵 **MMD loss** (Wu et al., 2023): code có, `domain_mmd.enabled=false` mặc định.
 - ✅ **Đo domain gap định lượng (Chiều 2 — ĐÃ CHẠY):** model chỉ-biết-lab (DeiT-39 ngoài, backbone-38 của mình) chạy trên holdout field → macro-F1 0.479 và 0.312 so với **0.595** của model fine-tune field. Xác nhận domain gap (Mục 6.5).
 - 🔵 **Chiều 1 trên PlantDoc (lab→field zero-shot/+adaptation):** là kế hoạch, chưa chạy (cần de-dup hash).
