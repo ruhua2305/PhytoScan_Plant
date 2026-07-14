@@ -14,7 +14,7 @@ tập trung vào **cách tổ chức dữ liệu và cách chạy**.
 | Hạng mục | Giá trị |
 |---|---|
 | Phần cứng đích | RTX 3050 Ti Laptop **4GB VRAM** / **16GB RAM** / Windows |
-| Backbone | EfficientNetV2-S (primary), B0 (fallback) |
+| Backbone | Loài: EfficientNetV2-S (`tf_efficientnetv2_s.in1k`); Leaf Gate: MobileNetV3-Small |
 | Định tuyến | Per-species: 5 model riêng, người dùng chọn loài |
 | Chia dữ liệu | 70/10/10/10 = train/calib/val/holdout, manifest khoá + SHA256 |
 | Lớp ít mẫu nhất | `Tomato/Spider_mites` (**55 ảnh**) — vẫn train head thường; không còn lớp <30 |
@@ -108,6 +108,13 @@ D:\DAT301m_Project\Final_Pipeline\data\
 > `class_mapping.json` của bundle và dùng chung cho ONNX/API. Frontend dịch sang nhãn hiển thị
 > song ngữ (en/vi) trong `api_compat.py`.
 
+> **Cách dựng dữ liệu nguồn:** hai dataset trên được gom/lọc từ nhiều nguồn field (PlantDoc,
+> FieldPlant, ...) bằng các script trong [`raw_data_processing/`](raw_data_processing/)
+> (`classify_lab_field_clip.py` phân loại lab/field bằng CLIP, `del_unrelevant_label.py` lọc nhãn,
+> `combined_all_into_a_dataset(except_PV).py` gộp). Prefix tên file (`MASTER_`, `PLANTDOC_`,
+> `FIELDPLANT_`, `MERGED_`) cho biết nguồn gốc. Đây là bước tiền xử lý một lần, không nằm trong
+> pipeline train ở Mục 4.
+
 ### 2.2. Dữ liệu SINH RA (code tạo — nằm TRONG `Final_Pipeline`)
 
 Bạn không tạo tay các thư mục này; pipeline sẽ ghi vào:
@@ -118,8 +125,9 @@ D:\DAT301m_Project\Final_Pipeline\
 │   ├── splits\                   # split_builder.py -> manifest 70/10/10/10 + SHA256
 │   │   ├── apple_split_v1.json   corn_split_v1.json   grape_split_v1.json
 │   │   └── pepper_bell_split_v1.json   tomato_split_v1.json
-│   ├── golden\                   # BẠN tạo: golden set cho parity/smoke test
-│   │   └── tomato.json           # {"images": ["<abs_path>", ...]} — vài ảnh chuẩn mỗi loài
+│   ├── golden\                   # golden set cho parity/smoke test (đã có sẵn 5 loài)
+│   │   ├── apple.json corn.json grape.json pepper_bell.json tomato.json
+│   │   └── # {"images": ["<abs_path>", ...]} — sinh bằng create_golden_random.py
 │   └── leaf_gate\                # dataset Leaf Gate (mục 3): leaf tự trích + not_leaf bạn thêm
 │       ├── train\{leaf, not_leaf}\ *.jpg
 │       ├── calib\{leaf, not_leaf}\ *.jpg
@@ -139,7 +147,16 @@ D:\DAT301m_Project\Final_Pipeline\
 
 ### 2.3. Golden set (cho Phase 4 parity)
 
-Tạo tay file JSON liệt kê vài ảnh đại diện mỗi loài (lấy từ split `train`/`val`, tránh holdout):
+Golden set liệt kê vài ảnh đại diện mỗi loài (lấy từ split `train`/`val`, tránh holdout) để so
+PyTorch vs ONNX (parity) và smoke test trước khi deploy. Dự án **đã có sẵn** 5 file
+`data/golden/<species>.json`. Muốn sinh lại:
+
+```bash
+python create_golden_random.py
+```
+
+Script đọc `data/splits/<species>_split_v1.json`, lấy ≥3 ảnh/lớp (tối đa ~30 ảnh/loài) từ split
+`train`/`val` với seed cố định. Định dạng file:
 
 ```json
 // data/golden/tomato.json
@@ -149,16 +166,14 @@ Tạo tay file JSON liệt kê vài ảnh đại diện mỗi loài (lấy từ 
 ] }
 ```
 
-Golden set dùng để so PyTorch vs ONNX (parity) và smoke test trước khi deploy — nên chọn ảnh
-"kinh điển", rõ ràng, đủ các lớp chính của loài.
-
 ---
 
 ## 3. Dataset Leaf Gate
 
-Leaf Gate là bộ phân loại **nhị phân**: `leaf` (lá cây hợp lệ) vs `not_leaf` (mọi thứ còn lại).
-Nó là **chốt chặn đầu tiên** — chặn ảnh rác trước khi đưa vào model loài. Dự án **chưa** có sẵn
-ảnh `not_leaf`, bạn phải tự dựng theo hướng dẫn dưới.
+Leaf Gate là bộ phân loại **nhị phân** (backbone MobileNetV3-Small): `leaf` (lá cây hợp lệ) vs
+`not_leaf` (mọi thứ còn lại). Nó là **chốt chặn đầu tiên** — chặn ảnh rác trước khi đưa vào model
+loài. Dataset `data/leaf_gate/{train,calib,val}/{leaf,not_leaf}/` **đã có sẵn** trong dự án; các mục
+dưới mô tả cách nó được dựng (để tái tạo hoặc mở rộng).
 
 ### 3.1. Lớp `leaf` (positive) — dùng script tự trích
 
@@ -203,19 +218,28 @@ Mục tiêu: dạy gate từ chối mọi ảnh **không có một chiếc lá l
 **Nguồn ảnh negative gợi ý:** ImageNet/COCO/Open Images (lọc lớp không liên quan lá); ảnh nền/đồ
 vật tự chụp bằng điện thoại (đúng thiết bị người dùng). Bắt đầu ~1.500–3.000 ảnh là đủ.
 
+Repo có sẵn script [`download_not_leaf.py`](download_not_leaf.py) tải negative từ **Open Images v7**
+(qua FiftyOne), lọc ~50 lớp không-phải-lá (hoa/quả/tay/đồ vật/cây tán xa...) và tự export chia
+80/10/10 vào `data/leaf_gate/{train,calib,val}/not_leaf/`:
+
+```bash
+pip install fiftyone            # chưa nằm trong requirements.txt
+python download_not_leaf.py     # tải ~3.500 ảnh, chia 80/10/10
+```
+
 ### 3.3. Cân bằng, split & license
 
 - Giữ tỷ lệ `leaf : not_leaf` khoảng **1:1 đến 1:1.5**. Lệch quá → gate thiên vị.
 - Chia `not_leaf` theo cùng **80/10/10** vào `{train,calib,val}/not_leaf/`, stratified theo nhóm.
 - **`[Cần verify license]`** cho MỌI ảnh negative từ nguồn ngoài — ghi lại nguồn + giấy phép.
 - Strip EXIF (GPS/thiết bị) khỏi ảnh tự chụp nếu định chia sẻ dataset.
-- Cấu trúc đích cuối cùng (kiểm lại trước khi train):
+- Cấu trúc đích cuối cùng (dataset trong repo hiện đã build đầy đủ):
 
 ```
-Final_Pipeline/data/leaf_gate/
-├── train/  leaf/ (nhiều)      not_leaf/ (≈ tương đương)
-├── calib/  leaf/ (~10%)       not_leaf/ (~10%)
-└── val/    leaf/ (~10%)       not_leaf/ (~10%)
+Final_Pipeline/data/leaf_gate/          # đã có sẵn trong repo
+├── train/  leaf/ (~1.944)     not_leaf/ (~2.799)
+├── calib/  leaf/ (~242)       not_leaf/ (~350)
+└── val/    leaf/ (~245)       not_leaf/ (~348)
 ```
 
 Train + hiệu chỉnh:
@@ -279,12 +303,16 @@ python -m src.export.export_onnx  --config configs/finetune_tomato.yaml \
 python -m src.export.parity_test  --bundle model_bundles/tmp/tomato/ \
        --pt-ckpt checkpoints/model_tomato.pt --golden-set data/golden/tomato.json
 python -m src.export.build_bundle --species tomato \
-       --version tomato_2026_07_04_effv2s_ab12cd \
+       --version tomato_2026_07_07_effv2s_ab12cd \
        --onnx model_bundles/tmp/tomato/model.onnx --git-commit <commit>
 ```
 → `export_onnx` sinh `model.onnx` + `class_mapping.json`. `parity_test` **chặn** nếu top-1 lệch
 hoặc sai số > atol. `build_bundle` gom mọi artefact → `manifest.json` + `checksums.sha256`, và
-**chặn release** nếu thiếu ONNX/class_mapping. Lặp cho 5 loài + leaf_gate.
+**chặn release** nếu thiếu ONNX/class_mapping. Lặp cho 5 loài.
+
+> Riêng **leaf-gate** export bằng script gốc [`export_leaf_gate.py`](export_leaf_gate.py) (không
+> qua `src.export`): `python export_leaf_gate.py` → sinh `model_bundles/leaf_gate/model.onnx` +
+> `calibration.json`.
 
 ### Phase 4b — Holdout (CHỈ CHẠY MỘT LẦN, sau khi chốt mọi thứ)
 ```bash
@@ -350,10 +378,16 @@ hoặc lỗi mạng thì tự trả câu tĩnh an toàn.
 
 ```bash
 export LLM_API_KEY="..."
-export LLM_BASE_URL="https://api.groq.com/openai/v1"   # mặc định code hợp Groq; đổi sang OpenAI/DeepSeek/OpenRouter tùy ý
+export LLM_BASE_URL="https://api.groq.com/openai/v1"   # mặc định code là OpenAI (api.openai.com/v1); đặt biến này để chuyển Groq/DeepSeek/OpenRouter
 export LLM_MODEL="llama-3.3-70b-versatile"             # mặc định trong code
 export LLM_MAX_TOKENS="2048"                            # hạ xuống để tiết kiệm chi phí
+export LLM_TIMEOUT="15"                                 # giây, timeout mỗi lượt gọi
 ```
+
+> ⚠️ Default **không tự khớp**: `LLM_BASE_URL` mặc định là OpenAI nhưng `LLM_MODEL` mặc định lại là
+> model Groq (`llama-3.3-70b-versatile`). Phải đặt cả hai cùng một nhà cung cấp — ví dụ dùng Groq
+> thì set `LLM_BASE_URL=https://api.groq.com/openai/v1`, dùng OpenAI thì đổi `LLM_MODEL` sang model
+> OpenAI.
 
 > ⚠️ Bảo mật: `/predict` và `/api/*` hiện **chưa** có auth/rate-limit. Trước khi mở Internet công
 > khai phải thêm API key + rate-limiting + HTTPS. Riêng `/api/consult` nên có rate-limit riêng vì
