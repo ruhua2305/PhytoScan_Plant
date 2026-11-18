@@ -6,7 +6,6 @@ import numpy as np
 import onnxruntime as ort
 from PIL import Image
 
-
 # ── PlantVillage 38-class labels ───────────────────────────────────────────────
 CLASS_NAMES: list[str] = [
     "Apple___Apple_scab",

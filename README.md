@@ -1,155 +1,87 @@
-# 🌿 LeafScan — AI Plant Disease Detector
+﻿# LeafScan — Plant Disease Detection API
 
-A full-stack web app that diagnoses plant diseases from leaf photos using your fine-tuned **EfficientNet-B2 ONNX model**.
+FastAPI service that classifies a leaf photo into one of 38 PlantVillage classes with an EfficientNet-B2 model exported to ONNX.
 
-**Stack:** FastAPI · ONNX Runtime · React · Vite
-
----
-
-## Project Structure
+## Architecture
 
 ```
-plant-disease-app/
-├── backend/
-│   ├── main.py          # FastAPI app — CORS, /predict, /health endpoints
-│   ├── inference.py     # ONNX model loader, image preprocessing, softmax
-│   ├── requirements.txt
-│   └── models/          # ← put plant_disease_model.onnx here
-└── frontend/
-    ├── index.html
-    ├── package.json
-    ├── vite.config.js   # Dev proxy to backend
-    └── src/
-        ├── App.jsx           # State machine: idle → preview → loading → result
-        ├── index.css         # Full design system (no Tailwind dependency)
-        ├── components/
-        │   ├── Header.jsx
-        │   ├── UploadZone.jsx    # Drag-and-drop with specimen-tray aesthetics
-        │   ├── LoadingSpinner.jsx # Scan-line animation during inference
-        │   ├── DiagnosisCard.jsx  # Full result card with treatment steps
-        │   └── HowItWorks.jsx
-        └── utils/
-            └── diseaseInfo.js    # Rich metadata for all 38 PlantVillage classes
+client
+  |
+  | POST /predict (JPEG, PNG, or WebP, max 10 MB)
+  v
+FastAPI (backend/app/main.py)
+  |
+  | Pillow decode + resize + ImageNet normalize
+  v
+ONNX Runtime (backend/app/inference.py)
+  |
+  v
+backend/models/plant_disease_model.onnx
 ```
 
----
+## Run with Docker
 
-## Quick Start
+From the repository root:
 
-### 1. Set up the backend
+```bash
+docker compose up --build
+```
+
+The API listens on `http://localhost:8000`. `GET /health` is the container health check.
+
+## Run locally
+
+Requires Python 3.11+.
 
 ```bash
 cd backend
-
-# Create and activate a virtual environment
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Copy your ONNX model
-mkdir -p models
-cp /path/to/plant_disease_model.onnx models/
-
-# Start the API server
-uvicorn main:app --reload --port 8000
+.venv\Scripts\activate
+pip install -r requirements.txt ".[dev]"
+uvicorn app.main:app --reload --port 8000
 ```
 
-> **GPU acceleration:** Replace `onnxruntime` with `onnxruntime-gpu` in requirements.txt
-> if you have a CUDA-capable GPU.
+On Unix, activate with `source .venv/bin/activate`.
 
-Visit `http://localhost:8000/docs` to explore the auto-generated API documentation.
-
-### 2. Set up the frontend
+## Example request
 
 ```bash
-cd frontend
-
-npm install
-npm run dev
+curl -F "file=@leaf.jpg;type=image/jpeg" http://localhost:8000/predict
 ```
 
-Open `http://localhost:5173` in your browser.
+A successful response has this shape:
 
----
-
-## API Reference
-
-### `POST /predict`
-
-Upload a leaf image and receive a disease prediction.
-
-**Request:** `multipart/form-data` with a `file` field (JPEG, PNG, or WebP, max 10 MB).
-
-**Response:**
 ```json
 {
-  "top_prediction": { "label": "Tomato___Early_blight", "confidence": 0.9421 },
-  "top_5": [
-    { "label": "Tomato___Early_blight",    "confidence": 0.9421 },
-    { "label": "Tomato___Late_blight",     "confidence": 0.0312 },
-    { "label": "Tomato___Target_Spot",     "confidence": 0.0148 },
-    { "label": "Tomato___Bacterial_spot",  "confidence": 0.0083 },
-    { "label": "Tomato___Septoria_leaf_spot", "confidence": 0.0036 }
-  ],
-  "inference_ms": 47.3,
+  "top_prediction": { "label": "Tomato___Early_blight", "confidence": 0.9 },
+  "top_5": [{ "label": "Tomato___Early_blight", "confidence": 0.9 }],
+  "inference_ms": 0.0,
   "plant": "Tomato",
   "disease": "Early Blight",
   "is_healthy": false
 }
 ```
 
-### `GET /health`
+`GET /health` returns `{ "status": "ok", "model_loaded": true }` once the model file is present.
 
-Returns `{ "status": "ok", "model_loaded": true }`.
+## Metrics
 
----
+These numbers have not been measured on this checkout. Do not treat the placeholders as results.
 
-## Supported Plants & Diseases (38 classes)
+| Metric | Value |
+| --- | --- |
+| Top-1 accuracy | TODO |
+| Top-5 accuracy | TODO |
+| p50 inference latency | TODO |
+| p95 inference latency | TODO |
+| Evaluation dataset | TODO |
 
-| Plant      | Diseases Detected |
-|------------|-------------------|
-| Apple      | Apple Scab, Black Rot, Cedar Rust, Healthy |
-| Corn       | Gray Leaf Spot, Common Rust, Northern Leaf Blight, Healthy |
-| Grape      | Black Rot, Esca (Black Measles), Leaf Blight, Healthy |
-| Tomato     | Bacterial Spot, Early Blight, Late Blight, Leaf Mold, Septoria Leaf Spot, Spider Mites, Target Spot, TYLCV, Mosaic Virus, Healthy |
-| Potato     | Early Blight, Late Blight, Healthy |
-| Peach      | Bacterial Spot, Healthy |
-| Bell Pepper | Bacterial Spot, Healthy |
-| Cherry     | Powdery Mildew, Healthy |
-| Strawberry | Leaf Scorch, Healthy |
-| Orange     | Citrus Greening (HLB) |
-| Blueberry  | Healthy |
-| Raspberry  | Healthy |
-| Soybean    | Healthy |
-| Squash     | Powdery Mildew |
+## Checks
 
----
+[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
 
-## Environment Variables
-
-| Variable         | Default                    | Description |
-|------------------|----------------------------|-------------|
-| `VITE_API_URL`   | `http://localhost:8000`    | Backend URL for the frontend |
-
-Create `frontend/.env.local`:
-```
-VITE_API_URL=http://localhost:8000
-```
-
----
-
-## Production Deployment
-
-**Backend:** Deploy with `uvicorn main:app --host 0.0.0.0 --port 8000` behind Nginx, or containerize with Docker.
-
-**Frontend:** Run `npm run build` and serve the `dist/` folder via Nginx, Vercel, or any static host.
-
-Update CORS origins in `main.py` for your production domain.
-
----
+CI runs `ruff check`, `pytest --cov`, and `docker build` (no push) on every push and pull request. Replace `OWNER/REPO` after the repository has a GitHub remote.
 
 ## Disclaimer
 
-For educational and research purposes only. Always consult a certified agronomist or plant pathologist for critical crop management decisions.
+For education and research only. Confirm crop decisions with a qualified agronomist or plant pathologist.

@@ -4,26 +4,42 @@ Built with FastAPI + ONNX Runtime
 """
 
 import io
-import time
 import logging
+import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-import numpy as np
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 
-from inference import PlantDiseasePredictor
+from .inference import PlantDiseasePredictor
 
 # ── Logging ────────────────────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO, format="%(levelname)s │ %(message)s")
 log = logging.getLogger(__name__)
 
 # ── App ────────────────────────────────────────────────────────────────────────
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Load the ONNX model once when the process starts."""
+    global predictor
+    if MODEL_PATH.exists():
+        predictor = PlantDiseasePredictor(str(MODEL_PATH))
+        log.info(f"✅ Model loaded from {MODEL_PATH}")
+    else:
+        log.warning(
+            f"Model not found at {MODEL_PATH}. "
+            "Copy plant_disease_model.onnx to backend/models/ and restart."
+        )
+    yield
+
+
 app = FastAPI(
     title="LeafScan API",
     description="Plant disease detection via EfficientNet-B2 ONNX model.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -35,21 +51,8 @@ app.add_middleware(
 )
 
 # ── Load model once at startup ─────────────────────────────────────────────────
-MODEL_PATH = Path(__file__).parent / "models" / "plant_disease_model.onnx"
+MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "plant_disease_model.onnx"
 predictor: PlantDiseasePredictor | None = None
-
-
-@app.on_event("startup")
-async def load_model() -> None:
-    global predictor
-    if not MODEL_PATH.exists():
-        log.warning(
-            f"Model not found at {MODEL_PATH}. "
-            "Copy plant_disease_model.onnx to backend/models/ and restart."
-        )
-        return
-    predictor = PlantDiseasePredictor(str(MODEL_PATH))
-    log.info(f"✅ Model loaded from {MODEL_PATH}")
 
 
 # ── Health check ───────────────────────────────────────────────────────────────
@@ -85,14 +88,20 @@ async def predict(file: UploadFile = File(...)):
     if predictor is None:
         raise HTTPException(
             status_code=503,
-            detail="Model is not loaded. Check that plant_disease_model.onnx exists in backend/models/.",
+            detail=(
+                "Model is not loaded. Check that plant_disease_model.onnx "
+                "exists in backend/models/."
+            ),
         )
 
     # Guard: file type
     if file.content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(
             status_code=415,
-            detail=f"Unsupported file type '{file.content_type}'. Please upload a JPEG, PNG, or WebP image.",
+            detail=(
+                f"Unsupported file type '{file.content_type}'. "
+                "Please upload a JPEG, PNG, or WebP image."
+            ),
         )
 
     # Read image bytes
