@@ -13,3 +13,6 @@ dist/
 htmlcov/
 *.egg-info/
 build/
+coverage/
+playwright-report/
+test-results/

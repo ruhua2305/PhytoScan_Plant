@@ -27,7 +27,8 @@ From the repository root:
 docker compose up --build
 ```
 
-The API listens on `http://localhost:8000`. `GET /health` is the container health check.
+- API: `http://localhost:8000` — `GET /health` is the container health check.
+- Frontend: `http://localhost:8080`. The nginx container serves the React build and proxies `/predict` and `/health` to the API, so the browser talks to one origin.
 
 ## Run locally
 
@@ -76,11 +77,21 @@ These numbers have not been measured on this checkout. Do not treat the placehol
 | p95 inference latency | TODO |
 | Evaluation dataset | TODO |
 
+## Frontend checks
+
+From `frontend/`:
+
+```bash
+npm ci
+npm test            # Vitest unit tests
+npx playwright test # E2E against the running compose stack (needs docker compose up)
+```
+
 ## Checks
 
 [![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
 
-CI runs `ruff check`, `pytest --cov`, and `docker build` (no push) on every push and pull request. Replace `OWNER/REPO` after the repository has a GitHub remote.
+CI runs `ruff check`, `pytest --cov`, `npm test` (Vitest), a Playwright end-to-end job against `docker compose up`, and `docker build` (no push) on every push and pull request. Replace `OWNER/REPO` after the repository has a GitHub remote.
 
 ## Disclaimer
 
